@@ -48,12 +48,13 @@ tunes/            tune library for all 8 verses (JSON + MIDI), specs and scripts
 - All tests and demo content were deleted on purpose. Don't add demo reels or sample data.
 
 ## Secrets: never commit
-- Vercel env vars (Production): `ELEVENLABS_API_KEY` ✅, `SUPABASE_SECRET_KEY` ✅, `SUPABASE_URL` (add if missing). Optional: `ELEVENLABS_VOICE_ID`.
+- Vercel env vars (Production), all set: `ELEVENLABS_API_KEY`, `SUPABASE_SECRET_KEY`, `SUPABASE_URL`. Optional: `ELEVENLABS_VOICE_ID`.
 - Never put keys in code, docs, commits or chat output. Laksh pastes secret values into Vercel himself.
 
 ## Status (2026-10-07)
-- Done: verse 1 app, 12 instruments, Sing mode, Supabase backend, setup SQL run in Supabase.
-- Next: make sure `SUPABASE_URL` is set in Vercel, redeploy, then verify on the live site: share a reel, check that a second browser sees it, check learnt counts, a recorded voice, and the AI voice (`/api/tts`).
+- Done: verse 1 app, 12 instruments, Sing mode, Supabase backend (setup SQL run), all env vars set. Vercel is connected to lakshveerrao/TattvaReels (it used to deploy an old copy from captvenkat/tattvareels; that link was removed).
+- Verified live: `/api/reels` reads from Supabase (empty feed), `/api/tts` returns audio, no console errors.
+- Next: Laksh shares the first real reel; then check that a second browser sees it, the learnt counts, and a recorded voice.
 - Later: verses 2–8 (tunes already composed in `tunes/verse-N.B.json`; each needs its film/visuals, meaning text and audio renders via `tunes/render_all.py`).
 
 ## Testing locally
