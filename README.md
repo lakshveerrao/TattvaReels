@@ -23,7 +23,7 @@ Optional: `ELEVENLABS_VOICE_ID` to choose a different voice.
 **Sign-in is simulated:** it asks for an email, but none is sent, and the name before the @ becomes the reel's handle.
 
 ## What's in here
-- `index.html` the app. `audio/` the approved tune (tune B, Revati) on 12 instruments plus tanpura, tabla, mridangam. `vendor/three.min.js` for the verse 1 film.
+- `index.html` the app, built from `src/` with `python3 build.py` (don't edit it by hand). `CLAUDE.md` has the full handoff notes. `audio/` the approved tune (tune B, Revati) on 12 instruments plus tanpura, tabla, mridangam. `vendor/three.min.js` for the verse 1 film.
 - `api/`: `reels` (list and share), `learn` ("I learnt this", one per browser), `take` (a reel's recorded voice), and `tts` (ElevenLabs recitation, cached at Vercel's edge). `_db.js` holds the shared Supabase helpers.
 - `supabase/setup.sql` creates the tables and the storage bucket.
 

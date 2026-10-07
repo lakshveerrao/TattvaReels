@@ -1,0 +1,93 @@
+<div id="app">
+  <section class="view" id="v-feed">
+    <div class="reels" id="reels" aria-label="Reels"></div>
+    <header class="topbar">
+      <div class="logo">Tattva <small>तत्त्व</small></div>
+      <button class="icon-btn glass" id="snd" aria-label="Turn sound on"></button>
+    </header>
+    <button class="hint glass" id="hint"></button>
+  </section>
+
+  <section class="view" id="v-top" hidden>
+    <div class="top">
+      <div><p class="eyebrow">Leaderboard</p><h1>Your best reels</h1></div>
+      <div class="stats"><div class="stat"><b id="st-learn">0</b><span>Learnings</span></div><div class="stat"><b id="st-reels">0</b><span>Reels</span></div></div>
+      <p class="note">Your reels on this device, ranked by “I learnt this” and tune score.</p>
+      <div class="who top-who" id="who"></div>
+      <div class="lb" id="lb"></div>
+    </div>
+  </section>
+
+  <nav class="nav" aria-label="Main">
+    <button id="nv-feed" aria-current="page" aria-label="Reels"></button>
+    <button id="nv-create" class="create" aria-label="Create a reel"></button>
+    <button id="nv-top" aria-label="Leaderboard"></button>
+  </nav>
+
+  <section class="view full" id="v-create" hidden>
+    <canvas class="stagecv" id="c-create"></canvas>
+    <div class="shade"></div>
+    <div class="ctop">
+      <button class="icon-btn glass" id="cr-close" aria-label="Close"></button>
+      <button class="tpill glass" id="cr-tattva"><span id="cr-tname">Tattva 1 · The mirror city</span></button>
+      <button class="icon-btn glass" id="cr-snd" aria-label="Turn sound on"></button>
+    </div>
+    <div class="tools" id="tools"></div>
+    <div id="rescard" hidden></div>
+    <div class="cbottom">
+      <div class="fxname" id="fxname"></div>
+      <div class="fx" id="fx" role="listbox" aria-label="Visual effects"></div>
+      <div class="shrow">
+        <label class="side" for="file"><span class="ib glass" id="ic-up"></span>Upload</label>
+        <button class="shutter" id="shutter" aria-label="Sing it"><i></i><span class="shlab">Sing</span></button>
+        <div class="side"><button class="next" id="cr-next">Next</button></div>
+      </div>
+      <input type="file" id="file" accept="audio/*" hidden>
+    </div>
+  </section>
+
+  <section class="view full" id="v-review" hidden>
+    <canvas class="stagecv" id="c-review"></canvas>
+    <div class="shade"></div>
+    <div class="ctop">
+      <button class="icon-btn glass" id="rv-back" aria-label="Back to editing"></button>
+      <span class="tpill glass" id="rv-tag"></span>
+      <span style="width:40px"></span>
+    </div>
+    <div class="rpanel">
+      <label class="lab" for="caption">Caption</label>
+      <textarea id="caption" maxlength="140" placeholder="What does this tattva mean to you?"></textarea>
+      <div class="sum" id="rv-sum"></div>
+      <button class="btn gold" id="rv-share">Share reel</button>
+    </div>
+  </section>
+
+
+  <section class="view full sing" id="v-sing" hidden>
+    <div class="ctop">
+      <button class="icon-btn glass" id="sg-close" aria-label="Close"></button>
+      <span class="tpill glass"><span>Sing · Tattva 1</span></span>
+      <button class="tpill glass" id="sg-guide" aria-label="Choose guide instrument"></button>
+    </div>
+    <div class="sg-head">
+      <div class="sg-stat"><b id="sg-score">0</b><span>Score</span></div>
+      <div class="sg-now"><span class="dev" id="sg-dev"></span><span class="ia" id="sg-ia"></span></div>
+      <div class="sg-stat"><b id="sg-streak">0</b><span>Streak</span></div>
+    </div>
+    <div class="sg-lane"><canvas id="c-sing"></canvas><div class="sg-count" id="sg-count" hidden></div></div>
+    <div class="sg-lyric" id="sg-lyric"></div>
+    <div class="sg-progrow"><div class="sg-prog"><i id="sg-prog"></i></div><span id="sg-hits">0/76</span></div>
+    <div class="sg-foot">
+      <button class="sg-side" id="sg-key"></button>
+      <button class="sg-go" id="sg-go"><span>Start</span></button>
+      <label class="sg-side" for="sg-file" id="sg-up"></label>
+      <input type="file" id="sg-file" accept="audio/*" hidden>
+    </div>
+    <p class="note sg-tip" id="sg-tip">Headphones help, so the guide doesn’t leak into the mic. Sing along in any octave.</p>
+    <div class="sg-result" id="sg-result" hidden></div>
+  </section>
+
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div class="sbody" id="sbody"></div></div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
