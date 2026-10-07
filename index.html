@@ -913,9 +913,14 @@ function allReels(){return S.reels.slice();}
 function counts(){const c={};S.reels.forEach(r=>c[r.id]=r.learnt||0);return c;}
 function isLearnt(id){const r=S.reels.find(x=>x.id===id);return !!(r&&r.mine);}
 function setLearnt(r,val){const x=S.reels.find(y=>y.id===r.id);if(!x||x.mine===val){refreshCounts();return;}
- x.mine=val;x.learnt=val?1:0;const s=new Set(LS.get('tr-learnt',[]));val?s.add(r.id):s.delete(r.id);LS.set('tr-learnt',[...s]);refreshCounts();}
+ if(S.local){x.mine=val;x.learnt=val?1:0;const s=new Set(LS.get('tr-learnt',[]));val?s.add(r.id):s.delete(r.id);LS.set('tr-learnt',[...s]);refreshCounts();return;}
+ const before=x.learnt;x.mine=val;x.learnt=Math.max(0,before+(val?1:-1));refreshCounts();const seq=x._seq=(x._seq||0)+1;
+ API('/api/learn',{method:'POST',body:JSON.stringify({id:x.id,val})}).then(j=>{if(x._seq!==seq)return;x.learnt=j.count;refreshCounts();if(S.view==='top')renderTop();})
+  .catch(e=>{if(x._seq!==seq)return;x.mine=!val;x.learnt=before;refreshCounts();toast(e.status===404?'That reel is gone':'Couldn’t save that. Try again.');});}
 let firstLoad=true;
-async function loadReels(){S.local=true;S.offline=false;S.reels=localReels();
+async function loadReels(){S.offline=false;
+ try{const j=await API('/api/reels');S.local=false;S.reels=(j.reels||[]).map(cleanReel).filter(Boolean);}
+ catch(e){if(e.status===501||!e.status){S.local=true;S.reels=localReels();}else{S.local=false;S.offline=true;S.reels=[];}}
  S.loaded=true;renderFeed();if(S.view==='top')renderTop();
  if(firstLoad){firstLoad=false;const h=location.hash.match(/^#r-([\w-]{1,40})$/);if(h){const ix=reelList.findIndex(r=>r.id===h[1]);if(ix>0){reelsEl.scrollTop=ix*reelsEl.clientHeight;requestAnimationFrame(()=>activate(ix,true));}}}}
 
@@ -980,7 +985,7 @@ function activate(ix,force){
 function startReel(el){const r=el.__r,bar=el.querySelector('.prog i');const ec=el.querySelector('.endcard');if(ec)ec.remove();
  const hh=el.querySelector('.holdhint');
  const rec=r.style.Recitation,tk=rec==='My recording'?TAKES[r.id]:null;
- if(rec==='My recording'&&r.hasTake&&!TAKES[r.id]&&!TAKES['_'+r.id]){TAKES['_'+r.id]=1;Promise.resolve(LS.get('tr-take-'+r.id,null)).then(t=>{if(!t)throw 0;const bin=atob(t.b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer;}).then(ab=>{const ac=new AC();return ac.decodeAudioData(ab).finally(()=>closeAC(ac));}).then(b=>{TAKES[r.id]=b;if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});}
+ if(rec==='My recording'&&r.hasTake&&!TAKES[r.id]&&!TAKES['_'+r.id]){TAKES['_'+r.id]=1;(S.local?Promise.resolve(LS.get('tr-take-'+r.id,null)).then(t=>{if(!t)throw 0;const bin=atob(t.b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer;}):fetch('/api/take?id='+encodeURIComponent(r.id)).then(x=>{if(!x.ok)throw 0;return x.arrayBuffer();})).then(ab=>{const ac=new AC();return ac.decodeAudioData(ab).finally(()=>closeAC(ac));}).then(b=>{TAKES[r.id]=b;if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});}
  if(rec==='AI voice'&&!EL.buf&&!EL.off)elFetch().then(()=>{if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});
  play(el.querySelector('canvas'),0,r.style,{sound:S.sound,hold:true,take:tk,takeOffset:r.takeOffset||0,onTick:(p,pf,film)=>{bar.style.width=(p*100).toFixed(2)+'%';let k=0;for(let j=0;j<4;j++)if(pf>=PADA_AT[j])k=j;setPada(el,k);
   if(hh){const show=film&&pf>.27&&pf<.6;if(hh.hidden===show)hh.hidden=!show;hh.classList.toggle('on',HOLD.on);hh.lastChild.textContent=HOLD.on?'Awakening…':'Hold to awaken';}},onEnd:()=>showEnd(el)});}
@@ -1162,6 +1167,10 @@ function saveDraft(d){try{localStorage.setItem('tr-draft',JSON.stringify(d));}ca
 function loadDraft(){try{return JSON.parse(localStorage.getItem('tr-draft')||'null');}catch(e){return null;}}
 function clearDraft(){try{localStorage.removeItem('tr-draft');}catch(e){}}
 async function publish(d){
+ if(!S.local){try{const j=await API('/api/reels',{method:'POST',body:JSON.stringify({name:S.user?S.user.handle:'seeker',caption:d.caption,style:d.style,score:d.score,take:d.take,takeOffset:d.takeOffset})});
+   const c=cleanReel(j.reel);if(c){if(c.hasTake&&S.takeBuf)TAKES[c.id]=S.takeBuf;S.reels.unshift(c);}clearDraft();showView('feed');renderFeed(true);reelsEl.scrollTop=0;requestAnimationFrame(()=>activate(0,true));toast('Shared. Everyone can see it now');}
+  catch(e){if(e.status===501){S.local=true;return publish(d);}saveDraft(d);toast(e.message||'Couldn’t share. Try again.');}
+  return;}
  const id='r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);let hasTake=false;
  if(d.take){try{localStorage.setItem('tr-take-'+id,JSON.stringify(d.take));hasTake=true;if(S.takeBuf)TAKES[id]=S.takeBuf;}catch(e){toast('Not enough space on this device to keep your voice, so the reel saves without it');}}
  const r={id,t:0,name:S.user?S.user.handle:'seeker',caption:d.caption,style:Object.assign({},d.style,{Recitation:d.style.Recitation==='My recording'&&!hasTake?'None':d.style.Recitation}),score:d.score,createdAt:Date.now(),hasTake,takeOffset:hasTake?(d.takeOffset||0):0};

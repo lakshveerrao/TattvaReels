@@ -4,23 +4,32 @@ Short reels that teach the eight tattvas of the Dakṣiṇāmūrti Aṣṭakam (
 
 ## Go live on Vercel
 
-The code lives in GitHub (lakshveerrao/TattvaReels). Connect it once and every push deploys by itself.
+The code lives in GitHub (lakshveerrao/TattvaReels); every push to `main` deploys by itself.
 
-1. Go to **vercel.com/new**, import **TattvaReels**, and set the project name to **tattvareels**.
-2. Before you click Deploy, open **Environment Variables** and add `ELEVENLABS_API_KEY` with your ElevenLabs key. Then click **Deploy**.
+### Database (Supabase)
+1. In Supabase, open **SQL Editor → New query**, paste `supabase/setup.sql`, and click **Run**. This creates the `reels` and `learnt` tables and a private `takes` bucket for recorded voices.
+2. In Vercel → **tattvareels → Settings → Environment Variables**, add:
+   - `SUPABASE_URL`: your project URL (Supabase → Project Settings → Data API), like `https://abcd.supabase.co`
+   - `SUPABASE_SECRET_KEY`: your `sb_secret_…` key (Supabase → Project Settings → API Keys). **Never put this in the code.**
+   - `ELEVENLABS_API_KEY`: your ElevenLabs key
+3. **Deployments → ⋯ → Redeploy** so the new settings take effect.
 
-That's all. There's no database: reels, voice takes, learnings and the leaderboard are saved on each person's device.
+Only the server functions talk to Supabase, using the secret key. Row level security is on with no policies, so the public (publishable) key can't read or change anything, and the browser never needs it.
 
-The site is at **https://tattvareels.vercel.app** if that name is free; otherwise add it under Settings → Domains. Optional: `ELEVENLABS_VOICE_ID` to choose a different voice.
+If the database settings are missing, the app still works, saving reels on the device only.
 
-**Sign-in is simulated:** it asks for an email and shows a sign-in link, but nothing is sent. The name is kept on that device.
+Optional: `ELEVENLABS_VOICE_ID` to choose a different voice.
+
+**Sign-in is simulated:** it asks for an email, but none is sent, and the name before the @ becomes the reel's handle.
 
 ## What's in here
 - `index.html` the app. `audio/` the approved tune (tune B, Revati) on 12 instruments plus tanpura, tabla, mridangam. `vendor/three.min.js` for the verse 1 film.
-- `api/tts.js` the only server function: ElevenLabs recitation of verse 1, cached at Vercel's edge.
+- `api/`: `reels` (list and share), `learn` ("I learnt this", one per browser), `take` (a reel's recorded voice), and `tts` (ElevenLabs recitation, cached at Vercel's edge). `_db.js` holds the shared Supabase helpers.
+- `supabase/setup.sql` creates the tables and the storage bucket.
 
 ## Good to know
 - Watching, singing and "I learnt this" need no account. Sharing needs a (simulated) sign-in.
 - The singing score is calculated in the browser, so a determined person could fake it.
-- Everything is per device: other people don't see your reels, and clearing the browser's data removes them. Recorded voices up to about 1 minute are kept with the reel.
+- Reels, learnt counts and the leaderboard are shared by everyone. Recorded voices up to about 1 minute are stored with the reel.
+- Sign-in is simulated, so anyone can post under any name. Each browser can share up to 12 reels an hour.
 - The tune is a draft composed on the verse's metre, not a traditional chant; the instruments are synthesised.
