@@ -275,9 +275,9 @@ select.field{appearance:auto;font-size:14px;min-width:0;flex:1}
 
   <section class="view" id="v-top" hidden>
     <div class="top">
-      <div><p class="eyebrow">Leaderboard</p><h1>Reels people learnt from</h1></div>
+      <div><p class="eyebrow">Leaderboard</p><h1>Your best reels</h1></div>
       <div class="stats"><div class="stat"><b id="st-learn">0</b><span>Learnings</span></div><div class="stat"><b id="st-reels">0</b><span>Reels</span></div></div>
-      <p class="note">Ranked by how many people tapped “I learnt this” on each reel.</p>
+      <p class="note">Your reels on this device, ranked by “I learnt this” and tune score.</p>
       <div class="who top-who" id="who"></div>
       <div class="lb" id="lb"></div>
     </div>
@@ -913,11 +913,9 @@ function allReels(){return S.reels.slice();}
 function counts(){const c={};S.reels.forEach(r=>c[r.id]=r.learnt||0);return c;}
 function isLearnt(id){const r=S.reels.find(x=>x.id===id);return !!(r&&r.mine);}
 function setLearnt(r,val){const x=S.reels.find(y=>y.id===r.id);if(!x||x.mine===val){refreshCounts();return;}
- if(S.local){x.mine=val;x.learnt=val?1:0;const s=new Set(LS.get('tr-learnt',[]));val?s.add(r.id):s.delete(r.id);LS.set('tr-learnt',[...s]);refreshCounts();return;}
- const prev={mine:x.mine,learnt:x.learnt};x.mine=val;x.learnt=Math.max(0,x.learnt+(val?1:-1));refreshCounts();
- API('/api/learn',{method:'POST',body:JSON.stringify({id:r.id,val})}).then(j=>{x.learnt=j.count;x.mine=j.mine;refreshCounts();}).catch(e=>{x.mine=prev.mine;x.learnt=prev.learnt;refreshCounts();toast(e.message);});}
+ x.mine=val;x.learnt=val?1:0;const s=new Set(LS.get('tr-learnt',[]));val?s.add(r.id):s.delete(r.id);LS.set('tr-learnt',[...s]);refreshCounts();}
 let firstLoad=true;
-async function loadReels(){try{const j=await API('/api/reels');S.reels=(j.reels||[]).map(cleanReel).filter(Boolean);S.offline=false;S.local=false;}catch(e){if(e.status===503||e.status===404||!e.status&&location.protocol==='file:'){S.local=true;S.offline=false;S.reels=localReels();}else if(!S.reels.length)S.offline=true;}
+async function loadReels(){S.local=true;S.offline=false;S.reels=localReels();
  S.loaded=true;renderFeed();if(S.view==='top')renderTop();
  if(firstLoad){firstLoad=false;const h=location.hash.match(/^#r-([\w-]{1,40})$/);if(h){const ix=reelList.findIndex(r=>r.id===h[1]);if(ix>0){reelsEl.scrollTop=ix*reelsEl.clientHeight;requestAnimationFrame(()=>activate(ix,true));}}}}
 
@@ -968,7 +966,7 @@ function renderFeed(force){
  if(keepId&&!force){const ix=list.findIndex(r=>r.id===keepId);if(ix>0)reelsEl.scrollTop=ix*reelsEl.clientHeight;}
  if(S.view==='feed')requestAnimationFrame(()=>activate(currentIx(),true));}
 function emptyEl(){const el=document.createElement('div');el.className='reel emptyreel';
- const st=!S.loaded?['Loading reels…','']:S.offline?['Couldn’t load reels','Check your connection, then try again.']:['No reels yet','Sing the first verse or make a reel. It shows up here for everyone.'];
+ const st=!S.loaded?['Loading reels…','']:S.offline?['Couldn’t load reels','Check your connection, then try again.']:['No reels yet','Sing the first verse or make a reel. Your reels show up here.'];
  el.innerHTML='<canvas></canvas><div class="shade"></div><div class="emptybox"><p class="eyebrow">Tattva 1 · '+esc(T1.name)+'</p><h2 class="sh-title"></h2><p class="note"></p>'+(S.loaded?'<div class="row2">'+(S.offline?'<button class="btn gold" id="em-retry">Try again</button>':'<button class="btn gold" id="em-create">'+ico('plus')+'Make a reel</button><button class="btn line" id="em-sing">'+ico('mic')+'Sing the verse</button>')+'</div>':'')+'</div>';
  el.querySelector('.sh-title').textContent=st[0];el.querySelector('.note').textContent=st[1];
  const b1=el.querySelector('#em-create'),b2=el.querySelector('#em-sing'),b3=el.querySelector('#em-retry');if(b1)b1.onclick=()=>openCreate();if(b2)b2.onclick=()=>openSing();if(b3)b3.onclick=()=>{S.loaded=false;renderFeed(true);loadReels();};
@@ -982,7 +980,7 @@ function activate(ix,force){
 function startReel(el){const r=el.__r,bar=el.querySelector('.prog i');const ec=el.querySelector('.endcard');if(ec)ec.remove();
  const hh=el.querySelector('.holdhint');
  const rec=r.style.Recitation,tk=rec==='My recording'?TAKES[r.id]:null;
- if(rec==='My recording'&&r.hasTake&&!TAKES[r.id]&&!TAKES['_'+r.id]){TAKES['_'+r.id]=1;fetch('/api/take?id='+r.id).then(x=>x.ok?x.arrayBuffer():Promise.reject()).then(ab=>{const ac=new AC();return ac.decodeAudioData(ab).finally(()=>closeAC(ac));}).then(b=>{TAKES[r.id]=b;if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});}
+ if(rec==='My recording'&&r.hasTake&&!TAKES[r.id]&&!TAKES['_'+r.id]){TAKES['_'+r.id]=1;Promise.resolve(LS.get('tr-take-'+r.id,null)).then(t=>{if(!t)throw 0;const bin=atob(t.b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer;}).then(ab=>{const ac=new AC();return ac.decodeAudioData(ab).finally(()=>closeAC(ac));}).then(b=>{TAKES[r.id]=b;if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});}
  if(rec==='AI voice'&&!EL.buf&&!EL.off)elFetch().then(()=>{if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});
  play(el.querySelector('canvas'),0,r.style,{sound:S.sound,hold:true,take:tk,takeOffset:r.takeOffset||0,onTick:(p,pf,film)=>{bar.style.width=(p*100).toFixed(2)+'%';let k=0;for(let j=0;j<4;j++)if(pf>=PADA_AT[j])k=j;setPada(el,k);
   if(hh){const show=film&&pf>.27&&pf<.6;if(hh.hidden===show)hh.hidden=!show;hh.classList.toggle('on',HOLD.on);hh.lastChild.textContent=HOLD.on?'Awakening…':'Hold to awaken';}},onEnd:()=>showEnd(el)});}
@@ -1016,7 +1014,7 @@ function showEnd(el){
  ec.querySelector('.ec-read').onclick=e=>{e.stopPropagation();openLearn(r);};
  el.appendChild(ec);refreshCounts();}
 function learnLine(n,mine){if(mine)return n<=1?'You learnt this. You’re the first.':'You and <b>'+fmt(n-1)+'</b> other'+(n-1===1?'':'s')+' learnt this.';
- return n===0?'Be the first to learn from this reel.':'<b>'+fmt(n)+'</b> '+(n===1?'person':'people')+' learnt from this reel.';}
+ return n===0?'Tap “I learnt this” when it clicks.':'<b>'+fmt(n)+'</b> '+(n===1?'person':'people')+' learnt from this reel.';}
 function refreshCounts(){const c=counts();
  reelsEl.querySelectorAll('.reel').forEach(el=>{if(!el.__r)return;const id=el.__r.id,n=c[id]||0,m=isLearnt(id),b=el.querySelector('[data-a="learn"]');
   b.classList.toggle('on',m);b.setAttribute('aria-pressed',String(m));b.querySelector('.ct').textContent=n?fmt(n):'I learnt';
@@ -1164,12 +1162,12 @@ function saveDraft(d){try{localStorage.setItem('tr-draft',JSON.stringify(d));}ca
 function loadDraft(){try{return JSON.parse(localStorage.getItem('tr-draft')||'null');}catch(e){return null;}}
 function clearDraft(){try{localStorage.removeItem('tr-draft');}catch(e){}}
 async function publish(d){
- d=Object.assign({},d,{name:S.user?S.user.handle:'seeker'});
- const done=c=>{clearDraft();if(c){S.reels.unshift(c);}showView('feed');renderFeed(true);reelsEl.scrollTop=0;requestAnimationFrame(()=>activate(0,true));toast('Shared to Reels');};
- if(!S.local){try{const j=await API('/api/reels',{method:'POST',body:JSON.stringify(d)});if(d.take&&S.takeBuf)TAKES[j.reel.id]=S.takeBuf;done(cleanReel(j.reel));return;}
-  catch(e){if(e.status!==503){toast(e.message);return;}S.local=true;}}
- const r={id:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:0,name:d.name,caption:d.caption,style:Object.assign({},d.style,{Recitation:d.style.Recitation==='My recording'?'None':d.style.Recitation}),score:d.score,createdAt:Date.now(),hasTake:false,takeOffset:0};
- const list=LS.get('tr-reels',[]);list.unshift(r);LS.set('tr-reels',list.slice(0,40));done(cleanReel(r));}
+ const id='r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);let hasTake=false;
+ if(d.take){try{localStorage.setItem('tr-take-'+id,JSON.stringify(d.take));hasTake=true;if(S.takeBuf)TAKES[id]=S.takeBuf;}catch(e){toast('Not enough space on this device to keep your voice, so the reel saves without it');}}
+ const r={id,t:0,name:S.user?S.user.handle:'seeker',caption:d.caption,style:Object.assign({},d.style,{Recitation:d.style.Recitation==='My recording'&&!hasTake?'None':d.style.Recitation}),score:d.score,createdAt:Date.now(),hasTake,takeOffset:hasTake?(d.takeOffset||0):0};
+ const list=LS.get('tr-reels',[]);list.unshift(r);LS.set('tr-reels',list.slice(0,40));
+ clearDraft();const c=cleanReel(r);if(c)S.reels.unshift(c);showView('feed');renderFeed(true);reelsEl.scrollTop=0;requestAnimationFrame(()=>activate(0,true));toast('Shared to your reels');}
+
 /* ---------- saved audio ---------- */
 (function loadAudio(){
  const ids=['sitar','veena','bansuri','violin','harmonium','piano','guitar','santoor','sarangi','nadaswaram','harp','cello','drone_tanpura','rhythm_tabla','rhythm_mridangam'];let left=ids.length;
@@ -1323,7 +1321,6 @@ addEventListener('resize',()=>{if(S.view==='sing'&&G.st!=='run')singDraw(-1.2);}
 
 /* ---------- boot ---------- */
 setSoundIcons();renderFeed(true);loadReels();
-setInterval(()=>{if(!document.hidden&&S.view!=='create'&&S.view!=='sing')loadReels();},25000);
 })();
 
 </script>
