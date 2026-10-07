@@ -52,26 +52,11 @@ export async function readBody(req) {
 
 export const rid = (n = 16) => randomBytes(n).toString('hex');
 
-export function handleOf(email) { return (email.split('@')[0] || 'seeker').replace(/[^\w.-]/g, '').slice(0, 24) || 'seeker'; }
-
-export async function session(req) {
-  const sid = cookies(req).tr_s;
-  if (!sid || !/^[a-f0-9]{48}$/.test(sid)) return null;
-  const [email] = await redis(['GET', 'session:' + sid]);
-  return email ? { sid, email, handle: handleOf(email) } : null;
-}
 
 export function anon(req, res) {
   let a = cookies(req).tr_a;
   if (!a || !/^[a-f0-9]{32}$/.test(a)) { a = rid(16); setCookie(res, 'tr_a', a, 60 * 60 * 24 * 400); }
   return a;
-}
-
-export function origin(req) {
-  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
-  const host = req.headers['x-forwarded-host'] || req.headers.host;
-  const proto = req.headers['x-forwarded-proto'] || (process.env.VERCEL ? 'https' : 'http');
-  return proto + '://' + host;
 }
 
 export function ip(req) { return String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '').split(',')[0].trim() || 'unknown'; }

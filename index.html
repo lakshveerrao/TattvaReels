@@ -786,6 +786,9 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 
 const S={sound:false,user:null,emailOn:true,reels:[],loaded:false,offline:false,style:DEF(),t:0,source:null,score:null,takeBuf:null,takeBlob:null,takeOffset:0,view:'feed',idx:-1,feedIds:''};
 const TAKES={};
+const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:k=>{try{localStorage.removeItem(k);}catch(e){}}};
+S.user=LS.get('tr-user',null);if(S.user&&!/^[\w.-]{1,24}$/.test(S.user.handle||''))S.user=null;
+function localReels(){const mine=new Set(LS.get('tr-learnt',[]));return LS.get('tr-reels',[]).map(cleanReel).filter(Boolean).map(r=>Object.assign(r,{mine:mine.has(r.id),learnt:mine.has(r.id)?1:0}));}
 
 let cur=null;
 const EL={buf:null,busy:false,off:false,p:null};
@@ -910,10 +913,11 @@ function allReels(){return S.reels.slice();}
 function counts(){const c={};S.reels.forEach(r=>c[r.id]=r.learnt||0);return c;}
 function isLearnt(id){const r=S.reels.find(x=>x.id===id);return !!(r&&r.mine);}
 function setLearnt(r,val){const x=S.reels.find(y=>y.id===r.id);if(!x||x.mine===val){refreshCounts();return;}
+ if(S.local){x.mine=val;x.learnt=val?1:0;const s=new Set(LS.get('tr-learnt',[]));val?s.add(r.id):s.delete(r.id);LS.set('tr-learnt',[...s]);refreshCounts();return;}
  const prev={mine:x.mine,learnt:x.learnt};x.mine=val;x.learnt=Math.max(0,x.learnt+(val?1:-1));refreshCounts();
  API('/api/learn',{method:'POST',body:JSON.stringify({id:r.id,val})}).then(j=>{x.learnt=j.count;x.mine=j.mine;refreshCounts();}).catch(e=>{x.mine=prev.mine;x.learnt=prev.learnt;refreshCounts();toast(e.message);});}
 let firstLoad=true;
-async function loadReels(){try{const j=await API('/api/reels');S.reels=(j.reels||[]).map(cleanReel).filter(Boolean);S.offline=false;}catch(e){if(!S.reels.length)S.offline=true;}
+async function loadReels(){try{const j=await API('/api/reels');S.reels=(j.reels||[]).map(cleanReel).filter(Boolean);S.offline=false;S.local=false;}catch(e){if(e.status===503||e.status===404||!e.status&&location.protocol==='file:'){S.local=true;S.offline=false;S.reels=localReels();}else if(!S.reels.length)S.offline=true;}
  S.loaded=true;renderFeed();if(S.view==='top')renderTop();
  if(firstLoad){firstLoad=false;const h=location.hash.match(/^#r-([\w-]{1,40})$/);if(h){const ix=reelList.findIndex(r=>r.id===h[1]);if(ix>0){reelsEl.scrollTop=ix*reelsEl.clientHeight;requestAnimationFrame(()=>activate(ix,true));}}}}
 
@@ -1075,7 +1079,7 @@ document.addEventListener('keydown',e=>{if(S.view!=='feed'||sheetFor||/input|tex
 /* ---------- leaderboard ---------- */
 function renderTop(){const c=counts(),list=allReels().map(r=>({r,n:c[r.id]||0})).sort((a,b)=>b.n-a.n||(b.r.score||0)-(a.r.score||0)||b.r.createdAt-a.r.createdAt);
  let total=0;for(const k in c)total+=c[k];$('#st-learn').textContent=fmt(total);$('#st-reels').textContent=fmt(list.length);
- const lb=$('#lb');lb.innerHTML='';const who=$('#who');who.innerHTML='';if(S.user){const sp=document.createElement('span');sp.textContent='Signed in as '+S.user.handle;const bo=document.createElement('button');bo.className='linkbtn';bo.textContent='Sign out';bo.onclick=async()=>{try{await API('/api/auth/logout',{method:'POST'});}catch(e){}S.user=null;renderTop();toast('Signed out');};who.append(sp,bo);}
+ const lb=$('#lb');lb.innerHTML='';const who=$('#who');who.innerHTML='';if(S.user){const sp=document.createElement('span');sp.textContent='Signed in as '+S.user.handle;const bo=document.createElement('button');bo.className='linkbtn';bo.textContent='Sign out';bo.onclick=()=>{S.user=null;LS.del('tr-user');renderTop();toast('Signed out');};who.append(sp,bo);}
  if(!list.length){lb.innerHTML='<p class="note">No reels yet. Share one and it ranks here.</p>';return;}
  list.forEach((x,k)=>{const b=document.createElement('button');b.className='lrow';
   b.innerHTML='<span class="rk">'+(k+1)+'</span><span class="lthumb"><canvas></canvas></span><span class="lmid"><b></b><small></small></span><span class="lcount">'+ico('lotus')+fmt(x.n)+'<small>learnt</small></span>';
@@ -1143,14 +1147,13 @@ $('#rv-back').innerHTML=ico('back');$('#rv-back').onclick=()=>{showView('create'
 $('#cr-close').innerHTML=ico('x');
 $('#rv-share').onclick=async()=>{const b=$('#rv-share');if(b.disabled)return;b.disabled=true;try{const d=await makeDraft();if(S.user)await publish(d);else{saveDraft(d);openSignin();}}finally{b.disabled=false;}};
 function openSignin(){
- openSheet('signin','<div class="shead"><div><h2 class="sh-title">Sign in to share</h2><p class="note">No password. Enter your email to get a sign-in link. Your reel is saved and shares as soon as you’re back.</p></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
+ openSheet('signin','<div class="shead"><div><h2 class="sh-title">Sign in to share</h2><p class="note">No password. Enter your email to get a sign-in link. Your reel is saved and shares as soon as you’re in.</p></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
   '<div id="si-a" style="display:flex;flex-direction:column;gap:10px"><label class="lab" for="si-email">Email</label><input class="field" id="si-email" type="email" autocomplete="email" placeholder="you@example.com"><p class="err" id="si-err"></p><button class="btn gold" id="si-send">'+ico('mail')+'Send sign-in link</button></div>'+
   '<div id="si-b" hidden style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center"><span class="icon-btn glass" style="width:56px;height:56px;color:var(--gold)">'+ico('mail')+'</span><h3 class="sh-title" style="font-size:22px">Your sign-in link is ready</h3><p class="note" id="si-msg"></p><button class="btn gold" id="si-open">Open sign-in link</button><button class="btn line" id="si-diff">Use a different email</button></div>');
  $('#sh-x').onclick=closeSheet;const em=$('#si-email');setTimeout(()=>em.focus(),350);
- const go=async()=>{const v=em.value.trim();if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v)){$('#si-err').textContent='Enter an email like you@example.com.';return;}
-  const b=$('#si-send');b.disabled=true;b.textContent='Sending…';$('#si-err').textContent='';
-  try{const j=await API('/api/auth/start',{method:'POST',body:JSON.stringify({email:v})});$('#si-a').hidden=true;$('#si-b').hidden=false;$('#si-msg').textContent='Email is simulated for now, so nothing lands in '+v+'. Open the link here to sign in.';$('#si-open').onclick=()=>{location.href=j.link;};}
-  catch(e){$('#si-err').textContent=e.message;}finally{b.disabled=false;b.innerHTML=ico('mail')+'Send sign-in link';}};
+ const go=()=>{const v=em.value.trim().toLowerCase();if(!/^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/.test(v)){$('#si-err').textContent='Enter an email like you@example.com.';return;}
+  $('#si-err').textContent='';$('#si-a').hidden=true;$('#si-b').hidden=false;$('#si-msg').textContent='Email is simulated for now, so nothing lands in '+v+'. Open the link here to sign in.';
+  $('#si-open').onclick=()=>{const h=(v.split('@')[0]||'seeker').replace(/[^\w.-]/g,'').slice(0,24)||'seeker';S.user={handle:h};LS.set('tr-user',S.user);closeSheet();toast('Signed in as '+h);const d=loadDraft();if(d)publish(d);};};
  em.addEventListener('input',()=>$('#si-err').textContent='');em.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go();}});
  $('#si-send').onclick=go;$('#si-diff').onclick=()=>{$('#si-b').hidden=true;$('#si-a').hidden=false;em.focus();};}
 function blobB64(b){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=no;r.readAsDataURL(b);});}
@@ -1161,14 +1164,12 @@ function saveDraft(d){try{localStorage.setItem('tr-draft',JSON.stringify(d));}ca
 function loadDraft(){try{return JSON.parse(localStorage.getItem('tr-draft')||'null');}catch(e){return null;}}
 function clearDraft(){try{localStorage.removeItem('tr-draft');}catch(e){}}
 async function publish(d){
- try{const j=await API('/api/reels',{method:'POST',body:JSON.stringify(d)});clearDraft();
-  if(d.take&&S.takeBuf)TAKES[j.reel.id]=S.takeBuf;
-  const c=cleanReel(j.reel);if(c)S.reels.unshift(c);showView('feed');renderFeed(true);reelsEl.scrollTop=0;requestAnimationFrame(()=>activate(0,true));toast('Shared to Reels');}
- catch(e){if(e.status===401){S.user=null;saveDraft(d);openSignin();return;}toast(e.message);}}
-function resumeDraft(){const d=loadDraft();if(!d||!S.user)return;
- openSheet('draft','<div class="shead"><div><h2 class="sh-title">Finish sharing your reel</h2><p class="note">You’re signed in as '+esc(S.user.handle)+'. Your reel is ready to go.</p></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div><button class="btn gold" id="dr-go">Share reel</button><button class="btn line" id="dr-no">Discard it</button>');
- $('#sh-x').onclick=closeSheet;$('#dr-no').onclick=()=>{clearDraft();closeSheet();toast('Draft discarded');};$('#dr-go').onclick=async e=>{e.currentTarget.disabled=true;closeSheet();await publish(d);};}
-
+ d=Object.assign({},d,{name:S.user?S.user.handle:'seeker'});
+ const done=c=>{clearDraft();if(c){S.reels.unshift(c);}showView('feed');renderFeed(true);reelsEl.scrollTop=0;requestAnimationFrame(()=>activate(0,true));toast('Shared to Reels');};
+ if(!S.local){try{const j=await API('/api/reels',{method:'POST',body:JSON.stringify(d)});if(d.take&&S.takeBuf)TAKES[j.reel.id]=S.takeBuf;done(cleanReel(j.reel));return;}
+  catch(e){if(e.status!==503){toast(e.message);return;}S.local=true;}}
+ const r={id:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:0,name:d.name,caption:d.caption,style:Object.assign({},d.style,{Recitation:d.style.Recitation==='My recording'?'None':d.style.Recitation}),score:d.score,createdAt:Date.now(),hasTake:false,takeOffset:0};
+ const list=LS.get('tr-reels',[]);list.unshift(r);LS.set('tr-reels',list.slice(0,40));done(cleanReel(r));}
 /* ---------- saved audio ---------- */
 (function loadAudio(){
  const ids=['sitar','veena','bansuri','violin','harmonium','piano','guitar','santoor','sarangi','nadaswaram','harp','cello','drone_tanpura','rhythm_tabla','rhythm_mridangam'];let left=ids.length;
@@ -1322,8 +1323,6 @@ addEventListener('resize',()=>{if(S.view==='sing'&&G.st!=='run')singDraw(-1.2);}
 
 /* ---------- boot ---------- */
 setSoundIcons();renderFeed(true);loadReels();
-(async()=>{const p=new URLSearchParams(location.search);try{const j=await API('/api/auth/me');S.user=j.user;}catch(e){}
- const si=p.get('signin');if(si){history.replaceState(null,'',location.pathname+location.hash);if(si==='ok'&&S.user){toast('Signed in as '+S.user.handle);resumeDraft();}else if(si==='expired')toast('That sign-in link has expired or was used. Ask for a new one.');}})();
 setInterval(()=>{if(!document.hidden&&S.view!=='create'&&S.view!=='sing')loadReels();},25000);
 })();
 

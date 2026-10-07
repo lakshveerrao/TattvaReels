@@ -13,16 +13,18 @@ The code lives in GitHub (lakshveerrao/TattvaReels). Connect it once and every p
 
 The site is at **https://tattvareels.vercel.app** if that name is free; otherwise add it under Settings → Domains.
 
-Optional: `ELEVENLABS_VOICE_ID` to choose a different voice, `APP_URL` for the canonical address.
+Optional: `ELEVENLABS_VOICE_ID` to choose a different voice.
 
-**Email is simulated:** signing in asks for an email, but no email is sent. The sign-in link opens straight away on the page, so anyone can sign in with any address.
+**Sign-in is simulated:** it asks for an email and shows a sign-in link, but nothing is sent and nothing is stored on the server. The name is kept on that device, so anyone can share under any name.
+
+If the database isn't connected yet, the app still works: reels and learnings are saved on each person's device until you add Upstash.
 
 ## What's in here
 - `index.html` the app. `audio/` the approved tune (tune B, Revati) on 12 instruments plus tanpura, tabla, mridangam. `vendor/three.min.js` for the verse 1 film.
-- `api/` serverless functions: `auth/start` (makes the sign-in link; email is simulated), `auth/verify`, `auth/me`, `auth/logout`, `reels` (list and share), `learn` ("I learnt this"), `take` (a reel's recorded voice), `tts` (ElevenLabs, generated once then cached).
+- `api/` serverless functions: `reels` (list and share), `learn` ("I learnt this"), `take` (a reel's recorded voice), `tts` (ElevenLabs, generated once then cached).
 
 ## Good to know
-- Watching, singing and "I learnt this" need no account. Sharing needs a (simulated) email sign-in.
+- Watching, singing and "I learnt this" need no account. Sharing needs a (simulated) sign-in.
 - The singing score is calculated in the browser, so a determined person could fake it.
 - Recorded voices up to about 1 minute are stored with the reel (in Redis). Longer recordings share without the voice.
 - The tune is a draft composed on the verse's metre, not a traditional chant; the instruments are synthesised.

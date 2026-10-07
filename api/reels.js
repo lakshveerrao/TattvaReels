@@ -1,4 +1,4 @@
-import { redis, send, wrap, readBody, session, anon, limit, cleanStyle, rid, HttpError } from './_lib.js';
+import { redis, send, wrap, readBody, anon, limit, ip, cleanStyle, rid, HttpError } from './_lib.js';
 
 const MAX_TAKE = 1_200_000; // base64 chars, about 900 KB of audio
 
@@ -15,17 +15,19 @@ export default wrap(async (req, res) => {
     return send(res, 200, { reels });
   }
   if (req.method === 'POST') {
-    const s = await session(req);
-    if (!s) throw new HttpError(401, 'Sign in to share.');
-    await limit('post:' + s.email, 12, 3600);
+    // Sign-in is simulated in the browser, so the display name comes with the reel.
+    const me = anon(req, res);
+    await limit('post:' + me, 12, 3600);
+    await limit('post-ip:' + ip(req), 30, 3600);
     const b = await readBody(req);
+    const name = String(b.name || '').replace(/[^\w.-]/g, '').slice(0, 24) || 'seeker';
     const caption = String(b.caption || '').replace(/\s+/g, ' ').trim().slice(0, 140);
     const score = typeof b.score === 'number' && isFinite(b.score) ? Math.max(0, Math.min(100, Math.round(b.score))) : null;
     const take = b.take && typeof b.take.b64 === 'string' && /^audio\/[\w.+-]+(;[\w=.,+-]+)*$/.test(String(b.take.mime || '')) && b.take.b64.length <= MAX_TAKE && /^[A-Za-z0-9+/=]+$/.test(b.take.b64) ? b.take : null;
     const style = cleanStyle(b.style);
     if (style.Recitation === 'My recording' && !take) style.Recitation = 'None';
     const id = 'r' + Date.now().toString(36) + rid(3);
-    const reel = { id, t: 0, name: s.handle, caption, style, score, createdAt: Date.now(), hasTake: !!take, takeOffset: take ? Math.max(0, Math.min(10, Number(b.takeOffset) || 0)) : 0 };
+    const reel = { id, t: 0, name, caption, style, score, createdAt: Date.now(), hasTake: !!take, takeOffset: take ? Math.max(0, Math.min(10, Number(b.takeOffset) || 0)) : 0 };
     const cmds = [['SET', 'reel:' + id, JSON.stringify(reel)], ['ZADD', 'reels:recent', reel.createdAt, id]];
     if (take) cmds.push(['SET', 'take:' + id, JSON.stringify({ mime: take.mime, b64: take.b64 })]);
     await redis(...cmds);
