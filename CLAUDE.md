@@ -3,7 +3,7 @@
 Read this first. It is the full context for resuming work on this repo.
 
 ## What this is
-A Reels-style web app (simple, like Instagram Reels) that teaches the 8 tattvas of the **Dakṣiṇāmūrti Aṣṭakam**, one verse per tattva. Only **verse 1, "The mirror city"**, is built so far. Owner: Laksh (Lakshveer Rao). It should look divine/Vedic, with world-class motion graphics.
+A Reels-style web app (simple, like Instagram Reels) that teaches the 8 tattvas of the **Dakṣiṇāmūrti Aṣṭakam**, one verse per tattva. **All 8 are built**: 1 The mirror city, 2 The seed, 3 That you are, 4 The lamp in the pot, 5 Not the body, 6 The eclipse, 7 The unchanging I, 8 The dream of roles. Owner: Laksh (Lakshveer Rao). It should look divine/Vedic, with world-class motion graphics.
 
 - Live: https://tattvareels.vercel.app (Vercel project `tattvareels`, team "Venkat's projects")
 - Repo: github.com/lakshveerrao/TattvaReels, branch `main`. Every push auto-deploys on Vercel.
@@ -26,15 +26,18 @@ src/
   film.js         Three.js "Tattva film" for verse 1 (hold-to-awaken fast-forward)
   engines.js      2D particle visual engines (Mirror city, Splat bloom, Sound sand, Flow rivers, Embers, ...)
   analysis.js     YIN pitch tracking and scoring helpers
-  tune1.js        const TUNE1 = verse-1 tune B notes
+  tunes.js        const TUNES = tune B notes for verses 1–8 (generated from tunes/verse-N.B.json)
+  tattvas.js      const TATTVAS = per-verse text (dev/iast/en), teaching, keep points, word glossary
+  films/          00_kit.js shared film toolkit (one WebGL renderer, morphing particles, line art, labels);
+                  02_seed.js … 08_dream.js one 3D film per tattva (film 1 is film.js). FILMS[n] registry.
 api/              Vercel Node serverless functions (ESM)
   _db.js          Supabase REST helpers (server-only secret key), anon cookie, validation
   reels.js        GET list (with learnt counts + "mine") / POST share (12 per hour per browser)
   learn.js        POST "I learnt this" toggle, one per browser (tr_a cookie)
   take.js         GET a reel's recorded voice from the private Storage bucket "takes"
-  tts.js          ElevenLabs recitation of verse 1, cached at the edge
+  tts.js          ElevenLabs recitation, /api/tts?v=1..8, cached at the edge
 supabase/setup.sql  tables reels, learnt; view reel_feed; RLS on; bucket takes (ALREADY RUN on 2026-10-07)
-audio/            15 pre-rendered m4a: 12 instruments + drone_tanpura, rhythm_tabla, rhythm_mridangam
+audio/            verse 1: 12 instruments + shared drone_tanpura, rhythm_tabla, rhythm_mridangam; audio/vN/ = 12 instruments for verse N (loaded on demand)
 vendor/three.min.js  Three.js r128
 tunes/            tune library for all 8 verses (JSON + MIDI), specs and scripts (audio renders not in git)
 ```
@@ -45,6 +48,8 @@ tunes/            tune library for all 8 verses (JSON + MIDI), specs and scripts
 - If the DB env vars are missing, `/api/reels` returns 501 and the client falls back to device-only localStorage (`tr-reels`, `tr-learnt`, `tr-take-<id>`).
 - **Tune B (Revati)** is the approved tune: Sa = 196 Hz, 150 BPM, śārdūlavikrīḍita metre (guru = 2 beats, laghu = 1, pause after syllable 12), 76 notes per verse. The instruments are pre-rendered, not synthesised live.
 - **Sing mode:** Yousician-style live scoring. YIN pitch, beat-locked note judging (±50 cents, a note is hit at ≥50% of frames, octave folding, latency search −0.05 to +0.45 s), "Any key" mode finds the key by vote, pass mark 80. Full spec in `tunes/MATCHING_SPEC.md`; Python reference in `tunes/tune_check.py`.
+- A reel's tattva lives in `style.Tattva` (1–8), stored in the reels.style jsonb; no extra DB column.
+- Films: each is a pure function of story progress pf (0..1) and time; labels show a Sanskrit word + English. Check them frame by frame (render a grid of pf values headless) before shipping.
 - All tests and demo content were deleted on purpose. Don't add demo reels or sample data.
 
 ## Secrets: never commit
@@ -52,10 +57,8 @@ tunes/            tune library for all 8 verses (JSON + MIDI), specs and scripts
 - Never put keys in code, docs, commits or chat output. Laksh pastes secret values into Vercel himself.
 
 ## Status (2026-10-07)
-- Done: verse 1 app, 12 instruments, Sing mode, Supabase backend (setup SQL run), all env vars set. Vercel is connected to lakshveerrao/TattvaReels (it used to deploy an old copy from captvenkat/tattvareels; that link was removed).
-- Verified live: `/api/reels` reads from Supabase (empty feed), `/api/tts` returns audio, no console errors.
-- Next: Laksh shares the first real reel; then check that a second browser sees it, the learnt counts, and a recorded voice.
-- Later: verses 2–8 (tunes already composed in `tunes/verse-N.B.json`; each needs its film/visuals, meaning text and audio renders via `tunes/render_all.py`).
+- Done: all 8 tattvas (verse text checked against the metre data, meanings, 12 instruments per verse, Sing mode per verse, AI voice per verse, a 3D film per tattva), Supabase backend, env vars set, Vercel connected to lakshveerrao/TattvaReels.
+- Next ideas: real-device performance check of films on low-end phones; polish individual films with Laksh's feedback.
 
 ## Testing locally
 - Static check: `python3 -m http.server` in the repo root (the API won't work).

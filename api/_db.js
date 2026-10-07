@@ -64,6 +64,7 @@ export function cleanStyle(s) {
   s = s && typeof s === 'object' ? s : {};
   const snd = Array.isArray(s.Sound) ? [...new Set(s.Sound.filter(x => INSTR.includes(x)))].slice(0, 12) : [];
   return {
+    Tattva: Number.isInteger(s.Tattva) && s.Tattva >= 1 && s.Tattva <= 8 ? s.Tattva : 1,
     Tone: TONES.includes(s.Tone) ? s.Tone : 'Tabla',
     Visuals: VIS.includes(s.Visuals) ? s.Visuals : 'Tattva film',
     Sound: snd.length ? snd : ['sitar'],

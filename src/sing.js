@@ -1,17 +1,22 @@
-/* ---------- saved audio ---------- */
-(function loadAudio(){
- const ids=['sitar','veena','bansuri','violin','harmonium','piano','guitar','santoor','sarangi','nadaswaram','harp','cello','drone_tanpura','rhythm_tabla','rhythm_mridangam'];let left=ids.length;
- let dec;try{dec=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,44100,44100);}catch(e){return;}
- ids.forEach(id=>{fetch('/audio/'+id+'.m4a').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(ab=>dec.decodeAudioData(ab)).then(b=>{AUD.buf[id]=b;}).catch(()=>{}).finally(()=>{if(--left===0){AUD.ready=true;onAudioReady();}});});
-})();
-function onAudioReady(){if(!S.sound||!cur||cur.hasAudio)return;
+/* ---------- saved audio: stems shared, instruments per verse, loaded on demand ---------- */
+const INS_IDS=['sitar','veena','bansuri','violin','harmonium','piano','guitar','santoor','sarangi','nadaswaram','harp','cello'],STEMS=['drone_tanpura','rhythm_tabla','rhythm_mridangam'];
+AUD.st={};AUD.dec=null;
+AUD.load=function(key,url,done){if(AUD.st[key])return done&&done();AUD.st[key]=1;
+ try{if(!AUD.dec)AUD.dec=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,44100,44100);}catch(e){return;}
+ fetch(url).then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(ab=>AUD.dec.decodeAudioData(ab)).then(b=>{AUD.buf[key]=b;}).catch(()=>{}).finally(()=>{AUD.st[key]=2;done&&done();});};
+AUD.need=function(n){n=n||1;if(AUD.st['v'+n])return;AUD.st['v'+n]=1;const keys=STEMS.map(id=>[id,'/audio/'+id+'.m4a']).concat(INS_IDS.map(id=>[n+'/'+id,n===1?'/audio/'+id+'.m4a':'/audio/v'+n+'/'+id+'.m4a']));
+ let left=keys.length;keys.forEach(k=>AUD.load(k[0],k[1],()=>{if(--left===0){AUD.st['v'+n]=2;AUD.ready=true;onAudioReady(n);}}));};
+AUD.has=function(n){return AUD.st['v'+(n||1)]===2;};
+AUD.need(1);
+function onAudioReady(n){if(!S.sound||!cur||cur.hasAudio||(n&&cur.vn!==n))return;
  if(S.view==='feed'){const el=reelNode(S.idx);if(el&&!el.querySelector('.endcard'))startReel(el);}else if(S.view==='create')startPreview();else if(S.view==='review')startReview();}
 
 /* ---------- sing: Yousician-style practice ---------- */
-const SN=TT[0].notes,SPB=60/TT[0].bpm,SONG=TT[0].total*SPB;
+let SN=TT[0].notes,SPB=60/TT[0].bpm,SONG=TT[0].total*SPB,SV=1;
 const SWN={'-5':'Pa','-2':'Ni',0:'Sa',1:'Ri',5:'Ma',7:'Pa',10:'Ni',12:'Sa',13:'Ri'};
 const PITCH_TOL=50,NOTE_HIT=.5,PASS_MARK=80;
 const PHRASES=[];[1,2,3,4].forEach(l=>{const ks=SN.map((n,k)=>k).filter(k=>SN[k].line===l);PHRASES.push({line:l,part:1,ks:ks.slice(0,12)},{line:l,part:2,ks:ks.slice(12)});});
+function setSingVerse(n){n=n||1;SV=n;const T=TT[n-1];SN=T.notes;SPB=60/T.bpm;SONG=T.total*SPB;AUD.need(n);const V=TATTVAS[n-1],h=$('#sg-title');if(h)h.textContent='Sing · Tattva '+n;}
 const G={st:'idle',ac:null,stream:null,an:null,buf:null,mr:null,chunks:[],t0:0,recStart:0,frames:[],res:[],raf:0,guideSrc:[],guide:'sitar',drone:true,anyKey:false,keyOff:0,keyLocked:true,lat:.08,streak:0,best:0,only:null,parts:[],pops:[],count:0};
 const circ=d=>((d+600)%1200+1200)%1200-600;
 function yinF(x,sr){const W=x.length>>1,tmin=Math.floor(sr/1000),tmax=Math.min(W-1,Math.floor(sr/70));let rms=0;for(let i=0;i<W;i++)rms+=x[i]*x[i];if(Math.sqrt(rms/W)<.008)return NaN;
@@ -29,7 +34,7 @@ function keyFrom(frames,ks){const dv=[];ks.forEach(k=>{const no=SN[k],a=no.beat*
 function totals(res){const w=SN.map(n=>n.dur);let sw=0,on=0,hit=0,nh=0;res.forEach((r,k)=>{if(!r)return;sw+=w[k];on+=w[k]*r.on;hit+=w[k]*(r.hit?1:0);nh+=r.hit?1:0;});return{score:sw?Math.round(100*(.5*on+.5*hit)/sw):0,hits:nh,judged:res.filter(Boolean).length};}
 
 const SG=$('#v-sing');
-function openSing(){stopCur();S.source=S.source;showView('sing');singReset();}
+function openSing(){stopCur();setSingVerse(S.style.Tattva||1);showView('sing');singReset();}
 function singReset(){singStop(true);G.st='idle';G.res=new Array(SN.length).fill(null);G.frames=[];G.streak=0;G.best=0;G.pops=[];G.only=null;G.keyOff=0;G.keyLocked=!G.anyKey;G.nowK=-1;G.lyLine=0;
  $('#sg-result').hidden=true;$('#sg-go').hidden=false;$('#sg-go').className='sg-go';$('#sg-go').innerHTML='<span>Start</span>';$('#sg-count').hidden=true;
  $('#sg-guide').innerHTML=ico('music')+'<span>'+INSTR[G.guide]+'</span>';$('#sg-key').innerHTML='<span>'+(G.anyKey?'Any key':'Key of G · any octave')+'</span>';
@@ -65,7 +70,7 @@ function singDraw(t){const{g,w,h}=laneCtx();const pps=w/4.6,nowX=w*.28,top=10,bo
 
 async function singStart(){if(G.st==='run'||G.st==='count'){singFinish();return;}
  singReset();
- if(!AUD.ready){toast('The guide audio is still loading. Try again in a second.');return;}
+ if(!AUD.has(SV)){AUD.need(SV);toast('The guide audio is still loading. Try again in a second.');return;}
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){singNoMic();return;}
  try{G.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:false,autoGainControl:false}});}catch(e){singNoMic();return;}
  const ac=G.ac=new AC();if(ac.resume)ac.resume();const src=ac.createMediaStreamSource(G.stream);G.an=ac.createAnalyser();G.an.fftSize=2048;src.connect(G.an);G.buf=new Float32Array(2048);
@@ -75,7 +80,7 @@ async function singStart(){if(G.st==='run'||G.st==='count'){singFinish();return;
  G.t0=ac.currentTime+lead+.15-from;G.end=to;
  const m=ac.createGain();m.gain.value=.9;m.connect(ac.destination);
  const lay=(id,gain)=>{const b=AUD.buf[id];if(!b)return;const s=ac.createBufferSource(),gg=ac.createGain();gg.gain.value=gain;s.buffer=b;s.connect(gg);gg.connect(m);s.start(G.t0+from,from,to-from+.3);G.guideSrc.push(s);};
- lay(G.guide,.8);if(G.drone)lay('drone_tanpura',.35);
+ lay(SV+'/'+G.guide,.8);if(G.drone)lay('drone_tanpura',.35);
  G.st=lead?'count':'run';$('#sg-go').className='sg-go live';$('#sg-go').innerHTML='<span>Stop</span>';$('#sg-tip').hidden=true;
  const W=1024,ds=new Float32Array(W),sr=ac.sampleRate/2;
  const loop=()=>{const t=ac.currentTime-G.t0;
@@ -121,7 +126,7 @@ function checkOffline(fr){const hop=.025;let first=fr.findIndex(f=>!isNaN(f.c)),
  return{res,tot:totals(res),start:a+first*hop,tempo:b,off:((off%1200)+1200)%1200};}
 function judgeAt(k,frames,keyOff,sh){const n=SN[k],s=n.beat*SPB,d=n.dur*SPB,a=s+.18*d+sh,b=s+.85*d+sh,dv=[];frames.forEach(f=>{if(f.t>=a&&f.t<=b&&!isNaN(f.c))dv.push(circ(f.c-keyOff-n.semi*100));});
  const on=dv.length?dv.filter(x=>Math.abs(x)<=PITCH_TOL).length/dv.length:0;return{on,hit:on>=NOTE_HIT};}
-async function singUpload(file){if(S.view!=='sing'){showView('sing');singReset();}toast('Checking your recording…');
+async function singUpload(file){if(S.view!=='sing'){setSingVerse(S.style.Tattva||1);showView('sing');singReset();}toast('Checking your recording…');
  try{const ac=new AC(),buf=await ac.decodeAudioData(await file.arrayBuffer());closeAC(ac);await new Promise(r=>setTimeout(r,30));const x=await to16k(buf),fr=trackOff(x,16000,.025),r=checkOffline(fr);
   if(!r){toast('We didn’t hear enough singing in that file.');return;}G.res=r.res;G.takeBuf=buf;G.takeBlob=file;G.takeOffset=Math.max(0,r.start);singDraw(-1.2);singResults(r.tot,r.res,true);}catch(e){toast('Couldn’t read that audio. Try another file.');}}
 function singResults(tot,res,offline,label){const box=$('#sg-result'),pass=tot.score>=PASS_MARK&&tot.judged>=SN.length*(G.only?0:1);

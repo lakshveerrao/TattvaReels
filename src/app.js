@@ -2,19 +2,11 @@
 'use strict';
 const $=s=>document.querySelector(s);
 const AC=window.AudioContext||window.webkitAudioContext;
-const TT=[{n:1,bpm:TUNE1.bpm,total:TUNE1.total,notes:TUNE1.n.map(x=>({semi:x[0],beat:x[1],dur:x[2],dev:x[3],iast:x[4],line:x[5],sw:x[6]}))}];
+const TT=[1,2,3,4,5,6,7,8].map(n=>{const U=TUNES[n];return{n,bpm:U.bpm,total:U.total,notes:U.n.map(x=>({semi:x[0],beat:x[1],dur:x[2],dev:x[3],iast:x[4],line:x[5],sw:x[6]}))};});
 const INSTR={sitar:'Sitar',veena:'Veena',bansuri:'Bansuri',violin:'Violin',harmonium:'Harmonium',piano:'Piano',guitar:'Guitar',santoor:'Santoor',sarangi:'Sarangi',nadaswaram:'Nadaswaram',harp:'Harp',cello:'Cello'};
 const AUD={buf:{},ready:false};
-const T1={
- name:'The mirror city',
- dev:['विश्वं दर्पणदृश्यमाननगरीतुल्यं निजान्तर्गतं','पश्यन्नात्मनि मायया बहिरिवोद्भूतं यथा निद्रया ।','यः साक्षात्कुरुते प्रबोधसमये स्वात्मानमेवाद्वयं','तस्मै श्रीगुरुमूर्तये नम इदं श्रीदक्षिणामूर्तये ॥'],
- iast:['viśvaṁ darpaṇa-dṛśyamāna-nagarī-tulyaṁ nijāntargataṁ','paśyann ātmani māyayā bahir ivodbhūtaṁ yathā nidrayā','yaḥ sākṣāt kurute prabodha-samaye svātmānam evādvayaṁ','tasmai śrī-guru-mūrtaye nama idaṁ śrī-dakṣiṇāmūrtaye'],
- en:['The universe is like a city seen in a mirror. It exists within oneself.','Through māyā it seems to appear outside, as a dream does in sleep.','The one who, at the moment of awakening, sees directly his own Self, one without a second,','to that Guru in form, Śrī Dakṣiṇāmūrti, I offer this salutation.'],
- teach:'The world you see is like a city reflected in a mirror. It seems to be outside, yet it shines within you.',
- keep:['A reflection depends on the mirror. The world you see depends on the awareness that sees it.','A dream city feels real until you wake. Then you see it was in you all along.','The guru’s gift is that awakening: you are the one awareness, without a second.'],
- words:[['viśvam','the universe'],['darpaṇa','mirror'],['dṛśyamāna','being seen'],['nagarī','city'],['tulyam','just like'],['nija-antargatam','within oneself'],['māyayā','through māyā'],['bahiḥ iva','as if outside'],['nidrayā','in sleep'],['prabodha-samaye','at awakening'],['sva-ātmānam','one’s own Self'],['advayam','without a second'],['namaḥ','salutations']]
-};
-const TNAMES=['The mirror city','The seed and the sprout','The light of being','The lamp in the pot','Not the body','The eclipsed sun','The constant witness','Many roles, one Self'];
+const TA=r=>TATTVAS[((r&&r.style?r.style.Tattva:r&&r.Tattva)||1)-1]||TATTVAS[0];
+const TNAMES=TATTVAS.map(t=>t.name);
 const PADA_AT=[1,2,3,4].map(l=>TT[0].notes.find(n=>n.line===l).beat/TT[0].total);
 const TONES={'Tabla':1,'Mridangam':1,'Rock':1,'Lo-fi':1,'None':1};
 const LEG_T={Classical:'Tabla',Folk:'Mridangam'};
@@ -25,7 +17,7 @@ const FD='"Rozha One",Georgia,serif';
 const SCALE=Math.min(window.innerWidth,window.innerHeight)<700?.6:1;
 const VISUALS=['Tattva film'].concat(ENGINES,['Beatbox text']);
 const HOLD={on:false};
-const DEF=()=>({Tone:'Tabla',Visuals:'Tattva film',Sound:['sitar'],Recitation:'None'});
+const DEF=()=>({Tattva:1,Tone:'Tabla',Visuals:'Tattva film',Sound:['sitar'],Recitation:'None'});
 const DEMOS=[];
 
 const IC={
@@ -61,9 +53,10 @@ S.user=LS.get('tr-user',null);if(S.user&&!/^[\w.-]{1,24}$/.test(S.user.handle||'
 function localReels(){const mine=new Set(LS.get('tr-learnt',[]));return LS.get('tr-reels',[]).map(cleanReel).filter(Boolean).map(r=>Object.assign(r,{mine:mine.has(r.id),learnt:mine.has(r.id)?1:0}));}
 
 let cur=null;
-const EL={buf:null,busy:false,off:false,p:null};
-function elFetch(){if(EL.buf)return Promise.resolve(EL.buf);if(EL.off)return Promise.reject(501);if(EL.p)return EL.p;
- EL.p=fetch('/api/tts').then(async r=>{if(!r.ok){if(r.status===501)EL.off=true;throw r.status;}const ab=await r.arrayBuffer(),ac=new AC();EL.buf=await ac.decodeAudioData(ab);closeAC(ac);return EL.buf;}).finally(()=>{EL.p=null;});return EL.p;}
+const EL={bufs:{},busy:false,off:false,ps:{}};
+function elBuf(n){return EL.bufs[n||1]||null;}
+function elFetch(n){n=n||1;if(EL.bufs[n])return Promise.resolve(EL.bufs[n]);if(EL.off)return Promise.reject(501);if(EL.ps[n])return EL.ps[n];
+ EL.ps[n]=fetch('/api/tts?v='+n).then(async r=>{if(!r.ok){if(r.status===501)EL.off=true;throw r.status;}const ab=await r.arrayBuffer(),ac=new AC();const b=await ac.decodeAudioData(ab);closeAC(ac);EL.bufs[n]=b;return b;}).finally(()=>{EL.ps[n]=null;});return EL.ps[n];}
 const API=(p,o)=>fetch(p,Object.assign({credentials:'same-origin',headers:{'Content-Type':'application/json'}},o||{})).then(async r=>{let j={};try{j=await r.json();}catch(e){}if(!r.ok){const e=new Error(j.error||'Something went wrong. Try again.');e.status=r.status;throw e;}return j;});
 
 /* ---------- helpers ---------- */
@@ -76,12 +69,12 @@ function handle(u){return u&&u.handle?u.handle:'you';}
 function fmt(n){return n>=1e6?(n/1e6).toFixed(1).replace(/\.0$/,'')+'M':n>=1e3?(n/1e3).toFixed(1).replace(/\.0$/,'')+'K':String(n);}
 function norm(s){const d=DEF();s=s&&typeof s==='object'?s:{};const tone=LEG_T[s.Tone]||s.Tone;
  let snd=Array.isArray(s.Sound)?s.Sound.map(x=>INSTR[x]?x:LEG_I[x]).filter(Boolean):null;if(snd)snd=[...new Set(snd)].slice(0,12);
- return{Tone:TONES[tone]?tone:d.Tone,Visuals:VISUALS.includes(s.Visuals)?s.Visuals:d.Visuals,Sound:snd||d.Sound,Recitation:s.Recitation==='AI voice (demo)'?'AI voice':['None','My recording','AI voice'].includes(s.Recitation)?s.Recitation:'None'};}
+ return{Tattva:Number.isInteger(s.Tattva)&&s.Tattva>=1&&s.Tattva<=8?s.Tattva:1,Tone:TONES[tone]?tone:d.Tone,Visuals:VISUALS.includes(s.Visuals)?s.Visuals:d.Visuals,Sound:snd||d.Sound,Recitation:s.Recitation==='AI voice (demo)'?'AI voice':['None','My recording','AI voice'].includes(s.Recitation)?s.Recitation:'None'};}
 function cleanReel(r){if(!r||typeof r!=='object'||typeof r.id!=='string'||!/^[\w-]{1,40}$/.test(r.id))return null;
  return{id:r.id,t:0,name:String(r.name||'seeker').slice(0,24),caption:String(r.caption||'').slice(0,140),style:norm(r.style),score:typeof r.score==='number'?Math.max(0,Math.min(100,Math.round(r.score))):null,createdAt:typeof r.createdAt==='number'?r.createdAt:0,learnt:Math.max(0,+r.learnt||0),mine:!!r.mine,hasTake:!!r.hasTake,takeOffset:Math.max(0,+r.takeOffset||0)};}
 
 /* ---------- timeline ---------- */
-function build(i,style){const T=TT[0],beat=60/T.bpm,ev=T.notes.map((n,idx)=>({t:n.beat*beat,dur:n.dur*beat,semi:n.semi,idx}));return{ev,total:T.total*beat+1.5,beat};}
+function build(i,style){const T=TT[((style&&style.Tattva)||1)-1]||TT[0],beat=60/T.bpm,ev=T.notes.map((n,idx)=>({t:n.beat*beat,dur:n.dur*beat,semi:n.semi,idx}));return{ev,total:T.total*beat+1.5,beat};}
 function adv(B,t,dt,A){let k=-1;for(let j=0;j<B.ev.length;j++){if(B.ev[j].t<=t)k=j;else break;}
  A.ons=(k!==A.idx&&k>=0);A.idx=k;
  if(k>=0){const e=B.ev[k];A.semi+=(e.semi-A.semi)*Math.min(1,dt*10);A.env=Math.exp(-(t-e.t)*3);}else A.env=0;
@@ -96,9 +89,10 @@ function dBeat(g,t,B,HH){const W=360,H=560;g.fillStyle='#07050F';g.fillRect(0,0,
   if(j===0){g.shadowColor='rgba(233,180,76,.7)';g.shadowBlur=30;}
   g.fillText(txt,W/2+(j===0?0:(k2%2?-36:36)),j===0?H*.5:H*.5-72-j*50);g.shadowBlur=0;}
  g.globalAlpha=1;g.restore();}
-function visKind(style){if(style.Visuals==='Tattva film'){if(FILM.init())return 'film';return GLR.init()?'Mirror city':'beat';}if(ENG[style.Visuals]&&GLR.init())return style.Visuals;return 'beat';}
+function filmOf(style){const f=FILMS[(style&&style.Tattva)||1];return f&&f.init()?f:null;}
+function visKind(style){if(style.Visuals==='Tattva film'){if(filmOf(style))return 'film';return GLR.init()?'Mirror city':'beat';}if(ENG[style.Visuals]&&GLR.init())return style.Visuals;return 'beat';}
 function drawStatic(c,style,i){const B=build(i||0,style),g=ctx2(c),HH=c.__h,vk=visKind(style);
- if(vk==='film'){g.drawImage(FILM.render(.4,4,HH),0,0,360,HH);return;}
+ if(vk==='film'){const F=filmOf(style);g.drawImage(F.render(F.poster||.4,4,HH),0,0,360,HH);return;}
  if(vk!=='beat'){const sim=makeSim(vk,SCALE*.6),A=newA(),Tend=B.total*.5,dt=.1;GLR.clear();
   for(let t=0;t<Tend;t+=dt){adv(B,t,dt,A);sim.step(dt,A);if(sim.trail>0&&t>Tend-1.2)GLR.draw(sim.n,sim.trail);}
   GLR.draw(sim.n,sim.trail);g.fillStyle='#07050F';g.fillRect(0,0,360,HH);g.drawImage(GLR.canvas,0,(HH-560)/2,360,560);}
@@ -151,29 +145,29 @@ function rhythm(ac,out,base,t0,B,tone,nb){if(tone!=='Rock'&&tone!=='Lo-fi')retur
 /* ---------- player ---------- */
 function stopCur(){if(cur)cur.stop();}
 function play(canvas,i,style,o){
- stopCur();o=o||{};const B=build(i,style),take=o.take||null;if(take)B.total=Math.max(B.total,take.duration+1.4);const elOn=style.Recitation==='AI voice'&&EL.buf;if(elOn)B.total=Math.max(B.total,EL.buf.duration+2);
+ stopCur();o=o||{};const B=build(i,style),take=o.take||null,vn=style.Tattva||1,elB=elBuf(vn);if(take)B.total=Math.max(B.total,take.duration+1.4);const elOn=style.Recitation==='AI voice'&&elB;if(elOn)B.total=Math.max(B.total,elB.duration+2);AUD.need(vn);
  let ac=null,master=null,t0=0,speaking=false;const p0=performance.now();
- if(o.sound&&AC&&AUD.ready){try{
+ if(o.sound&&AC&&AUD.has(vn)){try{
   ac=new AC();if(ac.resume)ac.resume();master=ac.createGain();master.gain.value=.85;const comp=ac.createDynamicsCompressor();master.connect(comp);comp.connect(ac.destination);t0=ac.currentTime+.12;
   const layer=(id,gain,off)=>{const b=AUD.buf[id];if(!b)return;const s=ac.createBufferSource(),gg=ac.createGain();gg.gain.value=gain;s.buffer=b;s.connect(gg);gg.connect(master);s.start(t0+(off||0));};
   layer('drone_tanpura',.4);
-  const ins=style.Sound,gi=((take||elOn)?.42:.72)/Math.sqrt(Math.max(1,ins.length));ins.forEach(id=>layer(id,gi));
+  const ins=style.Sound,gi=((take||elOn)?.42:.72)/Math.sqrt(Math.max(1,ins.length));ins.forEach(id=>layer(vn+'/'+id,gi));
   if(style.Tone==='Tabla')layer('rhythm_tabla',.45);else if(style.Tone==='Mridangam')layer('rhythm_mridangam',.45);else rhythm(ac,master,164.81,t0,B,style.Tone,noiseBuf(ac));
   if(take){const src=ac.createBufferSource(),tg=ac.createGain();tg.gain.value=1.15;src.buffer=take;src.connect(tg);tg.connect(master);src.start(t0,Math.max(0,o.takeOffset||0));}
-  if(elOn){const es=ac.createBufferSource(),eg=ac.createGain();eg.gain.value=1.1;es.buffer=EL.buf;es.connect(eg);eg.connect(master);es.start(t0+.6);}
-  if(style.Recitation==='AI voice'&&!elOn&&window.speechSynthesis){try{const u=new SpeechSynthesisUtterance(T1.dev.join(' '));u.lang='hi-IN';u.rate=.6;speechSynthesis.cancel();speechSynthesis.speak(u);speaking=true;}catch(e){}}
+  if(elOn){const es=ac.createBufferSource(),eg=ac.createGain();eg.gain.value=1.1;es.buffer=elB;es.connect(eg);eg.connect(master);es.start(t0+.6);}
+  if(style.Recitation==='AI voice'&&!elOn&&window.speechSynthesis){try{const u=new SpeechSynthesisUtterance(TA(style).dev.join(' '));u.lang='hi-IN';u.rate=.6;speechSynthesis.cancel();speechSynthesis.speak(u);speaking=true;}catch(e){}}
  }catch(e){ac=null;}}
  const g=ctx2(canvas),HH=canvas.__h;
- const vk=visKind(style),film=vk==='film';let sim=null,boost=0;if(!film&&vk!=='beat'){sim=makeSim(vk,SCALE);GLR.clear();}
+ const vk=visKind(style),film=vk==='film',F=film?filmOf(style):null;let sim=null,boost=0;if(!film&&vk!=='beat'){sim=makeSim(vk,SCALE);GLR.clear();}
  const A=newA();let raf=0,done=false,last=performance.now();
  const clock=()=>ac?ac.currentTime-t0:(performance.now()-p0)/1000-.08;
- const h={canvas,hasAudio:!!ac,
+ const h={canvas,hasAudio:!!ac,vn,
   stop(){end(false);},
   setMuted(m){if(master)master.gain.setTargetAtTime(m?0:.85,ac.currentTime,.04);if(m&&speaking){try{speechSynthesis.cancel();}catch(e){}speaking=false;}}};
  function end(fin){if(done)return;done=true;cancelAnimationFrame(raf);if(ac){closeAC(ac);}if(speaking){try{speechSynthesis.cancel();}catch(e){}}if(cur===h)cur=null;if(fin&&o.onEnd)o.onEnd();}
  function frame(){const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;let t=clock();if(t>=B.total){end(true);return;}t=Math.max(0,t);adv(B,t,dt,A);
   const p=t/B.total;let pf=p;
-  if(film){if(HOLD.on&&o.hold&&p+boost>.26&&p+boost<.82)boost+=dt*2.2/B.total;pf=Math.min(1,p+boost);g.drawImage(FILM.render(pf,t,HH),0,0,360,HH);FILM.overlay(g,pf,B.total,HH);}
+  if(film){const hr=F.hold||[.26,.82];if(HOLD.on&&o.hold&&p+boost>hr[0]&&p+boost<hr[1])boost+=dt*2.2/B.total;pf=Math.min(1,p+boost);g.drawImage(F.render(pf,t,HH),0,0,360,HH);F.overlay(g,pf,B.total,HH);}
   else if(sim){sim.step(dt,A);GLR.draw(sim.n,sim.trail);g.fillStyle='#07050F';g.fillRect(0,0,360,HH);g.drawImage(GLR.canvas,0,(HH-560)/2,360,560);}else dBeat(g,t,B,HH);
   if(o.onTick)o.onTick(p,pf,film);raf=requestAnimationFrame(frame);}
  cur=h;frame();return h;}
@@ -205,7 +199,7 @@ function reelEl(r,ix){
   '<button class="rbtn" data-a="remix" aria-label="Remix this reel">'+ico('remix')+'<span>Remix</span></button>'+
   '<button class="rbtn" data-a="share" aria-label="Share">'+ico('share')+'<span>Share</span></button></div>'+
   '<div class="cap"><div class="who"><span class="ava"></span><span class="nm"></span></div>'+
-  '<div class="rtitle">Tattva 1 · <span>'+esc(T1.name)+'</span></div>'+
+  '<div class="rtitle">Tattva '+TA(r).n+' · <span>'+esc(TA(r).name)+'</span></div>'+
   (r.caption?'<div class="rcap"></div>':'')+
   '<div class="pada"><span class="dev"></span><span class="ia"></span></div>'+
   '<div class="music">'+ico('music')+'<div class="mq"><span></span></div></div></div>'+
@@ -214,8 +208,8 @@ function reelEl(r,ix){
  const nm=el.querySelector('.nm');nm.textContent=r.name;if(r.score!=null){const p=document.createElement('span');p.className='pill';p.textContent='Tune '+r.score+'%';nm.after(p);}
  if(r.caption)el.querySelector('.rcap').textContent=r.caption;
  el.querySelector('.mq span').textContent=mus+'   ·   '+mus+'   ·   ';
- setPada(el,0,true);
  el.__r=r;el.__ix=ix;
+ setPada(el,0,true);
  el.addEventListener('click',e=>{if(el.__held){el.__held=false;return;}onReelTap(e,el);});
  let ht=0,sx=0,sy=0;const hg=el.querySelector('.holdglow');
  const endHold=()=>{clearTimeout(ht);if(HOLD.on){HOLD.on=false;hg.hidden=true;}};
@@ -226,7 +220,7 @@ function reelEl(r,ix){
  el.addEventListener('contextmenu',e=>{if(el.__r.style.Visuals==='Tattva film')e.preventDefault();});
  return el;}
 function setPada(el,k,now){const p=el.querySelector('.pada');if(el.__pada===k)return;el.__pada=k;
- const put=()=>{p.querySelector('.dev').textContent=T1.dev[k];p.querySelector('.ia').textContent=T1.iast[k];p.classList.remove('swap');};
+ const put=()=>{const V=TA(el.__r);p.querySelector('.dev').textContent=V.dev[k];p.querySelector('.ia').textContent=V.iast[k];p.classList.remove('swap');};
  if(now){put();return;}p.classList.add('swap');setTimeout(put,300);}
 const posterIO=('IntersectionObserver' in window)?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){posterIO.unobserve(e.target);const el=e.target;queuePoster(el.querySelector('canvas'),el.__r.style,0);}}),{root:reelsEl,rootMargin:'100% 0px'}):null;
 function renderFeed(force){
@@ -242,7 +236,7 @@ function renderFeed(force){
  if(S.view==='feed')requestAnimationFrame(()=>activate(currentIx(),true));}
 function emptyEl(){const el=document.createElement('div');el.className='reel emptyreel';
  const st=!S.loaded?['Loading reels…','']:S.offline?['Couldn’t load reels','Check your connection, then try again.']:['No reels yet','Sing the first verse or make a reel. Your reels show up here.'];
- el.innerHTML='<canvas></canvas><div class="shade"></div><div class="emptybox"><p class="eyebrow">Tattva 1 · '+esc(T1.name)+'</p><h2 class="sh-title"></h2><p class="note"></p>'+(S.loaded?'<div class="row2">'+(S.offline?'<button class="btn gold" id="em-retry">Try again</button>':'<button class="btn gold" id="em-create">'+ico('plus')+'Make a reel</button><button class="btn line" id="em-sing">'+ico('mic')+'Sing the verse</button>')+'</div>':'')+'</div>';
+ el.innerHTML='<canvas></canvas><div class="shade"></div><div class="emptybox"><p class="eyebrow">Dakṣiṇāmūrti Aṣṭakam · 8 tattvas</p><h2 class="sh-title"></h2><p class="note"></p>'+(S.loaded?'<div class="row2">'+(S.offline?'<button class="btn gold" id="em-retry">Try again</button>':'<button class="btn gold" id="em-create">'+ico('plus')+'Make a reel</button><button class="btn line" id="em-sing">'+ico('mic')+'Sing the verse</button>')+'</div>':'')+'</div>';
  el.querySelector('.sh-title').textContent=st[0];el.querySelector('.note').textContent=st[1];
  const b1=el.querySelector('#em-create'),b2=el.querySelector('#em-sing'),b3=el.querySelector('#em-retry');if(b1)b1.onclick=()=>openCreate();if(b2)b2.onclick=()=>openSing();if(b3)b3.onclick=()=>{S.loaded=false;renderFeed(true);loadReels();};
  queuePoster(el.querySelector('canvas'),DEF(),0);return el;}
@@ -256,9 +250,9 @@ function startReel(el){const r=el.__r,bar=el.querySelector('.prog i');const ec=e
  const hh=el.querySelector('.holdhint');
  const rec=r.style.Recitation,tk=rec==='My recording'?TAKES[r.id]:null;
  if(rec==='My recording'&&r.hasTake&&!TAKES[r.id]&&!TAKES['_'+r.id]){TAKES['_'+r.id]=1;(S.local?Promise.resolve(LS.get('tr-take-'+r.id,null)).then(t=>{if(!t)throw 0;const bin=atob(t.b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer;}):fetch('/api/take?id='+encodeURIComponent(r.id)).then(x=>{if(!x.ok)throw 0;return x.arrayBuffer();})).then(ab=>{const ac=new AC();return ac.decodeAudioData(ab).finally(()=>closeAC(ac));}).then(b=>{TAKES[r.id]=b;if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});}
- if(rec==='AI voice'&&!EL.buf&&!EL.off)elFetch().then(()=>{if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});
+ if(rec==='AI voice'&&!elBuf(r.style.Tattva)&&!EL.off)elFetch(r.style.Tattva).then(()=>{if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});
  play(el.querySelector('canvas'),0,r.style,{sound:S.sound,hold:true,take:tk,takeOffset:r.takeOffset||0,onTick:(p,pf,film)=>{bar.style.width=(p*100).toFixed(2)+'%';let k=0;for(let j=0;j<4;j++)if(pf>=PADA_AT[j])k=j;setPada(el,k);
-  if(hh){const show=film&&pf>.27&&pf<.6;if(hh.hidden===show)hh.hidden=!show;hh.classList.toggle('on',HOLD.on);hh.lastChild.textContent=HOLD.on?'Awakening…':'Hold to awaken';}},onEnd:()=>showEnd(el)});}
+  if(hh){const hr=(FILMS[r.style.Tattva]||{}).hold||[.26,.82],show=film&&pf>hr[0]+.01&&pf<hr[1]-.2;if(hh.hidden===show)hh.hidden=!show;hh.classList.toggle('on',HOLD.on);hh.lastChild.textContent=HOLD.on?'Awakening…':'Hold to awaken';}},onEnd:()=>showEnd(el)});}
 let scrollT=0;
 reelsEl.addEventListener('scroll',()=>{clearTimeout(scrollT);scrollT=setTimeout(()=>activate(currentIx()),110);},{passive:true});
 let lastTap=0,tapT=0;
@@ -283,7 +277,7 @@ function showEnd(el){
  const ec=document.createElement('div');ec.className='endcard';
  ec.innerHTML='<div class="ecard"><p class="eyebrow">What I learnt</p><p class="teach"></p><p class="count ec-count"></p>'+
   '<button class="btn ec-learn"></button><div class="row2"><button class="btn line ec-replay">'+ico('replay')+'Replay</button><button class="btn line ec-read">'+ico('book')+'Read the shloka</button></div></div>';
- ec.querySelector('.teach').textContent=T1.teach;
+ ec.querySelector('.teach').textContent=TA(r).teach;
  ec.querySelector('.ec-learn').onclick=e=>{e.stopPropagation();const v=!isLearnt(r.id);setLearnt(r,v);if(v){popLearn(el);const rc=el.getBoundingClientRect(),bc=e.currentTarget.getBoundingClientRect();burst(el,bc.left-rc.left+bc.width/2,bc.top-rc.top);}};
  ec.querySelector('.ec-replay').onclick=e=>{e.stopPropagation();startReel(el);};
  ec.querySelector('.ec-read').onclick=e=>{e.stopPropagation();openLearn(r);};
@@ -303,20 +297,20 @@ function openSheet(kind,html,ctx){sheetFor=Object.assign({kind},ctx||{});$('#sbo
 function closeSheet(){sheetFor=null;$('#scrim').classList.remove('on');$('#sheet').classList.remove('open');}
 $('#scrim').onclick=closeSheet;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sheetFor)closeSheet();});
-function openLearn(r){
+function openLearn(r){const T1=TA(r);
  const lines=T1.dev.map((d,k)=>'<div class="ln"><span class="dev">'+esc(d)+'</span><span class="ia">'+esc(T1.iast[k])+'</span><span class="en">'+esc(T1.en[k])+'</span></div>').join('');
  const words=T1.words.map(w=>'<div class="word"><b>'+esc(w[0])+'</b><span>'+esc(w[1])+'</span></div>').join('');
  const keep=T1.keep.map(k=>'<li>'+ico('lotus')+'<span>'+esc(k)+'</span></li>').join('');
- openSheet('learn','<div class="shead"><div><p class="eyebrow">Tattva 1 · What I learnt</p><h2 class="sh-title">'+esc(T1.teach)+'</h2></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
+ openSheet('learn','<div class="shead"><div><p class="eyebrow">Tattva '+T1.n+' · What I learnt</p><h2 class="sh-title">'+esc(T1.teach)+'</h2></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
   '<div class="learnbox" id="lbox"><span class="bignum" id="lb-n">0</span><span class="lab">people learnt from this reel</span><p class="count" id="lb-line"></p><button class="btn" id="lb-btn"></button></div>'+
   '<button class="btn line" id="lb-sing">'+ico('mic')+'Sing this verse</button><div><p class="lab">Keep these three</p><ul class="keep" style="margin-top:10px">'+keep+'</ul></div>'+
-  '<div><p class="lab">The shloka · Dakṣiṇāmūrti Aṣṭakam, verse 1</p><div class="shloka">'+lines+'</div></div>'+
+  '<div><p class="lab">The shloka · Dakṣiṇāmūrti Aṣṭakam, verse '+T1.n+'</p><div class="shloka">'+lines+'</div></div>'+
   '<div><p class="lab" style="margin-bottom:10px">Word by word</p><div class="words">'+words+'</div></div>',{r});
- $('#sh-x').onclick=closeSheet;$('#lb-sing').onclick=()=>{closeSheet();openSing();};$('#lb-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);if(v){const n=$('#lb-n');n.classList.remove('bump');void n.offsetWidth;n.classList.add('bump');}};
+ $('#sh-x').onclick=closeSheet;$('#lb-sing').onclick=()=>{closeSheet();S.style=norm(Object.assign({},S.style,{Tattva:T1.n}));openSing();};$('#lb-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);if(v){const n=$('#lb-n');n.classList.remove('bump');void n.offsetWidth;n.classList.add('bump');}};
  paintLearnBox();}
 function paintLearnBox(){const r=sheetFor.r,n=counts()[r.id]||0,m=isLearnt(r.id),b=$('#lb-btn');if(!b)return;
  $('#lb-n').textContent=fmt(n);$('#lb-line').innerHTML=learnLine(n,m);b.className='btn '+(m?'done':'gold');b.innerHTML=ico(m?'check':'lotus')+(m?'You learnt this':'I learnt this');}
-function openShare(r){const url=location.origin+'/#r-'+r.id;if(navigator.share){navigator.share({title:'Tattva Reels',text:'Tattva 1 · '+T1.name,url}).catch(()=>{});return;}
+function openShare(r){const url=location.origin+'/#r-'+r.id;if(navigator.share){navigator.share({title:'Tattva Reels',text:'Tattva '+TA(r).n+' · '+TA(r).name,url}).catch(()=>{});return;}
  openSheet('share','<div class="shead"><h2 class="sh-title">Share this reel</h2><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
   '<div class="linkbox"><input id="sh-url" readonly aria-label="Reel link"><button class="btn gold" id="sh-copy">Copy</button></div>'+
   '<p class="note">The link opens this reel for anyone you’ve shared Tattva with.</p>');
@@ -356,7 +350,7 @@ function renderTop(){const c=counts(),list=allReels().map(r=>({r,n:c[r.id]||0}))
  if(!list.length){lb.innerHTML='<p class="note">No reels yet. Share one and it ranks here.</p>';return;}
  list.forEach((x,k)=>{const b=document.createElement('button');b.className='lrow';
   b.innerHTML='<span class="rk">'+(k+1)+'</span><span class="lthumb"><canvas></canvas></span><span class="lmid"><b></b><small></small></span><span class="lcount">'+ico('lotus')+fmt(x.n)+'<small>learnt</small></span>';
-  b.querySelector('b').textContent=x.r.caption||('Tattva 1 · '+T1.name);
+  b.querySelector('b').textContent=x.r.caption||('Tattva '+TA(x.r).n+' · '+TA(x.r).name);
   const sm=b.querySelector('small');sm.textContent=x.r.name+' · '+x.r.style.Visuals;if(x.r.score!=null){const s=document.createElement('span');s.className='score';s.textContent='Tune '+x.r.score+'%';sm.appendChild(s);}
   b.onclick=()=>{const ix=reelList.findIndex(r=>r.id===x.r.id);showView('feed');if(ix>=0){reelsEl.scrollTop=ix*reelsEl.clientHeight;activate(ix,true);}};
   lb.appendChild(b);queuePoster(b.querySelector('canvas'),x.r.style,0);});}
@@ -367,7 +361,7 @@ const GROUPS={
  rhythm:{k:'Tone',multi:false,title:'Rhythm',note:'Tabla and mridangam are pre-recorded on the tune’s beat.',opts:Object.keys(TONES),icon:'drum',label:'Rhythm'},
  recite:{k:'Recitation',multi:false,title:'Shloka recitation',note:'Use your own voice from Sing, or let an AI voice read the shloka.',opts:['None','My recording','AI voice'],icon:'book',label:'Recite'}};
 let recording=false,mr=null,stream=null,chunks=[],recTimer=0,recSec=0,guideRaf=0,prevT=0;
-function openCreate(style){S.style=norm(style||S.style||DEF());S.source=null;S.score=null;S.takeBuf=null;$('#rescard').hidden=true;
+function openCreate(style){S.style=norm(style||S.style||DEF());paintTattvaPill();S.source=null;S.score=null;S.takeBuf=null;$('#rescard').hidden=true;
  showView('create');renderTools();renderFx(true);startPreview();}
 function renderTools(){const t=$('#tools');t.innerHTML='';
  Object.keys(GROUPS).forEach(id=>{const G=GROUPS[id],v=S.style[G.k],b=document.createElement('button');b.className='tool';
@@ -383,9 +377,9 @@ function openGroup(id){const G=GROUPS[id];
   paint();renderTools();clearTimeout(prevT);prevT=setTimeout(startPreview,250);};}
 function elPanel(paint){const box=document.createElement('div');box.className='elbox';
  box.innerHTML='<div class="elhead"><p class="lab">AI voice</p><span class="elstat" id="el-stat"></span></div><p class="note">An ElevenLabs voice reads the shloka over your music.</p><button class="btn gold" id="el-gen">Preview AI recitation</button><p class="note" id="el-msg"></p>';
- $('#sbody').appendChild(box);const stat=$('#el-stat'),msg=$('#el-msg'),setStat=()=>{stat.textContent=EL.buf?'Ready · '+Math.round(EL.buf.duration)+'s':'';stat.classList.toggle('ok',!!EL.buf);};setStat();
+ $('#sbody').appendChild(box);const stat=$('#el-stat'),msg=$('#el-msg'),setStat=()=>{const eb=elBuf(S.style.Tattva);stat.textContent=eb?'Ready · '+Math.round(eb.duration)+'s':'';stat.classList.toggle('ok',!!eb);};setStat();
  $('#el-gen').onclick=async e=>{if(EL.busy)return;const b=e.currentTarget;msg.style.color='';
-  try{EL.busy=true;b.textContent='Loading…';await elFetch();S.style.Recitation='AI voice';paint();renderTools();setStat();msg.textContent='Ready. It plays over the music in your reel.';if(!S.sound)toast('Turn sound on to hear it');startPreview();}
+  try{EL.busy=true;b.textContent='Loading…';await elFetch(S.style.Tattva);S.style.Recitation='AI voice';paint();renderTools();setStat();msg.textContent='Ready. It plays over the music in your reel.';if(!S.sound)toast('Turn sound on to hear it');startPreview();}
   catch(r){msg.style.color='var(--bad)';msg.textContent=r===501?'AI voice isn’t switched on for this site yet, so your browser’s voice reads it instead.':'Couldn’t load the AI voice. Try again.';}
   finally{EL.busy=false;b.textContent='Preview AI recitation';}};}
 function renderFx(scroll){const fx=$('#fx');fx.innerHTML='';
@@ -398,11 +392,14 @@ function renderFx(scroll){const fx=$('#fx');fx.innerHTML='';
  if(scroll)requestAnimationFrame(()=>{const on=fx.querySelector('.on');if(on)fx.scrollLeft=on.offsetLeft-fx.clientWidth/2+on.clientWidth/2;});}
 function startPreview(){if(S.view!=='create')return;play($('#c-create'),0,S.style,{sound:S.sound&&!recording,onEnd:()=>startPreview()});}
 $('#cr-close').onclick=()=>showView('feed');
-$('#cr-tattva').innerHTML='<span>Tattva 1 · '+esc(T1.name)+'</span>'+ico('down');
+function paintTattvaPill(){const V=TA(S.style);$('#cr-tattva').innerHTML='<span>Tattva '+V.n+' · '+esc(V.name)+'</span>'+ico('down');}
+paintTattvaPill();
+function setTattva(n){if(S.style.Tattva===n)return;S.style.Tattva=n;S.takeBuf=null;S.takeBlob=null;S.score=null;S.source=null;if(S.style.Recitation==='My recording')S.style.Recitation='None';$('#rescard').hidden=true;
+ paintTattvaPill();renderTools();renderFx(true);startPreview();}
 $('#cr-tattva').onclick=()=>{openSheet('tattva','<div class="shead"><h2 class="sh-title">Choose a tattva</h2><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
- '<p class="note">Eight tattvas from the Dakṣiṇāmūrti Aṣṭakam. The set is fixed.</p>'+
- TNAMES.map((n,k)=>'<button class="trow'+(k===0?' on':'')+'"'+(k?' disabled':'')+' data-k="'+k+'"><span class="n">'+(k+1)+'</span><span class="t"><b>'+esc(n)+'</b><small>'+(k?'Coming soon':'Verse 1 · ready to create')+'</small></span>'+ico(k?'lock':'check')+'</button>').join(''));
- $('#sh-x').onclick=closeSheet;$('#sbody').querySelector('[data-k="0"]').onclick=closeSheet;};
+ '<p class="note">The eight tattvas of the Dakṣiṇāmūrti Aṣṭakam, one per verse.</p>'+
+ TATTVAS.map((t,k)=>'<button class="trow'+(t.n===S.style.Tattva?' on':'')+'" data-k="'+t.n+'"><span class="n">'+t.n+'</span><span class="t"><b>'+esc(t.name)+'</b><small>'+esc(t.teach)+'</small></span>'+(t.n===S.style.Tattva?ico('check'):'')+'</button>').join(''));
+ $('#sh-x').onclick=closeSheet;$('#sbody').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{closeSheet();setTattva(+b.dataset.k);});};
 $('#ic-up').innerHTML=ico('upload');
 $('#cr-next').innerHTML='Next'+ico('right');
 $('#cr-next').onclick=()=>{if(recording)return;S.source='generated';S.score=null;S.takeBuf=null;if(S.style.Recitation==='My recording')S.style.Recitation='None';openReview();};
@@ -413,7 +410,7 @@ function stopRecIfAny(){}
 /* ---------- review & publish ---------- */
 function openReview(){showView('review');$('#caption').value='';
  $('#rv-tag').innerHTML=(S.source==='recorded'||S.source==='sung')?ico('check')+'<span>Tune match '+S.score+'%</span>':'<span>Generated · not ranked</span>';
- const s=S.style;$('#rv-sum').innerHTML=[s.Visuals,s.Tone==='None'?'No rhythm':s.Tone].concat(s.Sound.map(x=>INSTR[x]),s.Recitation!=='None'?[s.Recitation==='My recording'?'Your voice':(EL.buf?'ElevenLabs recitation':'AI recitation')]:[]).map(x=>'<span>'+esc(x)+'</span>').join('');
+ const s=S.style;$('#rv-sum').innerHTML=[s.Visuals,s.Tone==='None'?'No rhythm':s.Tone].concat(s.Sound.map(x=>INSTR[x]),s.Recitation!=='None'?[s.Recitation==='My recording'?'Your voice':(elBuf(s.Tattva)?'ElevenLabs recitation':'AI recitation')]:[]).map(x=>'<span>'+esc(x)+'</span>').join('');
  startReview();}
 function startReview(){if(S.view!=='review')return;const take=S.style.Recitation==='My recording'?S.takeBuf:null;play($('#c-review'),0,S.style,{sound:S.sound,take,takeOffset:S.takeOffset||0,onEnd:()=>startReview()});}
 $('#rv-back').innerHTML=ico('back');$('#rv-back').onclick=()=>{showView('create');renderTools();renderFx(true);startPreview();};

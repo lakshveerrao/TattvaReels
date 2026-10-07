@@ -331,7 +331,7 @@ select.field{appearance:auto;font-size:14px;min-width:0;flex:1}
   <section class="view full sing" id="v-sing" hidden>
     <div class="ctop">
       <button class="icon-btn glass" id="sg-close" aria-label="Close"></button>
-      <span class="tpill glass"><span>Sing · Tattva 1</span></span>
+      <span class="tpill glass"><span id="sg-title">Sing · Tattva 1</span></span>
       <button class="tpill glass" id="sg-guide" aria-label="Choose guide instrument"></button>
     </div>
     <div class="sg-head">
@@ -359,7 +359,71 @@ select.field{appearance:auto;font-size:14px;min-width:0;flex:1}
 
 <script src="/vendor/three.min.js"></script>
 <script>
-const TUNE1={"bpm":150,"total":137.0,"n":[[0,0.0,2.0,"वि","vi",1,"Sa"],[0,2.0,2.0,"श्वं","śvaṁ",1,"Sa"],[1,4.0,2.0,"द","da",1,"Ri"],[5,6.0,1.0,"र्प","rpa",1,"Ma"],[1,7.0,1.0,"ण","ṇa",1,"Ri"],[5,8.0,2.0,"दृ","dṛ",1,"Ma"],[7,10.0,1.0,"श्य","śya",1,"Pa"],[5,11.0,2.0,"मा","mā",1,"Ma"],[1,13.0,1.0,"न","na",1,"Ri"],[5,14.0,1.0,"न","na",1,"Ma"],[1,15.0,1.0,"ग","ga",1,"Ri"],[0,16.0,2.0,"री","rī",1,"Sa"],[-2,19.0,2.0,"तु","tu",1,"Ni"],[0,21.0,2.0,"ल्यं","lyaṁ",1,"Sa"],[1,23.0,1.0,"नि","ni",1,"Ri"],[5,24.0,2.0,"जा","jā",1,"Ma"],[7,26.0,2.0,"न्त","nta",1,"Pa"],[5,28.0,1.0,"र्ग","rga",1,"Ma"],[7,29.0,3.0,"तं","taṁ",1,"Pa"],[7,34.0,2.0,"प","pa",2,"Pa"],[7,36.0,2.0,"श्य","śya",2,"Pa"],[10,38.0,2.0,"न्ना","nnā",2,"Ni"],[12,40.0,1.0,"त्म","tma",2,"Sa"],[10,41.0,1.0,"नि","ni",2,"Ni"],[7,42.0,2.0,"मा","mā",2,"Pa"],[10,44.0,1.0,"य","ya",2,"Ni"],[7,45.0,2.0,"या","yā",2,"Pa"],[5,47.0,1.0,"ब","ba",2,"Ma"],[7,48.0,1.0,"हि","hi",2,"Pa"],[5,49.0,1.0,"रि","ri",2,"Ma"],[1,50.0,2.0,"वो","vo",2,"Ri"],[5,53.0,2.0,"द्भू","dbhū",2,"Ma"],[1,55.0,2.0,"तं","taṁ",2,"Ri"],[0,57.0,1.0,"य","ya",2,"Sa"],[1,58.0,2.0,"था","thā",2,"Ri"],[5,60.0,2.0,"नि","ni",2,"Ma"],[5,62.0,1.0,"द्र","dra",2,"Ma"],[1,63.0,3.0,"या","yā",2,"Ri"],[5,68.0,2.0,"यः","yaḥ",3,"Ma"],[7,70.0,2.0,"सा","sā",3,"Pa"],[10,72.0,2.0,"क्षा","kṣā",3,"Ni"],[12,74.0,1.0,"त्कु","tku",3,"Sa"],[12,75.0,1.0,"रु","ru",3,"Sa"],[10,76.0,2.0,"ते","te",3,"Ni"],[12,78.0,1.0,"प्र","pra",3,"Sa"],[13,79.0,2.0,"बो","bo",3,"Ri"],[12,81.0,1.0,"ध","dha",3,"Sa"],[10,82.0,1.0,"स","sa",3,"Ni"],[7,83.0,1.0,"म","ma",3,"Pa"],[10,84.0,2.0,"ये","ye",3,"Ni"],[12,87.0,2.0,"स्वा","svā",3,"Sa"],[10,89.0,2.0,"त्मा","tmā",3,"Ni"],[7,91.0,1.0,"न","na",3,"Pa"],[10,92.0,2.0,"मे","me",3,"Ni"],[7,94.0,2.0,"वा","vā",3,"Pa"],[5,96.0,1.0,"द्व","dva",3,"Ma"],[7,97.0,3.0,"यं","yaṁ",3,"Pa"],[12,102.0,2.0,"त","ta",4,"Sa"],[10,104.0,2.0,"स्मै","smai",4,"Ni"],[7,106.0,2.0,"श्री","śrī",4,"Pa"],[10,108.0,1.0,"गु","gu",4,"Ni"],[7,109.0,1.0,"रु","ru",4,"Pa"],[5,110.0,2.0,"मू","mū",4,"Ma"],[7,112.0,1.0,"र्त","rta",4,"Pa"],[5,113.0,2.0,"ये","ye",4,"Ma"],[1,115.0,1.0,"न","na",4,"Ri"],[5,116.0,1.0,"म","ma",4,"Ma"],[1,117.0,1.0,"इ","i",4,"Ri"],[0,118.0,2.0,"दं","daṁ",4,"Sa"],[1,121.0,2.0,"श्री","śrī",4,"Ri"],[5,123.0,2.0,"द","da",4,"Ma"],[7,125.0,1.0,"क्षि","kṣi",4,"Pa"],[5,126.0,2.0,"णा","ṇā",4,"Ma"],[1,128.0,2.0,"मू","mū",4,"Ri"],[1,130.0,1.0,"र्त","rta",4,"Ri"],[0,131.0,3.0,"ये","ye",4,"Sa"]]};
+const TUNES={"1":{"bpm":150,"total":137.0,"n":[[0,0.0,2.0,"वि","vi",1,"Sa"],[0,2.0,2.0,"श्वं","śvaṁ",1,"Sa"],[1,4.0,2.0,"द","da",1,"Ri"],[5,6.0,1.0,"र्प","rpa",1,"Ma"],[1,7.0,1.0,"ण","ṇa",1,"Ri"],[5,8.0,2.0,"दृ","dṛ",1,"Ma"],[7,10.0,1.0,"श्य","śya",1,"Pa"],[5,11.0,2.0,"मा","mā",1,"Ma"],[1,13.0,1.0,"न","na",1,"Ri"],[5,14.0,1.0,"न","na",1,"Ma"],[1,15.0,1.0,"ग","ga",1,"Ri"],[0,16.0,2.0,"री","rī",1,"Sa"],[-2,19.0,2.0,"तु","tu",1,"Ni"],[0,21.0,2.0,"ल्यं","lyaṁ",1,"Sa"],[1,23.0,1.0,"नि","ni",1,"Ri"],[5,24.0,2.0,"जा","jā",1,"Ma"],[7,26.0,2.0,"न्त","nta",1,"Pa"],[5,28.0,1.0,"र्ग","rga",1,"Ma"],[7,29.0,3.0,"तं","taṁ",1,"Pa"],[7,34.0,2.0,"प","pa",2,"Pa"],[7,36.0,2.0,"श्य","śya",2,"Pa"],[10,38.0,2.0,"न्ना","nnā",2,"Ni"],[12,40.0,1.0,"त्म","tma",2,"Sa"],[10,41.0,1.0,"नि","ni",2,"Ni"],[7,42.0,2.0,"मा","mā",2,"Pa"],[10,44.0,1.0,"य","ya",2,"Ni"],[7,45.0,2.0,"या","yā",2,"Pa"],[5,47.0,1.0,"ब","ba",2,"Ma"],[7,48.0,1.0,"हि","hi",2,"Pa"],[5,49.0,1.0,"रि","ri",2,"Ma"],[1,50.0,2.0,"वो","vo",2,"Ri"],[5,53.0,2.0,"द्भू","dbhū",2,"Ma"],[1,55.0,2.0,"तं","taṁ",2,"Ri"],[0,57.0,1.0,"य","ya",2,"Sa"],[1,58.0,2.0,"था","thā",2,"Ri"],[5,60.0,2.0,"नि","ni",2,"Ma"],[5,62.0,1.0,"द्र","dra",2,"Ma"],[1,63.0,3.0,"या","yā",2,"Ri"],[5,68.0,2.0,"यः","yaḥ",3,"Ma"],[7,70.0,2.0,"सा","sā",3,"Pa"],[10,72.0,2.0,"क्षा","kṣā",3,"Ni"],[12,74.0,1.0,"त्कु","tku",3,"Sa"],[12,75.0,1.0,"रु","ru",3,"Sa"],[10,76.0,2.0,"ते","te",3,"Ni"],[12,78.0,1.0,"प्र","pra",3,"Sa"],[13,79.0,2.0,"बो","bo",3,"Ri"],[12,81.0,1.0,"ध","dha",3,"Sa"],[10,82.0,1.0,"स","sa",3,"Ni"],[7,83.0,1.0,"म","ma",3,"Pa"],[10,84.0,2.0,"ये","ye",3,"Ni"],[12,87.0,2.0,"स्वा","svā",3,"Sa"],[10,89.0,2.0,"त्मा","tmā",3,"Ni"],[7,91.0,1.0,"न","na",3,"Pa"],[10,92.0,2.0,"मे","me",3,"Ni"],[7,94.0,2.0,"वा","vā",3,"Pa"],[5,96.0,1.0,"द्व","dva",3,"Ma"],[7,97.0,3.0,"यं","yaṁ",3,"Pa"],[12,102.0,2.0,"त","ta",4,"Sa"],[10,104.0,2.0,"स्मै","smai",4,"Ni"],[7,106.0,2.0,"श्री","śrī",4,"Pa"],[10,108.0,1.0,"गु","gu",4,"Ni"],[7,109.0,1.0,"रु","ru",4,"Pa"],[5,110.0,2.0,"मू","mū",4,"Ma"],[7,112.0,1.0,"र्त","rta",4,"Pa"],[5,113.0,2.0,"ये","ye",4,"Ma"],[1,115.0,1.0,"न","na",4,"Ri"],[5,116.0,1.0,"म","ma",4,"Ma"],[1,117.0,1.0,"इ","i",4,"Ri"],[0,118.0,2.0,"दं","daṁ",4,"Sa"],[1,121.0,2.0,"श्री","śrī",4,"Ri"],[5,123.0,2.0,"द","da",4,"Ma"],[7,125.0,1.0,"क्षि","kṣi",4,"Pa"],[5,126.0,2.0,"णा","ṇā",4,"Ma"],[1,128.0,2.0,"मू","mū",4,"Ri"],[1,130.0,1.0,"र्त","rta",4,"Ri"],[0,131.0,3.0,"ये","ye",4,"Sa"]]},"2":{"bpm":150,"total":137.0,"n":[[0,0.0,2.0,"बी","bī",1,"Sa"],[0,2.0,2.0,"ज","ja",1,"Sa"],[1,4.0,2.0,"स्या","syā",1,"Ri"],[5,6.0,1.0,"न्त","nta",1,"Ma"],[1,7.0,1.0,"रि","ri",1,"Ri"],[5,8.0,2.0,"वा","vā",1,"Ma"],[7,10.0,1.0,"ङ्कु","ṅku",1,"Pa"],[5,11.0,2.0,"रो","ro",1,"Ma"],[1,13.0,1.0,"ज","ja",1,"Ri"],[5,14.0,1.0,"ग","ga",1,"Ma"],[1,15.0,1.0,"दि","di",1,"Ri"],[0,16.0,2.0,"दं","daṁ",1,"Sa"],[-2,19.0,2.0,"प्रा","prā",1,"Ni"],[0,21.0,2.0,"ङ्नि","ṅni",1,"Sa"],[1,23.0,1.0,"र्वि","rvi",1,"Ri"],[5,24.0,2.0,"क","ka",1,"Ma"],[7,26.0,2.0,"ल्पं","lpaṁ",1,"Pa"],[5,28.0,1.0,"पु","pu",1,"Ma"],[7,29.0,3.0,"नः","naḥ",1,"Pa"],[7,34.0,2.0,"मा","mā",2,"Pa"],[7,36.0,2.0,"या","yā",2,"Pa"],[10,38.0,2.0,"क","ka",2,"Ni"],[12,40.0,1.0,"ल्पि","lpi",2,"Sa"],[10,41.0,1.0,"त","ta",2,"Ni"],[7,42.0,2.0,"दे","de",2,"Pa"],[10,44.0,1.0,"श","śa",2,"Ni"],[7,45.0,2.0,"का","kā",2,"Pa"],[5,47.0,1.0,"ल","la",2,"Ma"],[7,48.0,1.0,"क","ka",2,"Pa"],[5,49.0,1.0,"ल","la",2,"Ma"],[1,50.0,2.0,"ना","nā",2,"Ri"],[5,53.0,2.0,"वै","vai",2,"Ma"],[1,55.0,2.0,"चि","ci",2,"Ri"],[0,57.0,1.0,"त्र्य","trya",2,"Sa"],[1,58.0,2.0,"चि","ci",2,"Ri"],[5,60.0,2.0,"त्री","trī",2,"Ma"],[5,62.0,1.0,"कृ","kṛ",2,"Ma"],[1,63.0,3.0,"तम्","tam",2,"Ri"],[5,68.0,2.0,"मा","mā",3,"Ma"],[7,70.0,2.0,"या","yā",3,"Pa"],[10,72.0,2.0,"वी","vī",3,"Ni"],[12,74.0,1.0,"व","va",3,"Sa"],[12,75.0,1.0,"वि","vi",3,"Sa"],[10,76.0,2.0,"जृ","jṛ",3,"Ni"],[12,78.0,1.0,"म्भ","mbha",3,"Sa"],[13,79.0,2.0,"य","ya",3,"Ri"],[12,81.0,1.0,"त्य","tya",3,"Sa"],[10,82.0,1.0,"पि","pi",3,"Ni"],[7,83.0,1.0,"म","ma",3,"Pa"],[10,84.0,2.0,"हा","hā",3,"Ni"],[12,87.0,2.0,"यो","yo",3,"Sa"],[10,89.0,2.0,"गी","gī",3,"Ni"],[7,91.0,1.0,"व","va",3,"Pa"],[10,92.0,2.0,"यः","yaḥ",3,"Ni"],[7,94.0,2.0,"स्वे","sve",3,"Pa"],[5,96.0,1.0,"च्छ","ccha",3,"Ma"],[7,97.0,3.0,"या","yā",3,"Pa"],[12,102.0,2.0,"त","ta",4,"Sa"],[10,104.0,2.0,"स्मै","smai",4,"Ni"],[7,106.0,2.0,"श्री","śrī",4,"Pa"],[10,108.0,1.0,"गु","gu",4,"Ni"],[7,109.0,1.0,"रु","ru",4,"Pa"],[5,110.0,2.0,"मू","mū",4,"Ma"],[7,112.0,1.0,"र्त","rta",4,"Pa"],[5,113.0,2.0,"ये","ye",4,"Ma"],[1,115.0,1.0,"न","na",4,"Ri"],[5,116.0,1.0,"म","ma",4,"Ma"],[1,117.0,1.0,"इ","i",4,"Ri"],[0,118.0,2.0,"दं","daṁ",4,"Sa"],[1,121.0,2.0,"श्री","śrī",4,"Ri"],[5,123.0,2.0,"द","da",4,"Ma"],[7,125.0,1.0,"क्षि","kṣi",4,"Pa"],[5,126.0,2.0,"णा","ṇā",4,"Ma"],[1,128.0,2.0,"मू","mū",4,"Ri"],[1,130.0,1.0,"र्त","rta",4,"Ri"],[0,131.0,3.0,"ये","ye",4,"Sa"]]},"3":{"bpm":150,"total":137.0,"n":[[0,0.0,2.0,"य","ya",1,"Sa"],[0,2.0,2.0,"स्यै","syai",1,"Sa"],[1,4.0,2.0,"व","va",1,"Ri"],[5,6.0,1.0,"स्फु","sphu",1,"Ma"],[1,7.0,1.0,"र","ra",1,"Ri"],[5,8.0,2.0,"णं","ṇaṁ",1,"Ma"],[7,10.0,1.0,"स","sa",1,"Pa"],[5,11.0,2.0,"दा","dā",1,"Ma"],[1,13.0,1.0,"त्म","tma",1,"Ri"],[5,14.0,1.0,"क","ka",1,"Ma"],[1,15.0,1.0,"म","ma",1,"Ri"],[0,16.0,2.0,"स","sa",1,"Sa"],[-2,19.0,2.0,"त्क","tka",1,"Ni"],[0,21.0,2.0,"ल्पा","lpā",1,"Sa"],[1,23.0,1.0,"र्थ","rtha",1,"Ri"],[5,24.0,2.0,"कं","kaṁ",1,"Ma"],[7,26.0,2.0,"भा","bhā",1,"Pa"],[5,28.0,1.0,"स","sa",1,"Ma"],[7,29.0,3.0,"ते","te",1,"Pa"],[7,34.0,2.0,"सा","sā",2,"Pa"],[7,36.0,2.0,"क्षा","kṣā",2,"Pa"],[10,38.0,2.0,"त्त","tta",2,"Ni"],[12,40.0,1.0,"त्त्व","ttva",2,"Sa"],[10,41.0,1.0,"म","ma",2,"Ni"],[7,42.0,2.0,"सी","sī",2,"Pa"],[10,44.0,1.0,"ति","ti",2,"Ni"],[7,45.0,2.0,"वे","ve",2,"Pa"],[5,47.0,1.0,"द","da",2,"Ma"],[7,48.0,1.0,"व","va",2,"Pa"],[5,49.0,1.0,"च","ca",2,"Ma"],[1,50.0,2.0,"सा","sā",2,"Ri"],[5,53.0,2.0,"यो","yo",2,"Ma"],[1,55.0,2.0,"बो","bo",2,"Ri"],[0,57.0,1.0,"ध","dha",2,"Sa"],[1,58.0,2.0,"य","ya",2,"Ri"],[5,60.0,2.0,"त्या","tyā",2,"Ma"],[5,62.0,1.0,"श्रि","śri",2,"Ma"],[1,63.0,3.0,"तान्","tān",2,"Ri"],[5,68.0,2.0,"य","ya",3,"Ma"],[7,70.0,2.0,"त्सा","tsā",3,"Pa"],[10,72.0,2.0,"क्षा","kṣā",3,"Ni"],[12,74.0,1.0,"त्क","tka",3,"Sa"],[12,75.0,1.0,"र","ra",3,"Sa"],[10,76.0,2.0,"णा","ṇā",3,"Ni"],[12,78.0,1.0,"द्भ","dbha",3,"Sa"],[13,79.0,2.0,"वे","ve",3,"Ri"],[12,81.0,1.0,"न्न","nna",3,"Sa"],[10,82.0,1.0,"पु","pu",3,"Ni"],[7,83.0,1.0,"न","na",3,"Pa"],[10,84.0,2.0,"रा","rā",3,"Ni"],[12,87.0,2.0,"वृ","vṛ",3,"Sa"],[10,89.0,2.0,"त्ति","tti",3,"Ni"],[7,91.0,1.0,"र्भ","rbha",3,"Pa"],[10,92.0,2.0,"वा","vā",3,"Ni"],[7,94.0,2.0,"म्भो","mbho",3,"Pa"],[5,96.0,1.0,"नि","ni",3,"Ma"],[7,97.0,3.0,"धौ","dhau",3,"Pa"],[12,102.0,2.0,"त","ta",4,"Sa"],[10,104.0,2.0,"स्मै","smai",4,"Ni"],[7,106.0,2.0,"श्री","śrī",4,"Pa"],[10,108.0,1.0,"गु","gu",4,"Ni"],[7,109.0,1.0,"रु","ru",4,"Pa"],[5,110.0,2.0,"मू","mū",4,"Ma"],[7,112.0,1.0,"र्त","rta",4,"Pa"],[5,113.0,2.0,"ये","ye",4,"Ma"],[1,115.0,1.0,"न","na",4,"Ri"],[5,116.0,1.0,"म","ma",4,"Ma"],[1,117.0,1.0,"इ","i",4,"Ri"],[0,118.0,2.0,"दं","daṁ",4,"Sa"],[1,121.0,2.0,"श्री","śrī",4,"Ri"],[5,123.0,2.0,"द","da",4,"Ma"],[7,125.0,1.0,"क्षि","kṣi",4,"Pa"],[5,126.0,2.0,"णा","ṇā",4,"Ma"],[1,128.0,2.0,"मू","mū",4,"Ri"],[1,130.0,1.0,"र्त","rta",4,"Ri"],[0,131.0,3.0,"ये","ye",4,"Sa"]]},"4":{"bpm":150,"total":137.0,"n":[[0,0.0,2.0,"ना","nā",1,"Sa"],[0,2.0,2.0,"ना","nā",1,"Sa"],[1,4.0,2.0,"च्छि","cchi",1,"Ri"],[5,6.0,1.0,"द्र","dra",1,"Ma"],[1,7.0,1.0,"घ","gha",1,"Ri"],[5,8.0,2.0,"टो","ṭo",1,"Ma"],[7,10.0,1.0,"द","da",1,"Pa"],[5,11.0,2.0,"र","ra",1,"Ma"],[1,13.0,1.0,"स्थि","sthi",1,"Ri"],[5,14.0,1.0,"त","ta",1,"Ma"],[1,15.0,1.0,"म","ma",1,"Ri"],[0,16.0,2.0,"हा","hā",1,"Sa"],[-2,19.0,2.0,"दी","dī",1,"Ni"],[0,21.0,2.0,"प","pa",1,"Sa"],[1,23.0,1.0,"प्र","pra",1,"Ri"],[5,24.0,2.0,"भा","bhā",1,"Ma"],[7,26.0,2.0,"भा","bhā",1,"Pa"],[5,28.0,1.0,"स्व","sva",1,"Ma"],[7,29.0,3.0,"रं","raṁ",1,"Pa"],[7,34.0,2.0,"ज्ञा","jñā",2,"Pa"],[7,36.0,2.0,"नं","naṁ",2,"Pa"],[10,38.0,2.0,"य","ya",2,"Ni"],[12,40.0,1.0,"स्य","sya",2,"Sa"],[10,41.0,1.0,"तु","tu",2,"Ni"],[7,42.0,2.0,"च","ca",2,"Pa"],[10,44.0,1.0,"क्षु","kṣu",2,"Ni"],[7,45.0,2.0,"रा","rā",2,"Pa"],[5,47.0,1.0,"दि","di",2,"Ma"],[7,48.0,1.0,"क","ka",2,"Pa"],[5,49.0,1.0,"र","ra",2,"Ma"],[1,50.0,2.0,"ण","ṇa",2,"Ri"],[5,53.0,2.0,"द्वा","dvā",2,"Ma"],[1,55.0,2.0,"रा","rā",2,"Ri"],[0,57.0,1.0,"ब","ba",2,"Sa"],[1,58.0,2.0,"हिः","hiḥ",2,"Ri"],[5,60.0,2.0,"स्प","spa",2,"Ma"],[5,62.0,1.0,"न्द","nda",2,"Ma"],[1,63.0,3.0,"ते","te",2,"Ri"],[5,68.0,2.0,"जा","jā",3,"Ma"],[7,70.0,2.0,"ना","nā",3,"Pa"],[10,72.0,2.0,"मी","mī",3,"Ni"],[12,74.0,1.0,"ति","ti",3,"Sa"],[12,75.0,1.0,"त","ta",3,"Sa"],[10,76.0,2.0,"मे","me",3,"Ni"],[12,78.0,1.0,"व","va",3,"Sa"],[13,79.0,2.0,"भा","bhā",3,"Ri"],[12,81.0,1.0,"न्त","nta",3,"Sa"],[10,82.0,1.0,"म","ma",3,"Ni"],[7,83.0,1.0,"नु","nu",3,"Pa"],[10,84.0,2.0,"भा","bhā",3,"Ni"],[12,87.0,2.0,"त्ये","tye",3,"Sa"],[10,89.0,2.0,"त","ta",3,"Ni"],[7,91.0,1.0,"त्स","tsa",3,"Pa"],[10,92.0,2.0,"म","ma",3,"Ni"],[7,94.0,2.0,"स्तं","staṁ",3,"Pa"],[5,96.0,1.0,"ज","ja",3,"Ma"],[7,97.0,3.0,"गत्","gat",3,"Pa"],[12,102.0,2.0,"त","ta",4,"Sa"],[10,104.0,2.0,"स्मै","smai",4,"Ni"],[7,106.0,2.0,"श्री","śrī",4,"Pa"],[10,108.0,1.0,"गु","gu",4,"Ni"],[7,109.0,1.0,"रु","ru",4,"Pa"],[5,110.0,2.0,"मू","mū",4,"Ma"],[7,112.0,1.0,"र्त","rta",4,"Pa"],[5,113.0,2.0,"ये","ye",4,"Ma"],[1,115.0,1.0,"न","na",4,"Ri"],[5,116.0,1.0,"म","ma",4,"Ma"],[1,117.0,1.0,"इ","i",4,"Ri"],[0,118.0,2.0,"दं","daṁ",4,"Sa"],[1,121.0,2.0,"श्री","śrī",4,"Ri"],[5,123.0,2.0,"द","da",4,"Ma"],[7,125.0,1.0,"क्षि","kṣi",4,"Pa"],[5,126.0,2.0,"णा","ṇā",4,"Ma"],[1,128.0,2.0,"मू","mū",4,"Ri"],[1,130.0,1.0,"र्त","rta",4,"Ri"],[0,131.0,3.0,"ये","ye",4,"Sa"]]},"5":{"bpm":150,"total":137.0,"n":[[0,0.0,2.0,"दे","de",1,"Sa"],[0,2.0,2.0,"हं","haṁ",1,"Sa"],[1,4.0,2.0,"प्रा","prā",1,"Ri"],[5,6.0,1.0,"ण","ṇa",1,"Ma"],[1,7.0,1.0,"म","ma",1,"Ri"],[5,8.0,2.0,"पी","pī",1,"Ma"],[7,10.0,1.0,"न्द्रि","ndri",1,"Pa"],[5,11.0,2.0,"या","yā",1,"Ma"],[1,13.0,1.0,"ण्य","ṇya",1,"Ri"],[5,14.0,1.0,"पि","pi",1,"Ma"],[1,15.0,1.0,"च","ca",1,"Ri"],[0,16.0,2.0,"लां","lāṁ",1,"Sa"],[-2,19.0,2.0,"बु","bu",1,"Ni"],[0,21.0,2.0,"द्धिं","ddhiṁ",1,"Sa"],[1,23.0,1.0,"च","ca",1,"Ri"],[5,24.0,2.0,"शू","śū",1,"Ma"],[7,26.0,2.0,"न्यं","nyaṁ",1,"Pa"],[5,28.0,1.0,"वि","vi",1,"Ma"],[7,29.0,3.0,"दुः","duḥ",1,"Pa"],[7,34.0,2.0,"स्त्री","strī",2,"Pa"],[7,36.0,2.0,"बा","bā",2,"Pa"],[10,38.0,2.0,"ला","lā",2,"Ni"],[12,40.0,1.0,"न्ध","ndha",2,"Sa"],[10,41.0,1.0,"ज","ja",2,"Ni"],[7,42.0,2.0,"डो","ḍo",2,"Pa"],[10,44.0,1.0,"प","pa",2,"Ni"],[7,45.0,2.0,"मा","mā",2,"Pa"],[5,47.0,1.0,"स्त्व","stva",2,"Ma"],[7,48.0,1.0,"ह","ha",2,"Pa"],[5,49.0,1.0,"मि","mi",2,"Ma"],[1,50.0,2.0,"ति","ti",2,"Ri"],[5,53.0,2.0,"भ्रा","bhrā",2,"Ma"],[1,55.0,2.0,"न्ता","ntā",2,"Ri"],[0,57.0,1.0,"भृ","bhṛ",2,"Sa"],[1,58.0,2.0,"शं","śaṁ",2,"Ri"],[5,60.0,2.0,"वा","vā",2,"Ma"],[5,62.0,1.0,"दि","di",2,"Ma"],[1,63.0,3.0,"नः","naḥ",2,"Ri"],[5,68.0,2.0,"मा","mā",3,"Ma"],[7,70.0,2.0,"या","yā",3,"Pa"],[10,72.0,2.0,"श","śa",3,"Ni"],[12,74.0,1.0,"क्ति","kti",3,"Sa"],[12,75.0,1.0,"वि","vi",3,"Sa"],[10,76.0,2.0,"ला","lā",3,"Ni"],[12,78.0,1.0,"स","sa",3,"Sa"],[13,79.0,2.0,"क","ka",3,"Ri"],[12,81.0,1.0,"ल्पि","lpi",3,"Sa"],[10,82.0,1.0,"त","ta",3,"Ni"],[7,83.0,1.0,"म","ma",3,"Pa"],[10,84.0,2.0,"हा","hā",3,"Ni"],[12,87.0,2.0,"व्या","vyā",3,"Sa"],[10,89.0,2.0,"मो","mo",3,"Ni"],[7,91.0,1.0,"ह","ha",3,"Pa"],[10,92.0,2.0,"सं","saṁ",3,"Ni"],[7,94.0,2.0,"हा","hā",3,"Pa"],[5,96.0,1.0,"रि","ri",3,"Ma"],[7,97.0,3.0,"णे","ṇe",3,"Pa"],[12,102.0,2.0,"त","ta",4,"Sa"],[10,104.0,2.0,"स्मै","smai",4,"Ni"],[7,106.0,2.0,"श्री","śrī",4,"Pa"],[10,108.0,1.0,"गु","gu",4,"Ni"],[7,109.0,1.0,"रु","ru",4,"Pa"],[5,110.0,2.0,"मू","mū",4,"Ma"],[7,112.0,1.0,"र्त","rta",4,"Pa"],[5,113.0,2.0,"ये","ye",4,"Ma"],[1,115.0,1.0,"न","na",4,"Ri"],[5,116.0,1.0,"म","ma",4,"Ma"],[1,117.0,1.0,"इ","i",4,"Ri"],[0,118.0,2.0,"दं","daṁ",4,"Sa"],[1,121.0,2.0,"श्री","śrī",4,"Ri"],[5,123.0,2.0,"द","da",4,"Ma"],[7,125.0,1.0,"क्षि","kṣi",4,"Pa"],[5,126.0,2.0,"णा","ṇā",4,"Ma"],[1,128.0,2.0,"मू","mū",4,"Ri"],[1,130.0,1.0,"र्त","rta",4,"Ri"],[0,131.0,3.0,"ये","ye",4,"Sa"]]},"6":{"bpm":150,"total":137.0,"n":[[0,0.0,2.0,"रा","rā",1,"Sa"],[0,2.0,2.0,"हु","hu",1,"Sa"],[1,4.0,2.0,"ग्र","gra",1,"Ri"],[5,6.0,1.0,"स्त","sta",1,"Ma"],[1,7.0,1.0,"दि","di",1,"Ri"],[5,8.0,2.0,"वा","vā",1,"Ma"],[7,10.0,1.0,"क","ka",1,"Pa"],[5,11.0,2.0,"रे","re",1,"Ma"],[1,13.0,1.0,"न्दु","ndu",1,"Ri"],[5,14.0,1.0,"स","sa",1,"Ma"],[1,15.0,1.0,"दृ","dṛ",1,"Ri"],[0,16.0,2.0,"शो","śo",1,"Sa"],[-2,19.0,2.0,"मा","mā",1,"Ni"],[0,21.0,2.0,"या","yā",1,"Sa"],[1,23.0,1.0,"स","sa",1,"Ri"],[5,24.0,2.0,"मा","mā",1,"Ma"],[7,26.0,2.0,"च्छा","cchā",1,"Pa"],[5,28.0,1.0,"द","da",1,"Ma"],[7,29.0,3.0,"नात्","nāt",1,"Pa"],[7,34.0,2.0,"स","sa",2,"Pa"],[7,36.0,2.0,"न्मा","nmā",2,"Pa"],[10,38.0,2.0,"त्रः","traḥ",2,"Ni"],[12,40.0,1.0,"क","ka",2,"Sa"],[10,41.0,1.0,"र","ra",2,"Ni"],[7,42.0,2.0,"णो","ṇo",2,"Pa"],[10,44.0,1.0,"प","pa",2,"Ni"],[7,45.0,2.0,"सं","saṁ",2,"Pa"],[5,47.0,1.0,"ह","ha",2,"Ma"],[7,48.0,1.0,"र","ra",2,"Pa"],[5,49.0,1.0,"ण","ṇa",2,"Ma"],[1,50.0,2.0,"तो","to",2,"Ri"],[5,53.0,2.0,"यो","yo",2,"Ma"],[1,55.0,2.0,"भू","bhū",2,"Ri"],[0,57.0,1.0,"त्सु","tsu",2,"Sa"],[1,58.0,2.0,"षु","ṣu",2,"Ri"],[5,60.0,2.0,"प्तः","ptaḥ",2,"Ma"],[5,62.0,1.0,"पु","pu",2,"Ma"],[1,63.0,3.0,"मान्","mān",2,"Ri"],[5,68.0,2.0,"प्रा","prā",3,"Ma"],[7,70.0,2.0,"ग","ga",3,"Pa"],[10,72.0,2.0,"स्वा","svā",3,"Ni"],[12,74.0,1.0,"प्स","psa",3,"Sa"],[12,75.0,1.0,"मि","mi",3,"Sa"],[10,76.0,2.0,"ति","ti",3,"Ni"],[12,78.0,1.0,"प्र","pra",3,"Sa"],[13,79.0,2.0,"बो","bo",3,"Ri"],[12,81.0,1.0,"ध","dha",3,"Sa"],[10,82.0,1.0,"स","sa",3,"Ni"],[7,83.0,1.0,"म","ma",3,"Pa"],[10,84.0,2.0,"ये","ye",3,"Ni"],[12,87.0,2.0,"यः","yaḥ",3,"Sa"],[10,89.0,2.0,"प्र","pra",3,"Ni"],[7,91.0,1.0,"त्य","tya",3,"Pa"],[10,92.0,2.0,"भि","bhi",3,"Ni"],[7,94.0,2.0,"ज्ञा","jñā",3,"Pa"],[5,96.0,1.0,"य","ya",3,"Ma"],[7,97.0,3.0,"ते","te",3,"Pa"],[12,102.0,2.0,"त","ta",4,"Sa"],[10,104.0,2.0,"स्मै","smai",4,"Ni"],[7,106.0,2.0,"श्री","śrī",4,"Pa"],[10,108.0,1.0,"गु","gu",4,"Ni"],[7,109.0,1.0,"रु","ru",4,"Pa"],[5,110.0,2.0,"मू","mū",4,"Ma"],[7,112.0,1.0,"र्त","rta",4,"Pa"],[5,113.0,2.0,"ये","ye",4,"Ma"],[1,115.0,1.0,"न","na",4,"Ri"],[5,116.0,1.0,"म","ma",4,"Ma"],[1,117.0,1.0,"इ","i",4,"Ri"],[0,118.0,2.0,"दं","daṁ",4,"Sa"],[1,121.0,2.0,"श्री","śrī",4,"Ri"],[5,123.0,2.0,"द","da",4,"Ma"],[7,125.0,1.0,"क्षि","kṣi",4,"Pa"],[5,126.0,2.0,"णा","ṇā",4,"Ma"],[1,128.0,2.0,"मू","mū",4,"Ri"],[1,130.0,1.0,"र्त","rta",4,"Ri"],[0,131.0,3.0,"ये","ye",4,"Sa"]]},"7":{"bpm":150,"total":137.0,"n":[[0,0.0,2.0,"बा","bā",1,"Sa"],[0,2.0,2.0,"ल्या","lyā",1,"Sa"],[1,4.0,2.0,"दि","di",1,"Ri"],[5,6.0,1.0,"ष्व","ṣva",1,"Ma"],[1,7.0,1.0,"पि","pi",1,"Ri"],[5,8.0,2.0,"जा","jā",1,"Ma"],[7,10.0,1.0,"ग्र","gra",1,"Pa"],[5,11.0,2.0,"दा","dā",1,"Ma"],[1,13.0,1.0,"दि","di",1,"Ri"],[5,14.0,1.0,"षु","ṣu",1,"Ma"],[1,15.0,1.0,"त","ta",1,"Ri"],[0,16.0,2.0,"था","thā",1,"Sa"],[-2,19.0,2.0,"स","sa",1,"Ni"],[0,21.0,2.0,"र्वा","rvā",1,"Sa"],[1,23.0,1.0,"स्व","sva",1,"Ri"],[5,24.0,2.0,"व","va",1,"Ma"],[7,26.0,2.0,"स्था","sthā",1,"Pa"],[5,28.0,1.0,"स्व","sva",1,"Ma"],[7,29.0,3.0,"पि","pi",1,"Pa"],[7,34.0,2.0,"व्या","vyā",2,"Pa"],[7,36.0,2.0,"वृ","vṛ",2,"Pa"],[10,38.0,2.0,"त्ता","ttā",2,"Ni"],[12,40.0,1.0,"स्व","sva",2,"Sa"],[10,41.0,1.0,"नु","nu",2,"Ni"],[7,42.0,2.0,"व","va",2,"Pa"],[10,44.0,1.0,"र्त","rta",2,"Ni"],[7,45.0,2.0,"मा","mā",2,"Pa"],[5,47.0,1.0,"न","na",2,"Ma"],[7,48.0,1.0,"म","ma",2,"Pa"],[5,49.0,1.0,"ह","ha",2,"Ma"],[1,50.0,2.0,"मि","mi",2,"Ri"],[5,53.0,2.0,"त्य","tya",2,"Ma"],[1,55.0,2.0,"न्तः","ntaḥ",2,"Ri"],[0,57.0,1.0,"स्फु","sphu",2,"Sa"],[1,58.0,2.0,"र","ra",2,"Ri"],[5,60.0,2.0,"न्तं","ntaṁ",2,"Ma"],[5,62.0,1.0,"स","sa",2,"Ma"],[1,63.0,3.0,"दा","dā",2,"Ri"],[5,68.0,2.0,"स्वा","svā",3,"Ma"],[7,70.0,2.0,"त्मा","tmā",3,"Pa"],[10,72.0,2.0,"नं","naṁ",3,"Ni"],[12,74.0,1.0,"प्र","pra",3,"Sa"],[12,75.0,1.0,"क","ka",3,"Sa"],[10,76.0,2.0,"टी","ṭī",3,"Ni"],[12,78.0,1.0,"क","ka",3,"Sa"],[13,79.0,2.0,"रो","ro",3,"Ri"],[12,81.0,1.0,"ति","ti",3,"Sa"],[10,82.0,1.0,"भ","bha",3,"Ni"],[7,83.0,1.0,"ज","ja",3,"Pa"],[10,84.0,2.0,"तां","tāṁ",3,"Ni"],[12,87.0,2.0,"यो","yo",3,"Sa"],[10,89.0,2.0,"मु","mu",3,"Ni"],[7,91.0,1.0,"द्र","dra",3,"Pa"],[10,92.0,2.0,"या","yā",3,"Ni"],[7,94.0,2.0,"भ","bha",3,"Pa"],[5,96.0,1.0,"द्र","dra",3,"Ma"],[7,97.0,3.0,"या","yā",3,"Pa"],[12,102.0,2.0,"त","ta",4,"Sa"],[10,104.0,2.0,"स्मै","smai",4,"Ni"],[7,106.0,2.0,"श्री","śrī",4,"Pa"],[10,108.0,1.0,"गु","gu",4,"Ni"],[7,109.0,1.0,"रु","ru",4,"Pa"],[5,110.0,2.0,"मू","mū",4,"Ma"],[7,112.0,1.0,"र्त","rta",4,"Pa"],[5,113.0,2.0,"ये","ye",4,"Ma"],[1,115.0,1.0,"न","na",4,"Ri"],[5,116.0,1.0,"म","ma",4,"Ma"],[1,117.0,1.0,"इ","i",4,"Ri"],[0,118.0,2.0,"दं","daṁ",4,"Sa"],[1,121.0,2.0,"श्री","śrī",4,"Ri"],[5,123.0,2.0,"द","da",4,"Ma"],[7,125.0,1.0,"क्षि","kṣi",4,"Pa"],[5,126.0,2.0,"णा","ṇā",4,"Ma"],[1,128.0,2.0,"मू","mū",4,"Ri"],[1,130.0,1.0,"र्त","rta",4,"Ri"],[0,131.0,3.0,"ये","ye",4,"Sa"]]},"8":{"bpm":150,"total":137.0,"n":[[0,0.0,2.0,"वि","vi",1,"Sa"],[0,2.0,2.0,"श्वं","śvaṁ",1,"Sa"],[1,4.0,2.0,"प","pa",1,"Ri"],[5,6.0,1.0,"श्य","śya",1,"Ma"],[1,7.0,1.0,"ति","ti",1,"Ri"],[5,8.0,2.0,"का","kā",1,"Ma"],[7,10.0,1.0,"र्य","rya",1,"Pa"],[5,11.0,2.0,"का","kā",1,"Ma"],[1,13.0,1.0,"र","ra",1,"Ri"],[5,14.0,1.0,"ण","ṇa",1,"Ma"],[1,15.0,1.0,"त","ta",1,"Ri"],[0,16.0,2.0,"या","yā",1,"Sa"],[-2,19.0,2.0,"स्व","sva",1,"Ni"],[0,21.0,2.0,"स्वा","svā",1,"Sa"],[1,23.0,1.0,"मि","mi",1,"Ri"],[5,24.0,2.0,"सं","saṁ",1,"Ma"],[7,26.0,2.0,"ब","ba",1,"Pa"],[5,28.0,1.0,"न्ध","ndha",1,"Ma"],[7,29.0,3.0,"तः","taḥ",1,"Pa"],[7,34.0,2.0,"शि","śi",2,"Pa"],[7,36.0,2.0,"ष्या","ṣyā",2,"Pa"],[10,38.0,2.0,"चा","cā",2,"Ni"],[12,40.0,1.0,"र्य","rya",2,"Sa"],[10,41.0,1.0,"त","ta",2,"Ni"],[7,42.0,2.0,"या","yā",2,"Pa"],[10,44.0,1.0,"त","ta",2,"Ni"],[7,45.0,2.0,"थै","thai",2,"Pa"],[5,47.0,1.0,"व","va",2,"Ma"],[7,48.0,1.0,"पि","pi",2,"Pa"],[5,49.0,1.0,"तृ","tṛ",2,"Ma"],[1,50.0,2.0,"पु","pu",2,"Ri"],[5,53.0,2.0,"त्रा","trā",2,"Ma"],[1,55.0,2.0,"द्या","dyā",2,"Ri"],[0,57.0,1.0,"त्म","tma",2,"Sa"],[1,58.0,2.0,"ना","nā",2,"Ri"],[5,60.0,2.0,"भे","bhe",2,"Ma"],[5,62.0,1.0,"द","da",2,"Ma"],[1,63.0,3.0,"तः","taḥ",2,"Ri"],[5,68.0,2.0,"स्व","sva",3,"Ma"],[7,70.0,2.0,"प्ने","pne",3,"Pa"],[10,72.0,2.0,"जा","jā",3,"Ni"],[12,74.0,1.0,"ग्र","gra",3,"Sa"],[12,75.0,1.0,"ति","ti",3,"Sa"],[10,76.0,2.0,"वा","vā",3,"Ni"],[12,78.0,1.0,"य","ya",3,"Sa"],[13,79.0,2.0,"ए","e",3,"Ri"],[12,81.0,1.0,"ष","ṣa",3,"Sa"],[10,82.0,1.0,"पु","pu",3,"Ni"],[7,83.0,1.0,"रु","ru",3,"Pa"],[10,84.0,2.0,"षो","ṣo",3,"Ni"],[12,87.0,2.0,"मा","mā",3,"Sa"],[10,89.0,2.0,"या","yā",3,"Ni"],[7,91.0,1.0,"प","pa",3,"Pa"],[10,92.0,2.0,"रि","ri",3,"Ni"],[7,94.0,2.0,"भ्रा","bhrā",3,"Pa"],[5,96.0,1.0,"मि","mi",3,"Ma"],[7,97.0,3.0,"तः","taḥ",3,"Pa"],[12,102.0,2.0,"त","ta",4,"Sa"],[10,104.0,2.0,"स्मै","smai",4,"Ni"],[7,106.0,2.0,"श्री","śrī",4,"Pa"],[10,108.0,1.0,"गु","gu",4,"Ni"],[7,109.0,1.0,"रु","ru",4,"Pa"],[5,110.0,2.0,"मू","mū",4,"Ma"],[7,112.0,1.0,"र्त","rta",4,"Pa"],[5,113.0,2.0,"ये","ye",4,"Ma"],[1,115.0,1.0,"न","na",4,"Ri"],[5,116.0,1.0,"म","ma",4,"Ma"],[1,117.0,1.0,"इ","i",4,"Ri"],[0,118.0,2.0,"दं","daṁ",4,"Sa"],[1,121.0,2.0,"श्री","śrī",4,"Ri"],[5,123.0,2.0,"द","da",4,"Ma"],[7,125.0,1.0,"क्षि","kṣi",4,"Pa"],[5,126.0,2.0,"णा","ṇā",4,"Ma"],[1,128.0,2.0,"मू","mū",4,"Ri"],[1,130.0,1.0,"र्त","rta",4,"Ri"],[0,131.0,3.0,"ये","ye",4,"Sa"]]}};
+const TUNE1=TUNES[1];
+
+/* The eight tattvas of the Dakṣiṇāmūrti Aṣṭakam (verses 1–8). Line 4 is the same refrain in every verse. */
+const L4={dev:'तस्मै श्रीगुरुमूर्तये नम इदं श्रीदक्षिणामूर्तये ॥',iast:'tasmai śrī-guru-mūrtaye nama idaṁ śrī-dakṣiṇāmūrtaye',en:'to that Guru in form, Śrī Dakṣiṇāmūrti, I offer this salutation.'};
+const TATTVAS=[
+{n:1,name:'The mirror city',
+ dev:['विश्वं दर्पणदृश्यमाननगरीतुल्यं निजान्तर्गतं','पश्यन्नात्मनि मायया बहिरिवोद्भूतं यथा निद्रया ।','यः साक्षात्कुरुते प्रबोधसमये स्वात्मानमेवाद्वयं'],
+ iast:['viśvaṁ darpaṇa-dṛśyamāna-nagarī-tulyaṁ nijāntargataṁ','paśyann ātmani māyayā bahir ivodbhūtaṁ yathā nidrayā','yaḥ sākṣāt kurute prabodha-samaye svātmānam evādvayaṁ'],
+ en:['The universe is like a city seen in a mirror. It exists within oneself.','Through māyā it seems to appear outside, as a dream does in sleep.','The one who, at the moment of awakening, sees directly his own Self, one without a second,'],
+ teach:'The world you see is like a city reflected in a mirror. It seems to be outside, yet it shines within you.',
+ keep:['A reflection depends on the mirror. The world you see depends on the awareness that sees it.','A dream city feels real until you wake. Then you see it was in you all along.','The guru’s gift is that awakening: you are the one awareness, without a second.'],
+ words:[['viśvam','the universe'],['darpaṇa','mirror'],['dṛśyamāna','being seen'],['nagarī','city'],['tulyam','just like'],['nija-antargatam','within oneself'],['māyayā','through māyā'],['bahiḥ iva','as if outside'],['nidrayā','in sleep'],['prabodha-samaye','at awakening'],['sva-ātmānam','one’s own Self'],['advayam','without a second']]},
+{n:2,name:'The seed',
+ dev:['बीजस्यान्तरिवाङ्कुरो जगदिदं प्राङ्निर्विकल्पं पुनः','मायाकल्पितदेशकालकलनावैचित्र्यचित्रीकृतम् ।','मायावीव विजृम्भयत्यपि महायोगीव यः स्वेच्छया'],
+ iast:['bījasyāntar ivāṅkuro jagad idaṁ prāṅ nirvikalpaṁ punaḥ','māyā-kalpita-deśa-kāla-kalanā-vaicitrya-citrīkṛtam','māyāvīva vijṛmbhayaty api mahā-yogīva yaḥ svecchayā'],
+ en:['Like the sprout inside a seed, this world at first lies undivided.','Then, through māyā, it is painted with the endless variety of space and time.','The one who unfolds it by his own will, like a magician, like a great yogi,'],
+ teach:'The whole world rests in the Self like a tree inside a seed. Space and time unfold it, the way a magician conjures a show.',
+ keep:['A seed holds the whole tree before it sprouts. The Self holds the world before it appears.','Space and time are the painter’s brush: they give the one canvas its many colours.','Like a magician who is never fooled by his own show, the Self stays untouched by the world it unfolds.'],
+ words:[['bījasya antaḥ','inside the seed'],['aṅkuraḥ','sprout'],['jagat idam','this world'],['prāk','at first'],['nirvikalpam','undivided'],['māyā-kalpita','imagined by māyā'],['deśa','space'],['kāla','time'],['vaicitrya','variety'],['citrīkṛtam','painted'],['māyāvī','magician'],['vijṛmbhayati','unfolds'],['mahā-yogī','great yogi'],['sva-icchayā','by his own will']]},
+{n:3,name:'That you are',
+ dev:['यस्यैव स्फुरणं सदात्मकमसत्कल्पार्थकं भासते','साक्षात्तत्त्वमसीति वेदवचसा यो बोधयत्याश्रितान् ।','यत्साक्षात्करणाद्भवेन्न पुनरावृत्तिर्भवाम्भोनिधौ'],
+ iast:['yasyaiva sphuraṇaṁ sadātmakam asat-kalpārthakaṁ bhāsate','sākṣāt tat tvam asīti veda-vacasā yo bodhayaty āśritān','yat-sākṣāt-karaṇād bhaven na punar āvṛttir bhavāmbhonidhau'],
+ en:['His shining alone, which is existence itself, appears in things that are unreal.','Through the Vedic words “You are That”, he awakens those who come to him.','Seeing That directly, one never returns to the ocean of birth and death,'],
+ teach:'Everything you see shines only because existence shines through it. The guru points and says: you are That.',
+ keep:['A pot “is”, a tree “is”. That “is” is the one existence shining in every thing.','“Tat tvam asi”: what shines in everything is what you are.','Know it directly, and the cycle of becoming has nowhere to pull you back.'],
+ words:[['sphuraṇam','shining'],['sat-ātmakam','existence itself'],['asat','unreal'],['bhāsate','appears'],['sākṣāt','directly'],['tat','That'],['tvam','you'],['asi','are'],['veda-vacasā','by the words of the Veda'],['bodhayati','awakens'],['āśritān','those who come'],['āvṛttiḥ','return'],['bhava-ambhonidhau','in the ocean of becoming']]},
+{n:4,name:'The lamp in the pot',
+ dev:['नानाच्छिद्रघटोदरस्थितमहादीपप्रभाभास्वरं','ज्ञानं यस्य तु चक्षुरादिकरणद्वारा बहिः स्पन्दते ।','जानामीति तमेव भान्तमनुभात्येतत्समस्तं जगत्'],
+ iast:['nānācchidra-ghaṭodara-sthita-mahā-dīpa-prabhā-bhāsvaraṁ','jñānaṁ yasya tu cakṣur-ādi-karaṇa-dvārā bahiḥ spandate','jānāmīti tam eva bhāntam anubhāty etat samastaṁ jagat'],
+ en:['Like the bright light of a great lamp inside a pot with many holes,','his knowing streams outward through the eyes and the other senses.','“I know”: he shines, and only after him does this whole world shine,'],
+ teach:'Your awareness is a lamp inside a pot full of holes. It shines out through the eyes and ears, and the world lights up.',
+ keep:['The holes are many, the light is one. The senses are many, awareness is one.','Nothing in the world shines by itself. It is seen because awareness shines first.','“I know” is the lamp. Everything known is lit by it.'],
+ words:[['nānā chidra','many holes'],['ghaṭa-udara','inside a pot'],['mahā-dīpa','great lamp'],['prabhā','light'],['jñānam','knowing'],['cakṣuḥ-ādi','the eyes and the rest'],['karaṇa','senses'],['dvārā','through'],['bahiḥ','outward'],['spandate','streams'],['jānāmi','I know'],['bhāntam','shining'],['anubhāti','shines after']]},
+{n:5,name:'Not the body',
+ dev:['देहं प्राणमपीन्द्रियाण्यपि चलां बुद्धिं च शून्यं विदुः','स्त्रीबालान्धजडोपमास्त्वहमिति भ्रान्ता भृशं वादिनः ।','मायाशक्तिविलासकल्पितमहाव्यामोहसंहारिणे'],
+ iast:['dehaṁ prāṇam apīndriyāṇy api calāṁ buddhiṁ ca śūnyaṁ viduḥ','strī-bālāndha-jaḍopamās tv aham iti bhrāntā bhṛśaṁ vādinaḥ','māyā-śakti-vilāsa-kalpita-mahā-vyāmoha-saṁhāriṇe'],
+ en:['Some take the “I” to be the body, the breath, the senses, the restless mind, or emptiness.','Naive as children or the blind, they are deeply mistaken, though they argue loudly.','To him who ends this great delusion, conjured by the play of māyā’s power,'],
+ teach:'You are not the body, the breath, the senses or the mind. Those are things you know. The knower is what you are.',
+ keep:['Whatever you can watch is not the watcher. You watch the body, the breath, the thoughts.','Thoughts come and go. The one who sees them come and go stays.','The guru doesn’t add anything. He removes the mistake, and what is left is you.'],
+ words:[['deham','body'],['prāṇam','breath'],['indriyāṇi','senses'],['calām buddhim','restless mind'],['śūnyam','emptiness'],['viduḥ','they take to be'],['aham iti','as “I”'],['bhrāntāḥ','mistaken'],['vādinaḥ','debaters'],['māyā-śakti','power of māyā'],['vilāsa','play'],['vyāmoha','delusion'],['saṁhāriṇe','to the one who ends']]},
+{n:6,name:'The eclipse',
+ dev:['राहुग्रस्तदिवाकरेन्दुसदृशो मायासमाच्छादनात्','सन्मात्रः करणोपसंहरणतो योऽभूत्सुषुप्तः पुमान् ।','प्रागस्वाप्समिति प्रबोधसमये यः प्रत्यभिज्ञायते'],
+ iast:['rāhu-grasta-divākarendu-sadṛśo māyā-samācchādanāt','san-mātraḥ karaṇopasaṁharaṇato yo ’bhūt suṣuptaḥ pumān','prāg asvāpsam iti prabodha-samaye yaḥ pratyabhijñāyate'],
+ en:['Like the sun or the moon swallowed by Rāhu, covered over by māyā,','the one who in deep sleep, with the senses withdrawn, remains as pure existence,','on waking recognises himself: “I was asleep”,'],
+ teach:'In deep sleep you seem to vanish, like an eclipsed sun. On waking you say “I slept well”, so you were there all along.',
+ keep:['An eclipse hides the sun from us. The sun itself is never touched.','In deep sleep the senses and the mind fold away, but you remain as pure being.','“I slept well” is a memory. Someone was there to have it.'],
+ words:[['rāhu-grasta','seized by Rāhu'],['divākara','sun'],['indu','moon'],['sadṛśaḥ','like'],['samācchādanāt','by covering'],['sat-mātraḥ','pure existence'],['karaṇa','senses'],['upasaṁharaṇataḥ','by withdrawing'],['suṣuptaḥ','deeply asleep'],['pumān','person'],['prāk asvāpsam','“I slept until now”'],['prabodha-samaye','on waking'],['pratyabhijñāyate','recognises himself']]},
+{n:7,name:'The unchanging I',
+ dev:['बाल्यादिष्वपि जाग्रदादिषु तथा सर्वास्ववस्थास्वपि','व्यावृत्तास्वनुवर्तमानमहमित्यन्तः स्फुरन्तं सदा ।','स्वात्मानं प्रकटीकरोति भजतां यो मुद्रया भद्रया'],
+ iast:['bālyādiṣv api jāgrad-ādiṣu tathā sarvāsv avasthāsv api','vyāvṛttāsv anuvartamānam aham ity antaḥ sphurantaṁ sadā','svātmānaṁ prakaṭīkaroti bhajatāṁ yo mudrayā bhadrayā'],
+ en:['In childhood, youth and age, in waking, dream and deep sleep, in every state,','while the states come and go, the “I am” continues, always shining within.','He reveals this, one’s own Self, to those who seek him, with the auspicious gesture of knowledge,'],
+ teach:'Childhood ends, youth ends, dreams end. The “I am” that was present in all of them never ends.',
+ keep:['The states change like beads. The thread of “I am” runs through all of them.','You were a child and you are older now. The “I” that says both is the same.','The chin-mudrā: the finger of the self touches the thumb of the infinite, and the circle closes.'],
+ words:[['bālya-ādiṣu','in childhood and the rest'],['jāgrat-ādiṣu','in waking and the rest'],['avasthāsu','in the states'],['vyāvṛttāsu','as they pass'],['anuvartamānam','continuing'],['aham iti','as “I”'],['antaḥ','within'],['sphurantam','shining'],['sadā','always'],['sva-ātmānam','one’s own Self'],['prakaṭīkaroti','reveals'],['bhajatām','to those who seek'],['mudrayā bhadrayā','with the auspicious gesture']]},
+{n:8,name:'The dream of roles',
+ dev:['विश्वं पश्यति कार्यकारणतया स्वस्वामिसंबन्धतः','शिष्याचार्यतया तथैव पितृपुत्राद्यात्मना भेदतः ।','स्वप्ने जाग्रति वा य एष पुरुषो मायापरिभ्रामितः'],
+ iast:['viśvaṁ paśyati kārya-kāraṇatayā sva-svāmi-saṁbandhataḥ','śiṣyācāryatayā tathaiva pitṛ-putrādy-ātmanā bhedataḥ','svapne jāgrati vā ya eṣa puruṣo māyā-paribhrāmitaḥ'],
+ en:['One sees the world as cause and effect, as the owned and the owner,','as student and teacher, as father and son, all as division.','In dream or in waking, this person is spun around by māyā,'],
+ teach:'Cause and effect, owner and owned, teacher and student, parent and child. One Self plays every role, like a dreamer who is every person in the dream.',
+ keep:['In a dream you are the city, the crowd and the one walking through it.','Roles are real as roles. The one playing them is not divided.','The guru wakes you, the way morning ends a dream.'],
+ words:[['viśvam','the world'],['paśyati','sees'],['kārya','effect'],['kāraṇa','cause'],['sva','the owned'],['svāmi','owner'],['saṁbandhataḥ','through relation'],['śiṣya','student'],['ācārya','teacher'],['pitṛ','father'],['putra','son'],['bhedataḥ','as division'],['svapne','in dream'],['jāgrati','in waking'],['māyā-paribhrāmitaḥ','spun by māyā']]}
+];
+TATTVAS.forEach(t=>{t.dev.push(L4.dev);t.iast.push(L4.iast);t.en.push(L4.en);t.words.push(['namaḥ','salutations']);});
+
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 var GLR=(function(){
  var W=360,H=560,S=Math.min(2,window.devicePixelRatio||1),MAXN=13000,data=new Float32Array(MAXN*7);
@@ -728,23 +792,618 @@ var FILM=(function(){
  return{init:init,render:render,overlay:overlay,ss:ss};
 })();
 
+var FILMS={1:FILM};
+/* Shared toolkit for the tattva films 2–8: one WebGL renderer, a morphing golden-particle system,
+   silhouette sampling, draw-on line art, and the label overlay used by every film. */
+var KIT=(function(){
+ var ok=null,T,R,S=Math.min(2,window.devicePixelRatio||1),W=360,H=560,curH=0,glows={};
+ var NP=Math.min(window.innerWidth,window.innerHeight)<700?1800:2800;
+ function ss(a,b,v){var t=Math.max(0,Math.min(1,(v-a)/(b-a)));return t*t*(3-2*t);}
+ function eio(t){t=Math.max(0,Math.min(1,t));return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+ function lerp(a,b,t){return a+(b-a)*t;}
+ function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+ function cv(w,h){var c=document.createElement('canvas');c.width=w;c.height=h;return c;}
+ function init(){if(ok!==null)return ok;
+  try{T=window.THREE;if(!T){ok=false;return ok;}
+   var c=cv(Math.round(W*S),Math.round(H*S));
+   R=new T.WebGLRenderer({canvas:c,antialias:true,preserveDrawingBuffer:true,alpha:false});R.setPixelRatio(1);R.setClearColor(0x07050f,1);size(560);ok=true;
+  }catch(e){if(window.console)console.warn('film kit init failed',e);ok=false;}
+  return ok;}
+ function size(h){h=Math.round(h||560);if(h===curH)return;curH=h;R.setSize(Math.round(W*S),Math.round(h*S),false);}
+ // Keep the 360×560 safe frame fully visible whatever the canvas height (same rule as film 1).
+ function fit(cam,h){var f=2*Math.atan(Math.tan(cam.userData.fov0*Math.PI/360)*((W/H)/(W/h)))*180/Math.PI;if(cam.aspect!==W/h||cam.fov!==f){cam.aspect=W/h;cam.fov=f;cam.updateProjectionMatrix();}}
+ function camera(fov,near,far){var c=new T.PerspectiveCamera(fov,W/H,near||.05,far||80);c.userData.fov0=fov;return c;}
+ function draw(scene,cam,h){size(h);fit(cam,curH);R.render(scene,cam);return R.domElement;}
+ function glowTex(inner,outer){var k=inner+outer;if(glows[k])return glows[k];var c=cv(128,128),g=c.getContext('2d'),gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,inner);gr.addColorStop(.25,outer);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);return glows[k]=new T.CanvasTexture(c);}
+ function add(o){return Object.assign({transparent:true,depthWrite:false,depthTest:false,blending:T.AdditiveBlending},o||{});}
+ function sprite(inner,outer,o){var s=new T.Sprite(new T.SpriteMaterial(add(Object.assign({map:glowTex(inner||'rgba(255,250,235,1)',outer||'rgba(255,190,90,.55)')},o||{}))));return s;}
+ function bg(top,bot){var m=new T.Mesh(new T.PlaneGeometry(2,2),new T.ShaderMaterial({depthWrite:false,depthTest:false,uniforms:{uA:{value:new T.Color(top||0x0b0718)},uB:{value:new T.Color(bot||0x050309)},uG:{value:new T.Color(0x000000)},uGy:{value:.5},uGs:{value:0}},
+  vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
+  fragmentShader:'uniform vec3 uA,uB,uG;uniform float uGy,uGs;varying vec2 vUv;void main(){vec3 c=mix(uB,uA,vUv.y);float d=length((vUv-vec2(.5,uGy))*vec2(1.,1.5));c+=uG*uGs*exp(-d*d*6.);gl_FragColor=vec4(c,1.);}'}));m.frustumCulled=false;m.renderOrder=-10;return m;}
+ function mandala(){var c=cv(512,512),g=c.getContext('2d');g.translate(256,256);g.strokeStyle='rgba(233,180,76,1)';g.lineWidth=1.4;
+  [250,236,190,150].forEach(function(r){g.beginPath();g.arc(0,0,r,0,Math.PI*2);g.stroke();});
+  for(var i=0;i<24;i++){g.save();g.rotate(i*Math.PI/12);g.beginPath();g.moveTo(0,-150);g.quadraticCurveTo(22,-172,0,-190);g.quadraticCurveTo(-22,-172,0,-150);g.stroke();g.restore();}
+  for(i=0;i<16;i++){g.save();g.rotate(i*Math.PI/8);g.beginPath();g.moveTo(0,-190);g.quadraticCurveTo(30,-216,0,-236);g.quadraticCurveTo(-30,-216,0,-190);g.stroke();g.restore();}
+  var m=new T.Mesh(new T.PlaneGeometry(3.4,3.4),new T.MeshBasicMaterial(add({map:new T.CanvasTexture(c),opacity:.1})));return m;}
+ function motes(n,box,seed){var r=rng(seed||7),p=[],s=[];for(var i=0;i<n;i++){p.push((r()-.5)*box[0],(r()-.5)*box[1],(r()-.5)*box[2]);s.push(r());}
+  var g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(p,3));g.setAttribute('aS',new T.Float32BufferAttribute(s,1));
+  var m=new T.ShaderMaterial(add({uniforms:{uT:{value:0},uPx:{value:S},uA:{value:.5},uH:{value:box[1]},uC:{value:new T.Color(1,.82,.5)}},
+   vertexShader:'attribute float aS;uniform float uT,uPx,uH;varying float vA;void main(){vec3 p=position;p.y=mod(p.y+uH*.5+uT*(.03+.05*aS),uH)-uH*.5;p.x+=sin(uT*.3+aS*20.)*.06;vec4 mv=modelViewMatrix*vec4(p,1.);vA=.3+.7*aS;gl_PointSize=(2.+3.*aS)*uPx*3./-mv.z;gl_Position=projectionMatrix*mv;}',
+   fragmentShader:'uniform float uA;uniform vec3 uC;varying float vA;void main(){float d=length(gl_PointCoord-.5);float a=smoothstep(.5,0.,d)*vA*uA;gl_FragColor=vec4(uC*a,1.);}'}));
+  var o=new T.Points(g,m);o.frustumCulled=false;return o;}
+
+ /* Sample n points from a filled 2D silhouette. draw(g,w,h) paints white on a w×h canvas. Returns Float32Array xyz in world units (width sw). */
+ function shape(draw,n,sw,seed,w,h,z){w=w||256;h=h||256;var c=cv(w,h),g=c.getContext('2d');g.fillStyle='#fff';g.strokeStyle='#fff';draw(g,w,h);
+  var d=g.getImageData(0,0,w,h).data,pix=[];for(var y=0;y<h;y++)for(var x=0;x<w;x++)if(d[(y*w+x)*4+3]>110)pix.push(x,y);
+  var r=rng(seed||3),out=new Float32Array(n*3),sc=sw/w,np=pix.length/2;if(!np)return out;
+  for(var i=0;i<n;i++){var k=Math.floor(r()*np)*2;out[i*3]=(pix[k]+r()-w/2)*sc;out[i*3+1]=(h/2-pix[k+1]-r())*sc;out[i*3+2]=(z||0)+(r()-.5)*.04;}return out;}
+ function cloud(n,f,seed){var r=rng(seed||9),o=new Float32Array(n*3);for(var i=0;i<n;i++){var p=f(r,i);o[i*3]=p[0];o[i*3+1]=p[1];o[i*3+2]=p[2];}return o;}
+ function off(a,dx,dy,dz){for(var i=0;i<a.length;i+=3){a[i]+=dx||0;a[i+1]+=dy||0;a[i+2]+=dz||0;}return a;}
+
+ /* Morphing particle field: up to 6 target shapes, blended pairwise with per-particle delay and a swirl in flight. */
+ function morph(targets,colors,o){o=o||{};var n=targets[0].length/3,g=new T.BufferGeometry(),r=rng(o.seed||11),sd=new Float32Array(n),i;
+  for(i=0;i<n;i++)sd[i]=r();
+  targets.forEach(function(t,k){g.setAttribute(k?'p'+k:'position',new T.BufferAttribute(t,3));});
+  for(i=targets.length;i<6;i++)g.setAttribute('p'+i,new T.BufferAttribute(targets[0],3));
+  g.setAttribute('aS',new T.BufferAttribute(sd,1));
+  var vi=new Float32Array(n);for(i=0;i<n;i++)vi[i]=Math.floor(r()*4);g.setAttribute('aV',new T.BufferAttribute(vi,1));
+  var pal=o.pal||[new T.Color(1,.5,.6),new T.Color(.45,.9,.7),new T.Color(.5,.7,1),new T.Color(1,.85,.4)];
+  var cl=colors||[new T.Color(1,.82,.5)];while(cl.length<6)cl.push(cl[cl.length-1]);
+  var m=new T.ShaderMaterial(add({uniforms:{uA:{value:0},uB:{value:1},uK:{value:0},uT:{value:0},uPx:{value:S},uSz:{value:o.size||1},uAl:{value:1},uSw:{value:o.swirl==null?.35:o.swirl},uJ:{value:o.jitter==null?.012:o.jitter},
+    uVar:{value:0},uP0:{value:pal[0]},uP1:{value:pal[1]},uP2:{value:pal[2]},uP3:{value:pal[3]},uC0:{value:cl[0]},uC1:{value:cl[1]},uC2:{value:cl[2]},uC3:{value:cl[3]},uC4:{value:cl[4]},uC5:{value:cl[5]}},
+   vertexShader:'attribute vec3 p1,p2,p3,p4,p5;attribute float aS,aV;uniform float uA,uB,uK,uT,uPx,uSz,uSw,uJ,uVar;uniform vec3 uC0,uC1,uC2,uC3,uC4,uC5,uP0,uP1,uP2,uP3;varying vec3 vC;varying float vF;'+
+    'vec3 P(float i){if(i<.5)return position;if(i<1.5)return p1;if(i<2.5)return p2;if(i<3.5)return p3;if(i<4.5)return p4;return p5;}'+
+    'vec3 C(float i){if(i<.5)return uC0;if(i<1.5)return uC1;if(i<2.5)return uC2;if(i<3.5)return uC3;if(i<4.5)return uC4;return uC5;}'+
+    'void main(){float k=clamp(uK*1.5-aS*.5,0.,1.);k=k*k*(3.-2.*k);vec3 a=P(uA),b=P(uB);vec3 p=mix(a,b,k);float an=aS*6.283+k*6.;float fl=sin(k*3.1416);p.xy+=vec2(cos(an),sin(an))*fl*uSw*(.4+aS);p.z+=fl*uSw*.5*(aS-.5);'+
+    'p+=vec3(sin(uT*.9+aS*40.),cos(uT*.7+aS*31.),sin(uT*.5+aS*17.))*uJ;vC=mix(C(uA),C(uB),k);vec3 pv=aV<.5?uP0:aV<1.5?uP1:aV<2.5?uP2:uP3;vC=mix(vC,pv,uVar);vF=fl;vec4 mv=modelViewMatrix*vec4(p,1.);gl_PointSize=(1.5+.9*aS+1.6*fl)*uSz*uPx*5./-mv.z;gl_Position=projectionMatrix*mv;}',
+   fragmentShader:'uniform float uAl;varying vec3 vC;varying float vF;void main(){float d=length(gl_PointCoord-.5);float a=smoothstep(.5,0.,d)*uAl;gl_FragColor=vec4(vC*(1.+vF*.6)*a,1.);}'}));
+  var pts=new T.Points(g,m);pts.frustumCulled=false;
+  // play a sequence of [pf, shapeIndex] keys: holds each shape, morphs over `dur` of pf before the next key
+  pts.userData.seq=function(pf,keys,dur){var a=keys[0][1],b=a,k=0;for(var j=0;j<keys.length;j++){if(pf>=keys[j][0]){a=keys[j][1];b=a;k=0;var du=j+1<keys.length&&keys[j+1][2]!=null?keys[j+1][2]:dur;if(j+1<keys.length&&pf>keys[j+1][0]-du){b=keys[j+1][1];k=ss(keys[j+1][0]-du,keys[j+1][0],pf);}}}
+   m.uniforms.uA.value=a;m.uniforms.uB.value=b;m.uniforms.uK.value=k;};
+  return pts;}
+
+ /* Line art that draws itself on, with an optional glowing point. paths: arrays of [x,y] in a w×h space. */
+ function art(paths,w,h,pw,col){var c=cv(w,h),g=c.getContext('2d'),tex=new T.CanvasTexture(c),len=0,last=-1;
+  paths.forEach(function(p){var L=0;for(var i=1;i<p.length;i++)L+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);p.L=L;len+=L;});
+  var mesh=new T.Mesh(new T.PlaneGeometry(pw,pw*h/w),new T.MeshBasicMaterial(add({map:tex})));
+  mesh.userData.draw=function(pa,glow){if(Math.abs(pa-last)<.002&&pa<1&&!glow)return;last=pa;g.clearRect(0,0,w,h);var lim=pa*len;
+   for(var pass=0;pass<2;pass++){g.lineCap='round';g.lineJoin='round';g.strokeStyle=pass?(col||'rgba(255,230,170,1)'):'rgba(233,180,76,.35)';g.lineWidth=pass?2.6:9;var acc=0;
+    for(var k=0;k<paths.length;k++){var p=paths[k];if(acc>=lim)break;var rem=lim-acc;g.beginPath();g.moveTo(p[0][0],p[0][1]);
+     for(var i=1;i<p.length;i++){var sl=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);if(rem<sl){var f=rem/sl;g.lineTo(p[i-1][0]+(p[i][0]-p[i-1][0])*f,p[i-1][1]+(p[i][1]-p[i-1][1])*f);break;}g.lineTo(p[i][0],p[i][1]);rem-=sl;}
+     g.stroke();acc+=p.L;}}
+   if(glow&&glow.a>0){var gr=g.createRadialGradient(glow.x,glow.y,0,glow.x,glow.y,glow.r||40);gr.addColorStop(0,'rgba(255,240,200,'+(.95*glow.a)+')');gr.addColorStop(.3,'rgba(255,200,110,'+(.5*glow.a)+')');gr.addColorStop(1,'rgba(255,180,80,0)');g.fillStyle=gr;g.fillRect(0,0,w,h);}
+   tex.needsUpdate=true;};
+  return mesh;}
+ var A={arc:function(cx,cy,r,a0,a1,n){var o=[];n=n||24;for(var i=0;i<=n;i++){var a=a0+(a1-a0)*i/n;o.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r]);}return o;},
+  bez:function(a,b,c,d,n){var o=[];n=n||20;for(var i=0;i<=n;i++){var t=i/n,u=1-t;o.push([u*u*u*a[0]+3*u*u*t*b[0]+3*u*t*t*c[0]+t*t*t*d[0],u*u*u*a[1]+3*u*u*t*b[1]+3*u*t*t*c[1]+t*t*t*d[1]]);}return o;}};
+ // Dakṣiṇāmūrti under the banyan: the closing image shared by every film (same drawing as film 1).
+ function guruPaths(){var P=[],arc=A.arc,bez=A.bez,canopy=[];
+  [[70,240,48],[120,178,58],[200,146,62],[300,144,64],[386,176,58],[440,240,48]].forEach(function(c,i,Ar){canopy=canopy.concat(arc(c[0],c[1],c[2],Math.PI*(i===0?.8:1.05),Math.PI*(i===Ar.length-1?2.2:1.95),18));});P.push(canopy);
+  P.push(bez([212,262],[210,296],[206,322],[204,345]));P.push(bez([300,262],[302,296],[306,322],[308,345]));
+  [[64,274,480],[96,282,520],[128,272,440],[384,272,440],[416,282,520],[448,274,480]].forEach(function(a){P.push(bez([a[0],a[1]],[a[0]+6,a[1]+70],[a[0]-6,a[2]-80],[a[0]+3,a[2]]));});
+  P.push(arc(256,252,13,Math.PI*.5,Math.PI*2.5,24));P.push(arc(256,288,30,Math.PI*-.5,Math.PI*1.5,40));P.push(arc(271,248,9,Math.PI*.6,Math.PI*1.9,12));
+  P.push([[244,318],[244,332]]);P.push([[268,318],[268,332]]);
+  P.push(bez([244,332],[214,336],[196,346],[190,366]));P.push(bez([268,332],[298,336],[316,346],[322,366]));
+  P.push(bez([190,366],[194,410],[206,440],[214,474]));P.push(bez([322,366],[318,410],[306,440],[298,474]));
+  P.push(bez([190,366],[166,392],[160,420],[176,430]));P.push(bez([176,430],[190,420],[200,404],[204,388]));
+  P.push(bez([322,366],[350,396],[352,440],[340,486]));P.push(bez([340,486],[328,494],[314,494],[304,488]));
+  P.push(bez([214,474],[160,480],[134,506],[150,528]));P.push(bez([150,528],[200,548],[312,548],[362,528]));P.push(bez([362,528],[378,506],[352,480],[298,474]));
+  P.push(bez([200,512],[230,500],[260,500],[290,514]));P.push(bez([222,524],[252,514],[282,514],[312,526]));
+  for(var i=0;i<7;i++){var x0=136+i*34;P.push(bez([x0,560],[x0+4,540],[x0+30,540],[x0+34,560]));}
+  P.push([[132,562],[380,562]]);P.push(arc(206,384,6.5,0,Math.PI*2,16));return P;}
+
+ /* Label overlay: Sanskrit word springs up, English underneath (identical to film 1). */
+ function spring(x){return 1-Math.exp(-7*x)*Math.cos(10*x);}
+ function overlay(LABELS,hiFrom){return function(g,pf,total,h){var off=((h||560)-560)*.42;
+  var k=-1;for(var i=0;i<LABELS.length;i++)if(pf>=LABELS[i].p)k=i;if(k<0)return;
+  var L=LABELS[k],end=k+1<LABELS.length?LABELS[k+1].p:1.2,tin=(pf-L.p)*total,tout=(end-pf)*total;
+  var y0=(pf>=(hiFrom||.79)?96:124)+off,rise=spring(Math.min(1.2,tin)),out=pf<1?ss(.3,0,tout):0,hold=1-out;
+  var lw=Math.min(1,tin*3)*70*(1-out);
+  g.save();g.strokeStyle='rgba(233,180,76,.9)';g.lineWidth=1.2;g.beginPath();g.moveTo(180-lw,y0+8);g.lineTo(180+lw,y0+8);g.stroke();
+  g.beginPath();g.rect(0,y0-60,360,68);g.clip();g.textAlign='center';g.textBaseline='alphabetic';g.shadowColor='rgba(7,5,15,.9)';g.shadowBlur=12;
+  var dy=(1-rise)*46-out*30;g.globalAlpha=hold;g.fillStyle='#F6D58E';g.font=(L.dev.length>12?'27px ':'34px ')+'"Tiro Devanagari Sanskrit", "Noto Serif Devanagari", serif';g.fillText(L.dev,180,y0-4+dy);g.restore();
+  g.save();var e=ss(.15,.5,tin)*hold;g.globalAlpha=e;g.textAlign='center';g.fillStyle='#F6EBD2';g.shadowColor='rgba(7,5,15,.95)';g.shadowBlur=10;g.font='600 12.5px "Mukta", system-ui, sans-serif';
+  g.fillText(L.en.toUpperCase().split('').join(String.fromCharCode(8202)),180,y0+28+(1-e)*6);g.restore();};}
+
+ /* Wrap a film: build() once on first use; render(pf,t) updates the scene. */
+ function film(def){var built=false,st=null;
+  return{hold:def.hold,poster:def.poster,overlay:overlay(def.labels,def.hiFrom),
+   init:function(){if(!init())return false;if(!built){try{st=def.build(T);built=true;}catch(e){if(window.console)console.warn('film build failed',e);built=true;st=null;}}return !!st;},
+   render:function(pf,t,h){pf=Math.max(0,Math.min(1,pf));def.render(st,pf,t,h||560);return draw(st.scene,st.cam,h);}};}
+ return{init:init,ss:ss,eio:eio,lerp:lerp,rng:rng,cv:cv,glowTex:glowTex,add:add,sprite:sprite,bg:bg,mandala:mandala,motes:motes,shape:shape,cloud:cloud,off:off,morph:morph,art:art,A:A,guruPaths:guruPaths,film:film,camera:camera,
+  get NP(){return NP;},get T(){return T;},get S(){return S;}};
+})();
+
+/* Tattva 2 film: the seed. The whole tree lies folded in a seed; space and time unfold it; the magician folds it back. */
+FILMS[2]=KIT.film({hold:[.3,.78],poster:.56,
+ labels:[{p:.03,dev:'बीजस्य',en:'of the seed'},{p:.15,dev:'अन्तः अङ्कुरः',en:'the sprout within'},{p:.3,dev:'जगदिदं',en:'this world'},{p:.47,dev:'देशकाल',en:'space and time'},{p:.57,dev:'वैचित्र्य',en:'endless variety'},{p:.67,dev:'मायावी',en:'like a magician'},{p:.75,dev:'स्वेच्छया',en:'by his own will'},{p:.83,dev:'नमः',en:'salutations'}],
+ build:function(T){var K=KIT,r=K.rng(42),st={},NP=K.NP;
+  var scene=st.scene=new T.Scene();st.cam=K.camera(40,.05,60);
+  st.bg=K.bg(0x0d0818,0x040208);scene.add(st.bg);
+  st.mand=K.mandala();st.mand.position.set(0,.55,-1.2);scene.add(st.mand);
+  st.motes=K.motes(220,[3.2,4.4,2],5);scene.add(st.motes);
+  var SY=-1.18;st.SY=SY;
+  // ground: a faint disc of soil light, and the deśa grid that unfolds
+  var gl=[],gc=[];for(var i=-10;i<=10;i++){gl.push(i*.32,0,-3.2,i*.32,0,3.2,-3.2,0,i*.32,3.2,0,i*.32);}
+  var gg=new T.BufferGeometry();gg.setAttribute('position',new T.Float32BufferAttribute(gl,3));
+  st.grid=new T.LineSegments(gg,new T.ShaderMaterial(K.add({uniforms:{uR:{value:0},uA:{value:0}},
+   vertexShader:'varying vec3 vP;void main(){vP=position;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+   fragmentShader:'uniform float uR,uA;varying vec3 vP;void main(){float d=length(vP.xz);float a=smoothstep(uR,uR-.6,d)*smoothstep(3.2,1.2,d)*uA;gl_FragColor=vec4(vec3(.9,.65,.3)*a*.55,1.);}'})));
+  st.grid.position.y=SY-.02;scene.add(st.grid);
+  // kāla: rings of time with tick marks, expanding from the trunk
+  st.rings=[];for(i=0;i<4;i++){var rp=[];for(var j=0;j<=128;j++){var a=j/128*Math.PI*2;rp.push(Math.cos(a),0,Math.sin(a));}
+   for(j=0;j<24;j++){var a2=j/24*Math.PI*2,l=j%6?1.04:1.09;rp.push(Math.cos(a2),0,Math.sin(a2),Math.cos(a2)*l,0,Math.sin(a2)*l);}
+   var rg=new T.BufferGeometry();rg.setAttribute('position',new T.Float32BufferAttribute(rp.slice(0,129*3),3));
+   var ring=new T.Line(rg,new T.LineBasicMaterial(K.add({color:0xf2c26a,opacity:0})));ring.position.y=SY;scene.add(ring);st.rings.push(ring);}
+  // the tree: recursive branches with growth times, drawn as lines plus glowing bark points
+  var segs=[];(function br(x,y,z,ang,tilt,len,d,t0){var dx=Math.sin(ang)*Math.cos(tilt),dz=Math.sin(ang)*Math.sin(tilt),dy=Math.cos(ang);var x2=x+dx*len,y2=y+dy*len,z2=z+dz*len,t1=t0+.13+.02*d;
+   segs.push([x,y,z,x2,y2,z2,t0,t1,d]);if(d>=7)return;var n=d<2?2:(r()<.35?3:2);
+   for(var k=0;k<n;k++){var sp=(k-(n-1)/2)*(.55+.2*r())+(r()-.5)*.3;br(x2,y2,z2,ang*.55+sp,tilt+(r()-.5)*1.4,len*(.72+.1*r()),d+1,t1);}})(0,SY,0,0,0,.62,0,0);
+  var lp=[],la=[],lt=[];segs.forEach(function(s){lp.push(s[0],s[1],s[2],s[3],s[4],s[5]);la.push(s[0],s[1],s[2],s[0],s[1],s[2]);lt.push(s[6],s[7],s[6],s[7]);});
+  var lg=new T.BufferGeometry();lg.setAttribute('position',new T.Float32BufferAttribute(lp,3));lg.setAttribute('aA',new T.Float32BufferAttribute(la,3));lg.setAttribute('aT',new T.Float32BufferAttribute(lt,2));
+  st.treeMat=new T.ShaderMaterial(K.add({uniforms:{uG:{value:0},uA:{value:1}},
+   vertexShader:'attribute vec3 aA;attribute vec2 aT;uniform float uG;varying float vV;void main(){float k=clamp((uG-aT.x)/(aT.y-aT.x),0.,1.);vV=step(aT.x,uG);vec3 p=mix(aA,position,k);gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}',
+   fragmentShader:'uniform float uA;varying float vV;void main(){if(vV<.5)discard;gl_FragColor=vec4(vec3(1.,.78,.42)*uA,1.);}'}));
+  st.tree=new T.LineSegments(lg,st.treeMat);st.tree.frustumCulled=false;scene.add(st.tree);
+  var bp=[],bt=[],bs=[];segs.forEach(function(s){var m=Math.max(2,Math.round(14-s[8]*1.6));for(var q=0;q<m;q++){var f=q/m;bp.push(K.lerp(s[0],s[3],f),K.lerp(s[1],s[4],f),K.lerp(s[2],s[5],f));bt.push(K.lerp(s[6],s[7],f));bs.push(Math.max(.4,3.2-s[8]*.42));}});
+  var bg2=new T.BufferGeometry();bg2.setAttribute('position',new T.Float32BufferAttribute(bp,3));bg2.setAttribute('aT',new T.Float32BufferAttribute(bt,1));bg2.setAttribute('aW',new T.Float32BufferAttribute(bs,1));
+  st.barkMat=new T.ShaderMaterial(K.add({uniforms:{uG:{value:0},uA:{value:1},uPx:{value:K.S}},
+   vertexShader:'attribute float aT,aW;uniform float uG,uPx;varying float vA,vW;void main(){vA=smoothstep(aT,aT+.04,uG);vW=aW;vec4 mv=modelViewMatrix*vec4(position,1.);gl_PointSize=aW*uPx*4.5/-mv.z*vA;gl_Position=projectionMatrix*mv;}',
+   fragmentShader:'uniform float uA;varying float vA,vW;void main(){float d=length(gl_PointCoord-.5);gl_FragColor=vec4(vec3(1.,.72,.36)*smoothstep(.5,0.,d)*vA*uA*(.25+.2*vW),1.);}'}));
+  st.bark=new T.Points(bg2,st.barkMat);st.bark.frustumCulled=false;scene.add(st.bark);
+  st.growEnd=Math.max.apply(null,segs.map(function(s){return s[7];}));
+  // leaves: particles that live folded in the seed, bloom on the branch tips, take on colour, then spiral home
+  var tips=segs.filter(function(s){return s[8]>=5;});
+  var inSeed=K.cloud(NP,function(r){var a=r()*Math.PI*2,u=r()*2-1,rr=Math.pow(r(),.6),s=Math.sqrt(1-u*u);return[Math.cos(a)*s*rr*.1,SY+.02+u*rr*.15,Math.sin(a)*s*rr*.1];},4);
+  var curl=K.cloud(NP,function(r){var t=r(),a=t*Math.PI*7,rr=.02+t*.085;return[Math.cos(a)*rr,SY+.0+t*.17-.06,Math.sin(a)*rr*.6];},6);
+  var canopy=K.cloud(NP,function(r){var s=tips[Math.floor(r()*tips.length)],f=r();return[K.lerp(s[0],s[3],f)+(r()-.5)*.14,K.lerp(s[1],s[4],f)+(r()-.5)*.12,K.lerp(s[2],s[5],f)+(r()-.5)*.14];},8);
+  var galaxy=K.cloud(NP,function(r){var arm=Math.floor(r()*3),t=Math.pow(r(),.7),a=arm*2.094+t*5.2,rr=.1+t*1.15;return[Math.cos(a)*rr+(r()-.5)*.12,.35+Math.sin(a)*rr*.42+(r()-.5)*.08,(r()-.5)*.2];},10);
+  st.leaves=K.morph([inSeed,curl,canopy,galaxy,inSeed],[new T.Color(1,.86,.55),new T.Color(1,.86,.55),new T.Color(.85,1,.6),new T.Color(1,.85,.5),new T.Color(1,.9,.6)],{size:.9,swirl:.5,seed:21,pal:[new T.Color(1,.35,.5),new T.Color(.3,1,.6),new T.Color(.35,.6,1),new T.Color(1,.75,.2)]});
+  scene.add(st.leaves);
+  // the seed: a glowing shell in two halves
+  st.shellMat=new T.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{uA:{value:1},uIn:{value:0},uT:{value:0}},side:T.DoubleSide,
+   vertexShader:'varying vec3 vN,vV;varying float vY;void main(){vN=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.);vV=normalize(-mv.xyz);vY=position.y;gl_Position=projectionMatrix*mv;}',
+   fragmentShader:'uniform float uA,uIn,uT;varying vec3 vN,vV;varying float vY;void main(){float f=pow(1.-abs(dot(vN,vV)),2.2);vec3 c=mix(vec3(.55,.32,.1),vec3(1.,.82,.45),f);float rid=.94+.06*sin(vY*90.);c*=rid;float a=mix(.95,.18+f*.8,uIn);gl_FragColor=vec4(c*(1.+.3*sin(uT*2.)*0.),a*uA);}'});
+  var hg=new T.SphereGeometry(1,40,20,0,Math.PI);st.halves=[0,1].map(function(k){var m=new T.Mesh(hg,st.shellMat);m.rotation.y=k?Math.PI:0;m.scale.set(.13,.2,.13);m.position.set(0,SY+.02,0);m.renderOrder=3;scene.add(m);return m;});
+  st.glow=K.sprite();st.glow.renderOrder=6;scene.add(st.glow);
+  st.soil=K.sprite('rgba(255,200,120,.7)','rgba(180,90,30,.25)',{opacity:.5});st.soil.scale.set(1.6,.35,1);st.soil.position.set(0,SY-.03,0);scene.add(st.soil);
+  // closing: Dakṣiṇāmūrti under the banyan
+  st.art=K.art(K.guruPaths(),512,640,1.6);st.art.position.set(0,.56,.4);st.art.renderOrder=8;scene.add(st.art);
+  return st;},
+ render:function(st,pf,t,h){var K=KIT,ss=K.ss,e=K.eio,L=K.lerp,SY=st.SY;
+  var pull=e(ss(.12,.44,pf)),fin=ss(.8,.9,pf);
+  var cz=L(1.7,6.2,pull),cy=L(SY+.1,.42,pull);cz=L(cz,5.25,fin);cy=L(cy,.25,fin);
+  st.cam.position.set(Math.sin(t*.12)*.12*pull,cy,cz);st.cam.lookAt(0,cy-.02*(1-pull),0);
+  var crack=ss(.27,.33,pf),grow=ss(.3,.55,pf)*(1-ss(.66,.78,pf)),fold=ss(.66,.8,pf);
+  // seed
+  st.shellMat.uniforms.uIn.value=ss(.12,.2,pf);st.shellMat.uniforms.uT.value=t;st.shellMat.uniforms.uA.value=1-ss(.34,.42,pf)+ss(.74,.8,pf)*(1-fin);
+  st.halves.forEach(function(m,k){var o=(k?-1:1)*crack*.16;m.position.set(o,SY+.02+crack*.03,0);m.rotation.z=(k?1:-1)*crack*.5;var sc=1-ss(.74,.8,pf)*0;m.scale.set(.13,.2,.13);});
+  if(pf>.74){st.halves.forEach(function(m){m.position.set(0,SY+.02,0);m.rotation.z=0;});}
+  var gs=.35+.25*Math.sin(t*2)*.3+.9*ss(.25,.3,pf)*(1-crack)+1.2*fold*(1-fin);st.glow.scale.setScalar(gs);st.glow.position.set(0,SY+.03,.05);st.glow.material.opacity=(.7-.4*ss(.35,.45,pf)+.5*fold)*(1-fin*.9);
+  st.soil.material.opacity=.35+.3*grow;
+  // tree growth and folding
+  var g=grow*st.growEnd*1.02;st.treeMat.uniforms.uG.value=g;st.barkMat.uniforms.uG.value=g;st.treeMat.uniforms.uA.value=.55*(1-fold);st.barkMat.uniforms.uA.value=1-fold;
+  st.leaves.userData.seq(pf,[[0,0],[.19,1,.07],[.52,2,.2],[.72,3,.07],[.8,4,.07]],.1);
+  var lm=st.leaves.material.uniforms;lm.uT.value=t;lm.uVar.value=ss(.55,.6,pf)*(1-ss(.74,.8,pf));lm.uAl.value=ss(.13,.2,pf)*(1-fin)*(1-.45*ss(.5,.56,pf)*(1-ss(.68,.74,pf)));lm.uSz.value=pf<.3?.55:1+.5*ss(.52,.58,pf)*(1-ss(.7,.76,pf));lm.uSw.value=pf<.3?.03:.5;
+  // space and time
+  var sp=ss(.46,.56,pf)*(1-ss(.68,.76,pf));st.grid.material.uniforms.uR.value=.2+3.2*ss(.46,.58,pf);st.grid.material.uniforms.uA.value=sp;
+  st.rings.forEach(function(rg,k){var ph=((t*.12+k/4)%1),rr=.25+ph*2.6;rg.scale.set(rr,1,rr);rg.material.opacity=sp*(1-ph)*.7;});
+  // backdrop
+  st.mand.rotation.z=t*.02;st.mand.material.opacity=.05+.04*Math.sin(t*.8)+.2*fin;st.mand.position.set(0,L(.4,.66,fin),-1.2);
+  st.motes.material.uniforms.uT.value=t;st.bg.material.uniforms.uG.value.setRGB(.5,.3,.12);st.bg.material.uniforms.uGs.value=.25*grow+.2*fold;st.bg.material.uniforms.uGy.value=.3+.3*pull;
+  var dA=ss(.84,.97,pf);st.art.userData.draw(dA,{x:256,y:300,r:46,a:ss(.9,.99,pf)});st.art.visible=dA>0;
+  if(fin>0){st.glow.position.set(0,L(SY+.03,.44,e(fin)),.5);st.glow.material.opacity=.9*(1-ss(.9,1,pf)*.6);st.glow.scale.setScalar(L(.5,.9,fin));}}
+});
+
+/* Tattva 3 film: that you are. One light of being shines through every passing form; it is pointed out as you; the ocean of becoming falls still. */
+FILMS[3]=KIT.film({hold:[.28,.76],poster:.5,
+ labels:[{p:.03,dev:'स्फुरणं',en:'his shining'},{p:.13,dev:'सदात्मकम्',en:'is existence itself'},{p:.24,dev:'असत्',en:'forms that pass'},{p:.36,dev:'तत्',en:'that'},{p:.44,dev:'त्वम्',en:'you'},{p:.51,dev:'असि',en:'are'},{p:.62,dev:'न पुनरावृत्तिः',en:'no return'},{p:.8,dev:'नमः',en:'salutations'}],
+ build:function(T){var K=KIT,st={},NP=K.NP;
+  var scene=st.scene=new T.Scene();st.cam=K.camera(40,.05,60);
+  st.bg=K.bg(0x0c0717,0x030207);scene.add(st.bg);
+  st.mand=K.mandala();st.mand.position.set(0,.45,-1.4);scene.add(st.mand);
+  st.motes=K.motes(200,[3.2,4.4,2],8);scene.add(st.motes);
+  var W=1.5,Y=-.38;
+  function pot(g,w,h){g.beginPath();g.ellipse(w/2,h*.62,w*.33,h*.27,0,0,Math.PI*2);g.fill();g.fillRect(w*.38,h*.2,w*.24,h*.2);g.beginPath();g.ellipse(w/2,h*.2,w*.17,h*.045,0,0,Math.PI*2);g.fill();}
+  function tree(g,w,h){g.fillRect(w*.46,h*.5,w*.08,h*.42);[[.5,.3,.2],[.32,.42,.15],[.68,.42,.15],[.4,.22,.13],[.6,.22,.13],[.5,.48,.14]].forEach(function(c){g.beginPath();g.arc(w*c[0],h*c[1],w*c[2],0,Math.PI*2);g.fill();});g.fillRect(w*.2,h*.9,w*.6,h*.03);}
+  function mount(g,w,h){g.beginPath();g.moveTo(w*.02,h*.9);g.lineTo(w*.36,h*.22);g.lineTo(w*.5,h*.45);g.lineTo(w*.66,h*.12);g.lineTo(w*.98,h*.9);g.closePath();g.fill();}
+  function person(g,w,h){g.beginPath();g.arc(w*.5,h*.17,w*.075,0,Math.PI*2);g.fill();g.beginPath();g.moveTo(w*.5,h*.27);g.bezierCurveTo(w*.66,h*.28,w*.7,h*.36,w*.68,h*.6);g.bezierCurveTo(w*.84,h*.66,w*.92,h*.74,w*.9,h*.82);g.bezierCurveTo(w*.8,h*.9,w*.2,h*.9,w*.1,h*.82);g.bezierCurveTo(w*.08,h*.74,w*.16,h*.66,w*.32,h*.6);g.bezierCurveTo(w*.3,h*.36,w*.34,h*.28,w*.5,h*.27);g.fill();}
+  var A=K.shape(pot,NP,W*.9,1),B=K.shape(tree,NP,W,2),C=K.shape(mount,NP,W*1.15,3),P=K.shape(person,NP,W*1.05,4);
+  [A,B,C,P].forEach(function(a){K.off(a,0,Y,0);});
+  st.OY=.5;var halo=K.cloud(NP,function(r){var a=r()*Math.PI*2,rr=.16+Math.pow(r(),2)*.5;return[Math.cos(a)*rr,st.OY+Math.sin(a)*rr,(r()-.5)*.1];},5);
+  st.HY=Y+.08;var heart=K.cloud(NP,function(r){var a=r()*Math.PI*2,rr=Math.pow(r(),1.5)*.2;return[Math.cos(a)*rr,st.HY+Math.sin(a)*rr,.1];},6);
+  st.forms=K.morph([A,B,C,halo,P,heart],[new T.Color(1,.75,.42),new T.Color(.9,.85,.5),new T.Color(1,.78,.55),new T.Color(1,.92,.7),new T.Color(1,.8,.5),new T.Color(1,.95,.8)],{size:.95,swirl:.32,seed:31});
+  scene.add(st.forms);
+  // the light of being: core, halo and slowly turning rays
+  st.core=K.sprite('rgba(255,252,240,1)','rgba(255,200,110,.6)');st.core.renderOrder=5;scene.add(st.core);
+  st.aura=K.sprite('rgba(255,220,150,.5)','rgba(200,120,40,.18)');st.aura.renderOrder=4;scene.add(st.aura);
+  var rp=[];for(var i=0;i<48;i++){var a=i/48*Math.PI*2,l=i%2?.55:.9;rp.push(Math.cos(a)*.14,Math.sin(a)*.14,0,Math.cos(a)*l,Math.sin(a)*l,0);}
+  var rg=new T.BufferGeometry();rg.setAttribute('position',new T.Float32BufferAttribute(rp,3));
+  st.rays=new T.LineSegments(rg,new T.ShaderMaterial(K.add({uniforms:{uA:{value:0}},vertexShader:'varying float vD;void main(){vD=length(position.xy);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform float uA;varying float vD;void main(){gl_FragColor=vec4(vec3(1.,.8,.45)*uA*smoothstep(.9,.15,vD),1.);}'})));st.rays.renderOrder=3;scene.add(st.rays);
+  // the beam that points: "that" is "you"
+  st.beam=new T.Mesh(new T.PlaneGeometry(.09,1),new T.ShaderMaterial(K.add({uniforms:{uA:{value:0},uT:{value:0}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+   fragmentShader:'uniform float uA,uT;varying vec2 vUv;void main(){float x=1.-abs(vUv.x-.5)*2.;float f=pow(x,3.)*(.7+.3*sin(vUv.y*40.-uT*8.));gl_FragColor=vec4(vec3(1.,.85,.55)*f*uA,1.);}'})));st.beam.renderOrder=4;scene.add(st.beam);
+  // the ocean of becoming: a field of points that heaves, then falls still and mirrors the light
+  var op=[];for(var z=0;z<44;z++)for(var x=0;x<60;x++)op.push((x/59-.5)*5.2,0,-z*.11+.6);
+  var og=new T.BufferGeometry();og.setAttribute('position',new T.Float32BufferAttribute(op,3));
+  st.sea=new T.Points(og,new T.ShaderMaterial(K.add({uniforms:{uT:{value:0},uAmp:{value:1},uA:{value:0},uPx:{value:K.S},uL:{value:new T.Vector2(0,-2)}},
+   vertexShader:'uniform float uT,uAmp,uPx;uniform vec2 uL;varying float vA;void main(){vec3 p=position;float w=sin(p.x*2.1+uT*1.7)*.5+sin(p.z*3.3-uT*2.3+p.x)*.35+sin((p.x+p.z)*5.-uT*3.)*.15;p.y+=w*.16*uAmp;vec4 mv=modelViewMatrix*vec4(p,1.);float glint=exp(-pow(p.x-uL.x,2.)*3.)*(.4+.6*(1.-uAmp));vA=(.25+.75*glint)*smoothstep(-4.8,-1.,p.z);gl_PointSize=(1.4+1.5*glint)*uPx*5./-mv.z;gl_Position=projectionMatrix*mv;}',
+   fragmentShader:'uniform float uA;varying float vA;void main(){float d=length(gl_PointCoord-.5);gl_FragColor=vec4(vec3(1.,.78,.45)*smoothstep(.5,0.,d)*vA*uA*1.7,1.);}'})));
+  st.sea.position.y=-1.25;st.sea.frustumCulled=false;scene.add(st.sea);
+  st.refl=K.sprite('rgba(255,230,170,.7)','rgba(200,130,50,.25)');st.refl.scale.set(.5,1.2,1);st.refl.renderOrder=2;scene.add(st.refl);
+  st.art=K.art(K.guruPaths(),512,640,1.6);st.art.position.set(0,.56,.4);st.art.renderOrder=8;scene.add(st.art);
+  return st;},
+ render:function(st,pf,t,h){var K=KIT,ss=K.ss,e=K.eio,L=K.lerp;
+  var fin=ss(.8,.9,pf),sea=ss(.6,.66,pf)*(1-ss(.78,.84,pf));
+  st.cam.position.set(Math.sin(t*.15)*.1,L(.05,-.25,sea)+.2*fin,5.2-.4*ss(.36,.56,pf)+.3*fin);st.cam.lookAt(0,L(.05,-.35,sea)+.2*fin,0);
+  // forms: pot, tree, mountain each glowing with the same light; then they dissolve into it; then a person
+  st.forms.userData.seq(pf,[[0,0],[.1,1,.06],[.18,2,.06],[.29,3,.07],[.43,4,.09],[.82,5,.05]],.06);
+  var fm=st.forms.material.uniforms;fm.uT.value=t;fm.uAl.value=ss(0,.04,pf)*(1-fin)*(1-.35*ss(.66,.74,pf));fm.uC4.value.setRGB(1,L(.8,.92,ss(.56,.62,pf)),L(.5,.7,ss(.56,.62,pf)));fm.uSz.value=.95+.25*ss(.56,.62,pf);
+  var oy=L(st.OY,st.HY,e(ss(.52,.6,pf)));
+  var rad=.8+.2*Math.sin(t*1.6);st.core.position.set(0,oy,.2);st.core.scale.setScalar((.38+.12*ss(.22,.3,pf)*(1-ss(.5,.56,pf))+.25*ss(.58,.62,pf))*rad*(1-fin*.6));st.core.material.opacity=ss(0,.05,pf)*(1-fin*.8);
+  st.aura.position.set(0,oy,.15);st.aura.scale.setScalar(2.2+.6*ss(.22,.3,pf)-.8*ss(.52,.6,pf));st.aura.material.opacity=.5*ss(0,.06,pf)*(1-fin);
+  st.rays.position.set(0,oy,.1);st.rays.rotation.z=t*.06;st.rays.material.uniforms.uA.value=.5*ss(.1,.2,pf)*(1-ss(.5,.56,pf));st.rays.scale.setScalar(1+.15*Math.sin(t));
+  var bm=ss(.45,.5,pf)*(1-ss(.56,.6,pf)),y0=st.HY,y1=st.OY;st.beam.position.set(0,(y0+y1)/2,.12);st.beam.scale.set(1,(y1-y0)*ss(.45,.5,pf),1);st.beam.material.uniforms.uA.value=bm;st.beam.material.uniforms.uT.value=t;
+  // the sea
+  var su=st.sea.material.uniforms;su.uT.value=t;su.uA.value=sea;su.uAmp.value=1-ss(.66,.74,pf);
+  st.refl.position.set(0,-1.45,.4);st.refl.material.opacity=sea*ss(.68,.76,pf)*.8;
+  st.mand.rotation.z=t*.02;st.mand.material.opacity=.05+.04*Math.sin(t*.8)+.2*fin;st.mand.position.y=L(.45,.66,fin);
+  st.motes.material.uniforms.uT.value=t;st.bg.material.uniforms.uG.value.setRGB(.55,.32,.12);st.bg.material.uniforms.uGs.value=.35*(1-fin)+.15*fin;st.bg.material.uniforms.uGy.value=L(.62,.42,ss(.52,.6,pf));
+  var dA=ss(.84,.97,pf);st.art.userData.draw(dA,{x:256,y:300,r:46,a:ss(.9,.99,pf)});st.art.visible=dA>0;
+  if(fin>0){st.core.position.set(0,L(oy,.44,e(fin)),.5);st.core.scale.setScalar(L(.5,.7,fin));st.core.material.opacity=.9;}}
+});
+
+/* Tattva 4 film: the lamp in the pot. One flame inside a pot with many holes; its light streams out through the senses,
+   and the world is lit only where that light falls. */
+FILMS[4]=KIT.film({hold:[.28,.78],poster:.48,
+ labels:[{p:.03,dev:'नानाच्छिद्र',en:'many holes'},{p:.12,dev:'घटोदरस्थित',en:'inside a pot'},{p:.2,dev:'महादीप',en:'a great lamp'},{p:.3,dev:'चक्षुरादि',en:'through eyes and senses'},{p:.4,dev:'बहिः स्पन्दते',en:'it streams outward'},{p:.53,dev:'जानामि',en:'"I know"'},{p:.63,dev:'अनुभाति',en:'all shines after it'},{p:.82,dev:'नमः',en:'salutations'}],
+ build:function(T){var K=KIT,st={},NP=K.NP,r=K.rng(404);
+  var scene=st.scene=new T.Scene();st.cam=K.camera(40,.05,60);
+  st.bg=K.bg(0x0b0716,0x030206);scene.add(st.bg);
+  st.mand=K.mandala();st.mand.position.set(0,.5,-1.6);scene.add(st.mand);
+  st.motes=K.motes(160,[3.4,4.4,2],12);scene.add(st.motes);
+  var PY=-.42;st.PY=PY;
+  // the pot: lathe body; translucent when we look inside
+  var prof=[];for(var i=0;i<=40;i++){var s=i/40,y=s*1.02-.5,rr;if(s<.08)rr=.18+s*2.2;else if(s<.72){var u=(s-.08)/.64;rr=.36+.16*Math.sin(u*Math.PI)*1.15;}else if(s<.88)rr=K.lerp(.33,.17,(s-.72)/.16);else rr=.17+(s-.88)*.9;prof.push(new T.Vector2(rr,y));}
+  st.potMat=new T.ShaderMaterial({transparent:true,depthWrite:false,side:T.FrontSide,uniforms:{uX:{value:0},uA:{value:1},uL:{value:0}},
+   vertexShader:'varying vec3 vN,vV,vP;void main(){vN=normalize(normalMatrix*normal);vP=position;vec4 mv=modelViewMatrix*vec4(position,1.);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+   fragmentShader:'uniform float uX,uA,uL;varying vec3 vN,vV,vP;void main(){float f=pow(1.-abs(dot(vN,vV)),2.);vec3 clay=mix(vec3(.07,.03,.015),vec3(.2,.09,.04),.5+.5*vN.y);clay+=vec3(1.,.6,.25)*f*(.18+.4*uL);float band=smoothstep(.012,0.,abs(fract(vP.y*6.)-.5)-.47)*.25;clay+=vec3(.9,.6,.3)*band;clay+=vec3(1.,.55,.2)*uL*.18*(1.-f);float a=mix(1.,.12+f*.65,uX)*uA;gl_FragColor=vec4(clay,a);}'});
+  var lgeo=new T.LatheGeometry(prof,64);st.pot=new T.Mesh(lgeo,st.potMat);st.pot.position.y=PY;st.pot.rotation.y=Math.PI;st.pot.renderOrder=3;scene.add(st.pot);
+  st.potIn=new T.Mesh(lgeo,new T.MeshBasicMaterial({color:0x1a0b05,transparent:true,depthWrite:false,side:T.BackSide}));st.potIn.position.y=PY;st.potIn.renderOrder=1;scene.add(st.potIn);
+  // holes and beams: each hole sits on the pot surface; the beam leaves along the line from the flame through the hole
+  var FL=new T.Vector3(0,PY-.08,0);st.FL=FL;
+  var holes=[[-.15,.05],[.28,-.1],[.62,.12],[1.02,-.06],[1.4,.08],[1.85,-.12],[2.3,.02],[2.7,-.1],[3.2,.1],[3.7,-.05],[4.3,.06],[4.9,-.08],[5.5,.12],[5.95,-.02]];
+  st.holes=[];st.beams=[];var dirs=[];
+  var beamGeo=new T.CylinderGeometry(.02,.2,1,28,1,true);beamGeo.translate(0,.5,0);
+  function surf(a,y){var rr=.36+.16*Math.sin(((y+.5)/1.02-.08)/.64*Math.PI)*1.15;return new T.Vector3(Math.sin(a)*rr,PY+y,Math.cos(a)*rr);}
+  holes.forEach(function(hh){var pos=surf(hh[0],hh[1]);var sp=K.sprite('rgba(255,245,220,1)','rgba(255,180,80,.6)',{opacity:0});sp.position.copy(pos);sp.scale.setScalar(.09);sp.renderOrder=6;scene.add(sp);st.holes.push(sp);});
+  [[118,.14],[168,0],[218,-.2],[322,-.2],[12,0],[62,.14]].forEach(function(b,k){var ang=b[0]*Math.PI/180,d=new T.Vector3(Math.cos(ang),Math.sin(ang)*.85,.35).normalize();
+   var pos=new T.Vector3(d.x*.4,PY+b[1],d.z*.4+.18);var sp=K.sprite('rgba(255,250,235,1)','rgba(255,190,90,.7)',{opacity:0});sp.position.copy(pos);sp.scale.setScalar(.1);sp.renderOrder=6;scene.add(sp);st.holes.push(sp);
+   var m=new T.Mesh(beamGeo,new T.ShaderMaterial(K.add({side:T.DoubleSide,uniforms:{uA:{value:0},uT:{value:0}},
+    vertexShader:'varying vec2 vUv;varying float vF;void main(){vUv=uv;vec3 n=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.);vF=abs(dot(n,normalize(-mv.xyz)));gl_Position=projectionMatrix*mv;}',
+    fragmentShader:'uniform float uA,uT;varying vec2 vUv;varying float vF;void main(){float f=pow(1.-vUv.y,1.6)*pow(vF,1.5)*(.85+.15*sin(vUv.y*12.-uT*3.));gl_FragColor=vec4(vec3(1.,.8,.48)*f*uA*.32,1.);}'})));
+   m.position.copy(pos);m.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d);m.renderOrder=4;scene.add(m);st.beams.push(m);dirs.push(pos.clone(),d.clone());});
+  // the flame and its little lamp
+  st.flame=K.sprite('rgba(255,250,235,1)','rgba(255,170,60,.65)');st.flame.renderOrder=7;scene.add(st.flame);
+  st.flameCore=K.sprite('rgba(255,255,250,1)','rgba(255,230,170,.8)');st.flameCore.renderOrder=8;scene.add(st.flameCore);
+  st.diya=new T.Mesh(new T.SphereGeometry(.07,20,10,0,Math.PI*2,Math.PI/2,Math.PI/2),new T.MeshBasicMaterial({color:0x2a1408,transparent:true,depthWrite:false}));st.diya.scale.set(1.3,.6,1.3);st.diya.position.set(0,PY-.12,0);st.diya.renderOrder=6;scene.add(st.diya);
+  // the world outside: forms that exist in the dark but are seen only where the light lands
+  function tree(g,w,h){g.fillRect(w*.46,h*.5,w*.08,h*.42);[[.5,.32,.2],[.32,.44,.14],[.68,.44,.14],[.5,.5,.14]].forEach(function(c){g.beginPath();g.arc(w*c[0],h*c[1],w*c[2],0,Math.PI*2);g.fill();});}
+  function bird(g,w,h){g.beginPath();g.moveTo(w*.05,h*.45);g.quadraticCurveTo(w*.3,h*.2,w*.5,h*.5);g.quadraticCurveTo(w*.7,h*.2,w*.95,h*.45);g.quadraticCurveTo(w*.7,h*.35,w*.5,h*.62);g.quadraticCurveTo(w*.3,h*.35,w*.05,h*.45);g.fill();}
+  function flower(g,w,h){for(var i=0;i<8;i++){g.save();g.translate(w/2,h/2);g.rotate(i*Math.PI/4);g.beginPath();g.ellipse(0,-h*.24,w*.09,h*.2,0,0,Math.PI*2);g.fill();g.restore();}}
+  function hill(g,w,h){g.beginPath();g.moveTo(0,h*.85);g.quadraticCurveTo(w*.3,h*.2,w*.55,h*.6);g.quadraticCurveTo(w*.75,h*.35,w,h*.85);g.fill();}
+  function rings(g,w,h){g.lineWidth=w*.03;for(var i=1;i<5;i++){g.beginPath();g.arc(w/2,h/2,w*.11*i,-.9,.9);g.stroke();}}
+  function face(g,w,h){g.beginPath();g.arc(w*.5,h*.5,w*.36,0,Math.PI*2);g.lineWidth=w*.05;g.stroke();g.beginPath();g.arc(w*.36,h*.42,w*.05,0,7);g.arc(w*.64,h*.42,w*.05,0,7);g.fill();g.beginPath();g.arc(w*.5,h*.55,w*.17,.3,2.84);g.stroke();}
+  var forms=[tree,bird,flower,hill,rings,face],pts=new Float32Array(NP*3),per=Math.floor(NP*.8/dirs.length/2*2);var n=0;
+  for(var b=0;b<dirs.length/2&&b<forms.length;b++){var o=dirs[b*2],d=dirs[b*2+1],dist=.5+r()*.08,c=o.clone().add(d.clone().multiplyScalar(dist));var sp2=K.shape(forms[b],per,.52,40+b);
+   for(i=0;i<per&&n<NP;i++,n++){pts[n*3]=c.x+sp2[i*3];pts[n*3+1]=c.y+sp2[i*3+1];pts[n*3+2]=c.z+sp2[i*3+2];}}
+  for(;n<NP;n++){var a3=r()*Math.PI*2,rr3=.8+r()*1.6;pts[n*3]=Math.cos(a3)*rr3;pts[n*3+1]=PY+.2+Math.sin(a3)*rr3*1.1;pts[n*3+2]=(r()-.5)*.8;}
+  var bd=[];for(i=0;i<6;i++){var j=Math.min(i,dirs.length/2-1);bd.push(dirs[j*2],dirs[j*2+1]);}
+  var wg=new T.BufferGeometry();wg.setAttribute('position',new T.BufferAttribute(pts,3));var sd=new Float32Array(NP);for(i=0;i<NP;i++)sd[i]=r();wg.setAttribute('aS',new T.BufferAttribute(sd,1));
+  var u={uT:{value:0},uPx:{value:K.S},uReach:{value:0},uAll:{value:0},uAl:{value:1}};for(i=0;i<6;i++){u['uO'+i]={value:bd[i*2]};u['uD'+i]={value:bd[i*2+1]};}
+  st.worldMat=new T.ShaderMaterial(K.add({uniforms:u,
+   vertexShader:'attribute float aS;uniform float uT,uPx,uReach,uAll;uniform vec3 uO0,uO1,uO2,uO3,uO4,uO5,uD0,uD1,uD2,uD3,uD4,uD5;varying float vL;varying float vS;'+
+    'float lit(vec3 p,vec3 o,vec3 d){vec3 q=p-o;float al=dot(q,d);float pe=length(q-d*al);return step(0.,al)*smoothstep(.06+al*.36,al*.2,pe)*smoothstep(uReach,uReach-.4,al);}'+
+    'void main(){vec3 p=position;p+=vec3(sin(uT*.6+aS*30.),cos(uT*.5+aS*20.),0.)*.01;float l=max(max(max(lit(p,uO0,uD0),lit(p,uO1,uD1)),max(lit(p,uO2,uD2),lit(p,uO3,uD3))),max(lit(p,uO4,uD4),lit(p,uO5,uD5)));vL=max(l,uAll*(.55+.45*aS));vS=aS;vec4 mv=modelViewMatrix*vec4(p,1.);gl_PointSize=(1.2+1.4*vL+.6*aS)*uPx*5./-mv.z;gl_Position=projectionMatrix*mv;}',
+   fragmentShader:'uniform float uAl;varying float vL,vS;void main(){float d=length(gl_PointCoord-.5);vec3 c=mix(vec3(.16,.12,.2),mix(vec3(1.,.8,.5),vec3(1.,.95,.8),vS),vL);float a=smoothstep(.5,0.,d)*(.12+.88*vL)*uAl;gl_FragColor=vec4(c*a,1.);}'}));
+  st.world=new T.Points(wg,st.worldMat);st.world.frustumCulled=false;st.world.renderOrder=2;scene.add(st.world);
+  st.art=K.art(K.guruPaths(),512,640,1.6);st.art.position.set(0,.56,.4);st.art.renderOrder=9;scene.add(st.art);
+  return st;},
+ render:function(st,pf,t,h){var K=KIT,ss=K.ss,e=K.eio,L=K.lerp,PY=st.PY;
+  var xr=ss(.12,.2,pf),lamp=ss(.17,.24,pf),beam=ss(.28,.45,pf),inF=e(ss(.5,.58,pf))*(1-e(ss(.62,.7,pf))),all=ss(.62,.72,pf),potGone=ss(.68,.78,pf),fin=ss(.8,.9,pf);
+  // camera: slow orbit, a push into the flame at "I know", then back out
+  var orb=Math.sin(t*.1)*.25*(1-fin);st.cam.position.set(Math.sin(orb)*L(5.4,2.5,inF),L(.05,PY+.02,inF)+.15*fin,Math.cos(orb)*L(5.4,2.5,inF)+.4*fin);st.cam.lookAt(0,L(.0,PY-.06,inF)+.15*fin,0);
+  st.potMat.uniforms.uX.value=xr;st.potMat.uniforms.uL.value=lamp;st.potMat.uniforms.uA.value=(1-potGone)*(1-.55*inF);st.potIn.material.opacity=(1-xr*.7)*(1-potGone);
+  var fl=1+.08*Math.sin(t*9)+.05*Math.sin(t*23);st.flame.position.set(0,PY-.03,0);st.flame.scale.set(.2*fl*(1+inF*.6),.36*fl*(1+inF*.6),1);st.flame.material.opacity=lamp*(1-fin*.5);
+  st.flameCore.position.set(0,PY-.06,0);st.flameCore.scale.set(.06*fl,.13*fl,1);st.flameCore.material.opacity=lamp;
+  st.diya.material.opacity=(.3+.7*xr)*(1-potGone);
+  var hl=ss(0,.06,pf)*(.22+.1*Math.sin(t*2))+lamp*.75;st.holes.forEach(function(s,k){s.material.opacity=hl*(1-potGone*.6)*(.7+.3*Math.sin(t*3+k));s.scale.setScalar(.07+.05*lamp);});
+  st.beams.forEach(function(m,k){var g=ss(.28+k*.02,.4+k*.02,pf);m.scale.set(1+all*.6,(.2+1.9*g)*(1+all*.3),1+all*.6);m.material.uniforms.uA.value=g*(1-fin)*(1-inF*.5)*(1-.6*all);m.material.uniforms.uT.value=t;});
+  var wm=st.worldMat.uniforms;wm.uT.value=t;wm.uReach.value=.2+2.6*beam;wm.uAll.value=all*(1-fin*.7);wm.uAl.value=ss(.02,.1,pf)*(1-fin*.85);
+  st.mand.rotation.z=t*.02;st.mand.material.opacity=.04+.04*Math.sin(t*.8)+.2*fin;st.mand.position.y=L(.5,.66,fin);
+  st.motes.material.uniforms.uT.value=t;st.motes.material.uniforms.uA.value=.3+.3*all;
+  st.bg.material.uniforms.uG.value.setRGB(.6,.3,.1);st.bg.material.uniforms.uGs.value=.12+.35*lamp*(1-fin)+.3*all*(1-fin);st.bg.material.uniforms.uGy.value=.4;
+  var dA=ss(.84,.97,pf);st.art.userData.draw(dA,{x:256,y:300,r:46,a:ss(.9,.99,pf)});st.art.visible=dA>0;
+  if(fin>0){var fy=L(PY-.03,.44,e(fin));st.flame.position.set(0,fy,.5);st.flameCore.position.set(0,fy,.5);st.flame.material.opacity=.95;}}
+});
+
+/* Tattva 5 film: not the body. Body, breath, senses, mind and emptiness are each offered as "I", and each falls away;
+   what is left is the light that saw them all. */
+FILMS[5]=KIT.film({hold:[.5,.78],poster:.36,
+ labels:[{p:.03,dev:'देहं',en:'the body?'},{p:.13,dev:'प्राणम्',en:'the breath?'},{p:.23,dev:'इन्द्रियाणि',en:'the senses?'},{p:.33,dev:'चलां बुद्धिं',en:'the restless mind?'},{p:.43,dev:'शून्यं',en:'emptiness?'},{p:.53,dev:'भ्रान्ताः',en:'all mistaken'},{p:.65,dev:'व्यामोहसंहारिणे',en:'the delusion ends'},{p:.82,dev:'नमः',en:'salutations'}],
+ build:function(T){var K=KIT,st={},NP=K.NP,r=K.rng(505);
+  var scene=st.scene=new T.Scene();st.cam=K.camera(40,.05,60);
+  st.bg=K.bg(0x0b0717,0x030207);scene.add(st.bg);
+  st.mand=K.mandala();st.mand.position.set(0,.5,-1.6);scene.add(st.mand);
+  st.motes=K.motes(160,[3.4,4.4,2],15);scene.add(st.motes);
+  var BY=-.42;st.BY=BY;var HEAD={x:0,y:BY+.78},HEART={x:0,y:BY+.25};st.HEAD=HEAD;st.HEART=HEART;
+  function body(g,w,h){g.beginPath();g.arc(w*.5,h*.17,w*.09,0,Math.PI*2);g.fill();g.fillRect(w*.46,h*.24,w*.08,h*.06);g.beginPath();g.moveTo(w*.5,h*.29);g.bezierCurveTo(w*.68,h*.29,w*.73,h*.36,w*.71,h*.6);g.bezierCurveTo(w*.86,h*.65,w*.95,h*.73,w*.93,h*.82);g.bezierCurveTo(w*.82,h*.9,w*.18,h*.9,w*.07,h*.82);g.bezierCurveTo(w*.05,h*.73,w*.14,h*.65,w*.29,h*.6);g.bezierCurveTo(w*.27,h*.36,w*.32,h*.29,w*.5,h*.29);g.fill();}
+  var S=1.55,bodyP=K.off(K.shape(body,NP,S,51),0,BY+.18,0);
+  var drift=K.cloud(NP,function(r,i){var x=bodyP[i*3],y=bodyP[i*3+1],a=Math.atan2(y-HEART.y,x)+(r()-.5)*.6,d=1.4+r()*1.6;return[x+Math.cos(a)*d,y+Math.sin(a)*d,(r()-.5)*1.5];},52);
+  var seen=K.cloud(NP,function(r,i){return[bodyP[i*3]*1.04,bodyP[i*3+1]*1.02,bodyP[i*3+2]-.05];},53);
+  st.body=K.morph([bodyP,drift,seen],[new T.Color(1,.78,.48),new T.Color(.7,.5,.4),new T.Color(1,.9,.7)],{size:.85,swirl:.25,seed:54,jitter:.008});scene.add(st.body);
+  // outline of the figure, drawn on
+  var P=[],bez=K.A.bez,arc=K.A.arc;var ow=512,oh=512,mx=function(x){return x*ow;},my=function(y){return y*oh;};
+  P.push(arc(mx(.5),my(.17),mx(.09),0,Math.PI*2,40));
+  P.push(bez([mx(.5),my(.29)],[mx(.68),my(.29)],[mx(.73),my(.36)],[mx(.71),my(.6)]).concat(bez([mx(.71),my(.6)],[mx(.86),my(.65)],[mx(.95),my(.73)],[mx(.93),my(.82)])).concat(bez([mx(.93),my(.82)],[mx(.82),my(.9)],[mx(.18),my(.9)],[mx(.07),my(.82)])).concat(bez([mx(.07),my(.82)],[mx(.05),my(.73)],[mx(.14),my(.65)],[mx(.29),my(.6)])).concat(bez([mx(.29),my(.6)],[mx(.27),my(.36)],[mx(.32),my(.29)],[mx(.5),my(.29)])));
+  st.outline=K.art(P,ow,oh,S,'rgba(246,213,142,.9)');st.outline.position.set(0,BY+.18,.02);st.outline.renderOrder=3;scene.add(st.outline);
+  // breath: particles that circulate in through the nose, down to the belly and out again
+  var BN=1400,bp=[],bs=[];for(var i=0;i<BN;i++){bp.push(0,0,0);bs.push(r());}var bg=new T.BufferGeometry();bg.setAttribute('position',new T.Float32BufferAttribute(bp,3));bg.setAttribute('aS',new T.Float32BufferAttribute(bs,1));
+  st.breathMat=new T.ShaderMaterial(K.add({uniforms:{uT:{value:0},uA:{value:0},uPx:{value:K.S},uY0:{value:HEAD.y-.07},uY1:{value:BY+.12},uSc:{value:0}},
+   vertexShader:'attribute float aS;uniform float uT,uPx,uY0,uY1,uSc;varying float vA;void main(){float ph=fract(aS+uT*.12);float a=ph*6.2832;float side=sin(a);vec3 p=vec3(side*(.2+.04*sin(aS*40.)),mix(uY0,uY1,.5-.5*cos(a)),.14+.1*cos(a+aS*3.));vec3 jr=vec3(fract(sin(aS*127.1)*43758.5),fract(sin(aS*311.7)*24634.6),fract(sin(aS*74.7)*9531.2))-.5;p+=jr*(.16+uSc*3.*aS)+vec3(sin(uT*1.3+aS*50.),cos(uT*1.1+aS*70.),0.)*.02;vA=(.25+.45*sin(ph*3.1416));vec4 mv=modelViewMatrix*vec4(p,1.);gl_PointSize=(2.2+1.4*aS)*uPx*5./-mv.z;gl_Position=projectionMatrix*mv;}',
+   fragmentShader:'uniform float uA;varying float vA;void main(){float d=length(gl_PointCoord-.5);gl_FragColor=vec4(vec3(.65,.88,1.)*smoothstep(.5,0.,d)*vA*uA,1.);}'}));
+  st.breath=new T.Points(bg,st.breathMat);st.breath.frustumCulled=false;st.breath.renderOrder=5;scene.add(st.breath);
+  // senses: eyes, ears, nose, tongue, skin
+  st.senses=[[-.045,HEAD.y+.01],[.045,HEAD.y+.01],[-.14,HEAD.y],[.14,HEAD.y],[0,HEAD.y-.06],[0,HEAD.y-.1],[.4,BY+.12]].map(function(q){var s=K.sprite('rgba(255,250,235,1)','rgba(120,200,255,.55)',{opacity:0});s.position.set(q[0],q[1],.15);s.renderOrder=6;scene.add(s);
+   var ring=new T.Mesh(new T.RingGeometry(.9,1,48),new T.MeshBasicMaterial(K.add({color:0x9fd8ff,opacity:0,side:T.DoubleSide})));ring.position.copy(s.position);ring.renderOrder=6;scene.add(ring);return{s:s,ring:ring};});
+  // mind: thoughts racing round the head
+  var MN=700,mp=[],ms=[];for(i=0;i<MN;i++){mp.push(r(),r(),r());ms.push(r());}var mg=new T.BufferGeometry();mg.setAttribute('position',new T.Float32BufferAttribute(mp,3));mg.setAttribute('aS',new T.Float32BufferAttribute(ms,1));
+  st.mindMat=new T.ShaderMaterial(K.add({uniforms:{uT:{value:0},uA:{value:0},uPx:{value:K.S},uC:{value:new T.Vector3(HEAD.x,HEAD.y,0)},uOut:{value:0}},
+   vertexShader:'attribute float aS;uniform float uT,uPx,uOut;uniform vec3 uC;varying float vA;void main(){vec3 q=position;float sp=1.2+q.x*2.5;float a=uT*sp+aS*20.;float rr=.2+q.y*.2+uOut*(1.5+q.z*2.);float tl=(q.z-.5)*2.4;vec3 p=vec3(cos(a)*rr,sin(a)*rr*sin(tl)*.5,sin(a)*rr*cos(tl));p+=uC+vec3(0.,.05+uOut*.6,0.);vA=.5+.5*sin(uT*3.+aS*30.);vec4 mv=modelViewMatrix*vec4(p,1.);gl_PointSize=(1.3+aS*1.2)*uPx*5./-mv.z;gl_Position=projectionMatrix*mv;}',
+   fragmentShader:'uniform float uA;varying float vA;void main(){float d=length(gl_PointCoord-.5);gl_FragColor=vec4(vec3(.85,.7,1.)*smoothstep(.5,0.,d)*vA*uA,1.);}'}));
+  st.mind=new T.Points(mg,st.mindMat);st.mind.frustumCulled=false;st.mind.renderOrder=6;scene.add(st.mind);
+  // emptiness: a dark hole that swallows the light
+  st.void=new T.Mesh(new T.CircleGeometry(1,64),new T.ShaderMaterial({transparent:true,depthWrite:false,depthTest:false,uniforms:{uA:{value:0},uT:{value:0}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+   fragmentShader:'uniform float uA,uT;varying vec2 vUv;void main(){float d=length(vUv-.5)*2.;float rim=smoothstep(.75,.95,d)*smoothstep(1.,.95,d);vec3 c=vec3(.02,.01,.04)+vec3(.6,.4,.9)*rim*(.6+.4*sin(uT*3.+atan(vUv.y-.5,vUv.x-.5)*6.));gl_FragColor=vec4(c,uA*(smoothstep(1.,.9,d)));}'}));
+  st.void.position.set(0,HEART.y,.2);st.void.renderOrder=7;scene.add(st.void);
+  // the witness
+  st.wit=K.sprite();st.wit.renderOrder=9;scene.add(st.wit);
+  st.witRays=K.sprite('rgba(255,235,190,.35)','rgba(220,150,60,.12)',{opacity:0});st.witRays.renderOrder=8;scene.add(st.witRays);
+  st.art=K.art(K.guruPaths(),512,640,1.6);st.art.position.set(0,.56,.4);st.art.renderOrder=10;scene.add(st.art);
+  return st;},
+ render:function(st,pf,t,h){var K=KIT,ss=K.ss,e=K.eio,L=K.lerp,HEAD=st.HEAD,HEART=st.HEART;
+  var fall=ss(.52,.62,pf),wit=ss(.58,.66,pf),fin=ss(.8,.9,pf);
+  var foc=[ss(.02,.08,pf),ss(.12,.17,pf),ss(.22,.27,pf),ss(.32,.37,pf),ss(.42,.47,pf)];
+  var on=function(k){var n=k<4?foc[k+1]:fall;return foc[k]*(1-.55*n);};
+  // camera drifts toward whatever is being offered as "I"
+  function fyFix(p){var keys=[[0,0],[.1,0],[.2,-.05],[.3,HEAD.y-.18],[.4,HEAD.y-.08],[.48,HEART.y]],v=0;for(var i=0;i<keys.length;i++){if(p>=keys[i][0]){v=keys[i][1];if(i+1<keys.length)v=L(keys[i][1],keys[i+1][1],ss(keys[i+1][0]-.06,keys[i+1][0],p));}}return v;}
+  var back=ss(.5,.62,pf),ky=L(fyFix(pf),0,back),cz=L(L(5.2,4.0,ss(.02,.3,pf)),5.2,back)+.1*fin;
+  st.cam.position.set(Math.sin(t*.12)*.08,ky+.12*fin,cz);st.cam.lookAt(0,ky+.12*fin,0);
+  // body
+  st.body.userData.seq(pf,[[0,0],[.62,1,.1],[.66,2,.05]],.1);
+  var bm=st.body.material.uniforms;bm.uT.value=t;bm.uAl.value=(.35+.65*on(0))*ss(0,.05,pf)*(1-fall*.75)*(1-fin);
+  if(pf>.62){bm.uA.value=1;bm.uB.value=1;bm.uK.value=0;bm.uAl.value=.22*(1-fin)*wit;}
+  st.outline.userData.draw(ss(.02,.1,pf));st.outline.material.opacity=(.5+.5*on(0))*(1-fall);
+  // breath
+  st.breathMat.uniforms.uT.value=t;st.breathMat.uniforms.uA.value=on(1)*(1-fall)+(fall>0&&fall<1?(1-fall)*.5:0);st.breathMat.uniforms.uSc.value=fall;
+  // senses
+  st.senses.forEach(function(o,k){var a=on(2)*(1-fall)*(.7+.3*Math.sin(t*4+k));o.s.material.opacity=a;o.s.scale.setScalar(.06+.03*a);var ph=(t*.6+k*.17)%1;o.ring.scale.setScalar(.03+ph*.25);o.ring.material.opacity=a*(1-ph)*.6;});
+  // mind
+  st.mindMat.uniforms.uT.value=t;st.mindMat.uniforms.uA.value=on(3)*(1-ss(.56,.62,pf));st.mindMat.uniforms.uOut.value=fall;
+  // emptiness
+  var va=foc[4]*(1-ss(.5,.56,pf));st.void.material.uniforms.uA.value=va;st.void.material.uniforms.uT.value=t;st.void.scale.setScalar(.05+.32*e(foc[4])*(1-ss(.5,.56,pf)));
+  // witness
+  st.wit.position.set(0,HEART.y,.3);st.wit.scale.setScalar((.15+.55*wit)*(1+.05*Math.sin(t*2.5)));st.wit.material.opacity=Math.max(.12*ss(0,.05,pf)*(1-foc[4]),wit);
+  st.witRays.position.copy(st.wit.position);st.witRays.scale.setScalar(.5+2.6*wit);st.witRays.material.opacity=wit*.6*(1-fin);
+  st.mand.rotation.z=t*.02;st.mand.material.opacity=.04+.04*Math.sin(t*.8)+.15*wit+.1*fin;st.mand.position.y=L(.5,.66,fin);
+  st.motes.material.uniforms.uT.value=t;st.bg.material.uniforms.uG.value.setRGB(.5,.3,.14);st.bg.material.uniforms.uGs.value=.12+.3*wit*(1-fin);st.bg.material.uniforms.uGy.value=.45;
+  var dA=ss(.84,.97,pf);st.art.userData.draw(dA,{x:256,y:300,r:46,a:ss(.9,.99,pf)});st.art.visible=dA>0;
+  if(fin>0){st.wit.position.set(0,L(HEART.y,.44,e(fin)),.5);st.wit.scale.setScalar(L(.7,.6,fin));st.wit.material.opacity=.9;}}
+});
+
+/* Tattva 6 film: the eclipse. Rāhu covers the sun, yet the sun is untouched; in deep sleep the senses fold into the heart
+   and only being remains; on waking, "I slept". */
+FILMS[6]=KIT.film({hold:[.26,.78],poster:.24,
+ labels:[{p:.03,dev:'दिवाकर',en:'the sun'},{p:.12,dev:'राहुग्रस्त',en:'seized by Rāhu'},{p:.21,dev:'मायासमाच्छादनात्',en:'covered by māyā'},{p:.32,dev:'सुषुप्तः',en:'in deep sleep'},{p:.42,dev:'सन्मात्रः',en:'pure being remains'},{p:.53,dev:'प्रबोधसमये',en:'on waking'},{p:.64,dev:'प्रागस्वाप्सम्',en:'"I was asleep"'},{p:.82,dev:'नमः',en:'salutations'}],
+ build:function(T){var K=KIT,st={},NP=K.NP,r=K.rng(606);
+  var scene=st.scene=new T.Scene();st.cam=K.camera(40,.05,60);
+  st.bg=K.bg(0x1a0f2a,0x050309);scene.add(st.bg);
+  st.motes=K.motes(220,[3.6,4.6,2],18);scene.add(st.motes);
+  var SY=.42,R=.34;st.SY=SY;st.R=R;
+  st.sunMat=new T.ShaderMaterial(K.add({uniforms:{uF:{value:1},uR:{value:R/4},uO:{value:-1},uT:{value:0},uDay:{value:1}},
+   vertexShader:'varying vec2 vP;void main(){vP=position.xy;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+   fragmentShader:'uniform float uR,uO,uT,uDay,uF;varying vec2 vP;'+
+    'float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5);}float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}'+
+    'void main(){vec2 p=vP;float d=length(p);vec2 oc=vec2(uO*uR*2.3,uR*.12*uO);float od=length(p-oc);float occ=smoothstep(uR*1.005,uR*.985,od)*smoothstep(1.,.75,abs(uO));'+
+    'float disc=smoothstep(uR,uR*.98,d);float limb=sqrt(max(0.,1.-pow(d/uR,2.)));vec3 sun=mix(vec3(1.,.45,.12),vec3(1.,.95,.75),limb)*(.85+.15*n(p*40.+uT*.3));'+
+    'float vis=1.-smoothstep(uR*1.6,0.,length(oc));vec2 u=p/max(d,1e-4);float str=pow(n(u*3.+vec2(uT*.05,0.)+7.)*.6+n(u*8.+vec2(0.,uT*.08)+3.)*.4,2.);'+
+    'float cor=exp(-(d-uR)/(uR*(.35+.9*str)))*step(uR,d);vec3 corC=vec3(1.,.85,.65)*cor*(.25+1.1*(1.-vis));'+
+    'float glare=exp(-(d-uR)/(uR*.5))*step(uR,d)*vis*uDay;'+
+    'vec3 c=sun*disc*(1.-occ)+corC*(1.-occ*step(od,uR))+vec3(1.,.6,.25)*glare*.8;'+
+    'float edge=smoothstep(.02*uR,0.,abs(od-uR))*disc*(1.-vis)*.0;'+
+    'gl_FragColor=vec4(c*smoothstep(.8,.45,d)*uF,1.);}'}));
+  st.sun=new T.Mesh(new T.PlaneGeometry(1.6,1.6),st.sunMat);st.sun.scale.setScalar(4);st.sun.position.set(0,SY,-.01);st.sun.renderOrder=1;scene.add(st.sun);
+  st.ring=K.sprite('rgba(255,255,250,1)','rgba(255,220,160,.7)',{opacity:0});st.ring.renderOrder=3;scene.add(st.ring);
+  st.rahu=K.sprite('rgba(120,60,160,.35)','rgba(60,20,90,.15)',{opacity:0});st.rahu.renderOrder=2;scene.add(st.rahu);
+  // the sleeper, who later sits up
+  var BY=-.92;st.BY=BY;
+  function lying(g,w,h){g.beginPath();g.ellipse(w*.13,h*.47,w*.065,h*.1,0,0,Math.PI*2);g.fill();g.beginPath();g.ellipse(w*.1,h*.53,w*.06,h*.03,0,0,Math.PI*2);g.fill();g.beginPath();g.moveTo(w*.24,h*.44);g.bezierCurveTo(w*.4,h*.36,w*.62,h*.38,w*.7,h*.44);g.bezierCurveTo(w*.84,h*.46,w*.94,h*.5,w*.95,h*.56);g.bezierCurveTo(w*.8,h*.6,w*.4,h*.62,w*.24,h*.58);g.closePath();g.fill();}
+  function sitting(g,w,h){g.beginPath();g.arc(w*.5,h*.17,w*.08,0,Math.PI*2);g.fill();g.beginPath();g.moveTo(w*.5,h*.27);g.bezierCurveTo(w*.66,h*.28,w*.7,h*.36,w*.68,h*.6);g.bezierCurveTo(w*.84,h*.66,w*.92,h*.74,w*.9,h*.82);g.bezierCurveTo(w*.8,h*.9,w*.2,h*.9,w*.1,h*.82);g.bezierCurveTo(w*.08,h*.74,w*.16,h*.66,w*.32,h*.6);g.bezierCurveTo(w*.3,h*.36,w*.34,h*.28,w*.5,h*.27);g.fill();}
+  var Ly=K.off(K.shape(lying,NP,1.6,61),0,BY,0),Si=K.off(K.shape(sitting,NP,1.2,62),0,BY+.3,0);
+  st.HEART=new T.Vector3(.02,BY+.02,.15);st.HEARTS=new T.Vector3(0,BY+.32,.15);st.HEADL=new T.Vector3(-.54,BY+.0,.15);st.HEADS=new T.Vector3(0,BY+.55,.15);
+  st.body=K.morph([Ly,Si],[new T.Color(.75,.6,.95),new T.Color(1,.8,.5)],{size:.75,swirl:.2,seed:63,jitter:.006});scene.add(st.body);
+  st.mat=new T.Mesh(new T.PlaneGeometry(1.9,.05),new T.MeshBasicMaterial(K.add({color:0x6a4a9a,opacity:.5})));st.mat.position.set(0,BY-.12,0);scene.add(st.mat);
+  // senses: lights that withdraw into the heart in sleep and fly back out on waking
+  st.sense=[[-.6,.03],[-.5,.03],[-.56,-.04],[.3,-.05],[.9,-.04],[-.2,-.06]].map(function(q){var s=K.sprite('rgba(255,250,235,1)','rgba(160,210,255,.55)',{opacity:0});s.userData.l=new T.Vector3(q[0],BY+q[1],.15);s.renderOrder=6;scene.add(s);return s;});
+  st.sOut=[[-.04,.57],[.04,.57],[0,.5],[.3,.25],[-.3,.25],[0,.44]];
+  st.core=K.sprite('rgba(255,250,240,1)','rgba(255,200,120,.6)',{opacity:0});st.core.renderOrder=7;scene.add(st.core);
+  st.zz=K.sprite('rgba(200,170,255,.6)','rgba(120,80,200,.2)',{opacity:0});st.zz.renderOrder=5;scene.add(st.zz);
+  st.art=K.art(K.guruPaths(),512,640,1.6);st.art.position.set(0,.56,.4);st.art.renderOrder=10;scene.add(st.art);
+  st.mand=K.mandala();st.mand.position.set(0,.6,-1.4);st.mand.material.opacity=0;scene.add(st.mand);
+  return st;},
+ render:function(st,pf,t,h){var K=KIT,T=K.T,ss=K.ss,e=K.eio,L=K.lerp;
+  var cover=e(ss(.08,.22,pf)),uncover=e(ss(.53,.6,pf)),total=cover*(1-uncover),fin=ss(.8,.9,pf);
+  var sleep=ss(.28,.4,pf),wake=ss(.54,.64,pf);
+  // camera: start on the sun, tilt down to hold the sun and the sleeper together
+  var down=e(ss(.24,.34,pf));st.cam.position.set(0,L(.42,-.12,down)+.25*fin,L(3.3,5.4,down)-.1*fin);st.cam.lookAt(0,L(.42,-.12,down)+.25*fin,0);
+  // sun and Rāhu
+  var o=cover<1?-(1-cover):uncover;st.sunMat.uniforms.uO.value=o;st.sunMat.uniforms.uT.value=t;st.sunMat.uniforms.uDay.value=1-total*.9;
+  st.sun.material.opacity=1;st.sun.visible=fin<1;var sunA=1-fin;st.sunMat.uniforms.uDay.value*=sunA;st.sunMat.uniforms.uF.value=sunA;
+  var dia=Math.exp(-Math.pow((pf-.535)/.012,2))+.6*Math.exp(-Math.pow((pf-.215)/.01,2));st.ring.position.set(st.R*.92,st.SY+st.R*.2,.05);st.ring.scale.setScalar(.25+1.3*dia);st.ring.material.opacity=dia;
+  st.rahu.position.set(o*st.R*2.3,st.SY+st.R*.12*o,.04);st.rahu.scale.setScalar(st.R*3.2);st.rahu.material.opacity=.6*ss(.06,.14,pf)*(1-ss(.55,.59,pf));
+  // sky darkens in the eclipse
+  var bgU=st.bg.material.uniforms;bgU.uA.value.setRGB(L(.33,.06,total),L(.17,.035,total),L(.15,.1,total));bgU.uB.value.setRGB(L(.12,.02,total),L(.06,.012,total),L(.08,.035,total));
+  bgU.uG.value.setRGB(1,.55,.2);bgU.uGs.value=(.5*(1-total)+.1)*(1-fin);bgU.uGy.value=.72;
+  if(fin>0){bgU.uA.value.lerp(new T.Color(0x0b0717),fin);bgU.uB.value.lerp(new T.Color(0x030207),fin);}
+  // sleeper
+  st.body.userData.seq(pf,[[0,0],[.62,1,.06]],.06);var bm=st.body.material.uniforms;bm.uT.value=t;bm.uAl.value=ss(.27,.33,pf)*(1-.45*sleep*(1-wake))*(1-fin);
+  st.mat.material.opacity=.4*ss(.27,.33,pf)*(1-fin);
+  var withdraw=ss(.33,.42,pf)*(1-wake),heart=wake>0?st.HEART.clone().lerp(st.HEARTS,wake):st.HEART;
+  st.sense.forEach(function(s,k){var out=new T.Vector3(st.sOut[k][0],st.BY+.22+st.sOut[k][1]-.22,.15);var home=s.userData.l.clone().lerp(new T.Vector3(st.sOut[k][0],st.BY+st.sOut[k][1],.15),wake);
+   s.position.copy(home.lerp(heart,withdraw));s.scale.setScalar(.07);s.material.opacity=ss(.24,.3,pf)*(1-withdraw*.85)*(1-fin)*(.75+.25*Math.sin(t*3+k));});
+  st.core.position.copy(heart);st.core.scale.setScalar((.12+.32*withdraw)*(1+.08*Math.sin(t*1.5)));st.core.material.opacity=(.25*ss(.25,.32,pf)+.75*withdraw)*(1-fin)+.0;
+  var hd=st.HEADL.clone().lerp(st.HEADS,wake);st.zz.position.copy(hd);st.zz.scale.setScalar(.5);st.zz.material.opacity=ss(.62,.66,pf)*(1-ss(.76,.8,pf))*(.7+.3*Math.sin(t*4));
+  st.motes.material.uniforms.uT.value=t;st.motes.material.uniforms.uA.value=.25+.4*total;
+  st.mand.rotation.z=t*.02;st.mand.material.opacity=.22*fin;
+  var dA=ss(.84,.97,pf);st.art.userData.draw(dA,{x:256,y:300,r:46,a:ss(.9,.99,pf)});st.art.visible=dA>0;
+  if(fin>0){st.core.position.set(0,L(heart.y,.44,e(fin)),.5);st.core.scale.setScalar(.6);st.core.material.opacity=.9;}}
+});
+
+/* Tattva 7 film: the unchanging I. Childhood, youth, age, waking, dream and sleep pass along a golden thread;
+   the light of "I am" rides the thread through all of them; the thread closes into the jñāna-mudrā. */
+FILMS[7]=KIT.film({hold:[.06,.6],poster:.2,
+ labels:[{p:.03,dev:'बाल्यादिषु',en:'childhood, youth, age'},{p:.29,dev:'जाग्रदादिषु',en:'waking, dream, sleep'},{p:.47,dev:'व्यावृत्तासु',en:'as the states pass'},{p:.54,dev:'अनुवर्तमानम्',en:'one thing continues'},{p:.61,dev:'अहमिति स्फुरन्तं',en:'shining as "I am"'},{p:.7,dev:'मुद्रया भद्रया',en:'shown by the blessed mudrā'},{p:.84,dev:'नमः',en:'salutations'}],
+ build:function(T){var K=KIT,st={},NP=K.NP,r=K.rng(707);
+  var scene=st.scene=new T.Scene();st.cam=K.camera(40,.05,80);
+  st.bg=K.bg(0x0c0717,0x030207);scene.add(st.bg);
+  st.motes=K.motes(260,[14,4.6,3],21);st.motes.position.x=4;scene.add(st.motes);
+  var TY=-.78,GAP=1.7;st.TY=TY;st.GAP=GAP;
+  function child(g,w,h){g.beginPath();g.arc(w*.5,h*.5,w*.1,0,7);g.fill();g.beginPath();g.moveTo(w*.42,h*.6);g.lineTo(w*.58,h*.6);g.lineTo(w*.62,h*.8);g.lineTo(w*.56,h*.8);g.lineTo(w*.55,h*.95);g.lineTo(w*.51,h*.95);g.lineTo(w*.5,h*.82);g.lineTo(w*.49,h*.95);g.lineTo(w*.45,h*.95);g.lineTo(w*.44,h*.8);g.lineTo(w*.38,h*.8);g.closePath();g.fill();g.lineWidth=w*.03;g.lineCap='round';g.beginPath();g.moveTo(w*.42,h*.63);g.lineTo(w*.32,h*.74);g.moveTo(w*.58,h*.63);g.lineTo(w*.68,h*.55);g.stroke();}
+  function youth(g,w,h){g.beginPath();g.arc(w*.5,h*.13,w*.065,0,7);g.fill();g.beginPath();g.moveTo(w*.43,h*.22);g.lineTo(w*.57,h*.22);g.lineTo(w*.6,h*.55);g.lineTo(w*.55,h*.56);g.lineTo(w*.56,h*.95);g.lineTo(w*.51,h*.95);g.lineTo(w*.5,h*.6);g.lineTo(w*.49,h*.95);g.lineTo(w*.44,h*.95);g.lineTo(w*.45,h*.56);g.lineTo(w*.4,h*.55);g.closePath();g.fill();g.lineWidth=w*.028;g.lineCap='round';g.beginPath();g.moveTo(w*.43,h*.25);g.lineTo(w*.35,h*.5);g.moveTo(w*.57,h*.25);g.lineTo(w*.65,h*.5);g.stroke();}
+  function old(g,w,h){g.save();g.translate(w*.5,h*.95);g.rotate(.22);g.translate(-w*.5,-h*.95);youth(g,w,h*1.0);g.restore();g.lineWidth=w*.02;g.beginPath();g.moveTo(w*.7,h*.45);g.lineTo(w*.74,h*.95);g.stroke();}
+  function sun(g,w,h){g.beginPath();g.arc(w*.5,h*.55,w*.16,0,7);g.fill();g.lineWidth=w*.022;g.lineCap='round';for(var i=0;i<12;i++){var a=i/12*Math.PI*2;g.beginPath();g.moveTo(w*.5+Math.cos(a)*w*.22,h*.55+Math.sin(a)*w*.22);g.lineTo(w*.5+Math.cos(a)*w*.32,h*.55+Math.sin(a)*w*.32);g.stroke();}}
+  function moon(g,w,h){g.beginPath();g.arc(w*.5,h*.5,w*.18,0,7);g.fill();g.globalCompositeOperation='destination-out';g.beginPath();g.arc(w*.58,h*.45,w*.16,0,7);g.fill();g.globalCompositeOperation='source-over';[[.3,.8,.09],[.42,.77,.12],[.56,.8,.1],[.68,.82,.07]].forEach(function(c){g.beginPath();g.arc(w*c[0],h*c[1],w*c[2],0,7);g.fill();});}
+  function sleep(g,w,h){for(var i=0;i<40;i++){var a=i*2.39996,rr=Math.sqrt(i/40)*w*.3;g.beginPath();g.arc(w*.5+Math.cos(a)*rr,h*.6+Math.sin(a)*rr*.6,w*.006,0,7);g.fill();}}
+  var SZ=[.7,1.15,1.15,1.1,1.15,1.1],fns=[child,youth,old,sun,moon,sleep];
+  var tg=fns.slice(0,5).map(function(f,k){return K.off(K.shape(f,NP,SZ[k],70+k),k*GAP,TY+SZ[k]*.5-.02,0);});
+  tg.push(K.cloud(NP,function(r){var a=r()*Math.PI*2,u=r()*2-1,rr=Math.pow(r(),.5)*.3,q=Math.sqrt(1-u*u);return[5*GAP+Math.cos(a)*q*rr,TY+.45+u*rr*.8,Math.sin(a)*q*rr];},79));
+  st.forms=K.morph(tg,[new T.Color(1,.82,.55),new T.Color(1,.8,.5),new T.Color(.95,.78,.6),new T.Color(1,.75,.35),new T.Color(.7,.8,1),new T.Color(.32,.28,.55)],{size:.85,swirl:.25,seed:77});scene.add(st.forms);
+  // the thread: straight through every state, later closing into the mudrā circle
+  var TN=600,a0=[],a1=[];for(var i=0;i<TN;i++){var f=i/(TN-1);a0.push(-3+f*(5*GAP+6),TY,0);var an=Math.PI*.5+f*Math.PI*2;a1.push(Math.cos(an)*.1,Math.sin(an)*.1,0);}
+  var tgeo=new T.BufferGeometry();tgeo.setAttribute('position',new T.Float32BufferAttribute(a0,3));tgeo.setAttribute('pB',new T.Float32BufferAttribute(a1,3));
+  st.threadMat=new T.ShaderMaterial(K.add({uniforms:{uK:{value:0},uA:{value:1},uT:{value:0},uC:{value:new T.Vector3()},uPx:{value:K.S}},
+   vertexShader:'attribute vec3 pB;uniform float uK,uT,uPx;uniform vec3 uC;varying float vG;void main(){vec3 p=mix(position,pB+uC,uK);vG=.6+.4*sin(position.x*6.-uT*3.);vec4 mv=modelViewMatrix*vec4(p,1.);gl_PointSize=2.6*uPx*5./-mv.z;gl_Position=projectionMatrix*mv;}',
+   fragmentShader:'uniform float uA;varying float vG;void main(){float d=length(gl_PointCoord-.5);gl_FragColor=vec4(vec3(1.,.82,.48)*smoothstep(.5,0.,d)*vG*uA,1.);}'}));
+  st.thread=new T.Points(tgeo,st.threadMat);st.thread.frustumCulled=false;st.thread.renderOrder=4;scene.add(st.thread);
+  // the light of "I am", riding the thread
+  st.me=K.sprite();st.me.renderOrder=7;scene.add(st.me);
+  st.meHalo=K.sprite('rgba(255,230,170,.45)','rgba(220,150,60,.15)');st.meHalo.renderOrder=6;scene.add(st.meHalo);
+  // the jñāna-mudrā: right hand, index finger touching the thumb
+  var P=[],bez=K.A.bez,arc=K.A.arc;
+  P.push(bez([196,470],[186,400],[190,340],[214,300]));
+  P.push(bez([214,300],[220,250],[236,200],[250,150]).concat(bez([250,150],[256,132],[276,134],[274,154])).concat(bez([274,154],[268,200],[262,250],[262,296])));
+  P.push(bez([262,296],[272,240],[284,180],[296,136]).concat(bez([296,136],[302,118],[322,120],[320,142])).concat(bez([320,142],[312,190],[304,250],[300,304])));
+  P.push(bez([300,304],[312,260],[326,214],[338,184]).concat(bez([338,184],[346,168],[364,174],[360,192])).concat(bez([360,192],[350,236],[338,290],[330,330])));
+  P.push(bez([330,330],[336,380],[326,430],[300,470]));
+  P.push(bez([214,300],[180,300],[148,316],[136,344]).concat(arc(156,350,22,Math.PI,Math.PI*2.1,20)));
+  P.push(bez([222,296],[196,256],[150,268],[146,330]));
+  st.mudra=K.art(P,512,512,2.4);st.mudra.renderOrder=8;scene.add(st.mudra);
+  st.art=K.art(K.guruPaths(),512,640,1.6);st.art.renderOrder=10;scene.add(st.art);
+  st.mand=K.mandala();st.mand.material.opacity=0;scene.add(st.mand);
+  return st;},
+ render:function(st,pf,t,h){var K=KIT,T=K.T,ss=K.ss,e=K.eio,L=K.lerp,G=st.GAP,TY=st.TY;
+  // dolly along the thread, pausing at each state
+  var stops=[.13,.22,.31,.39,.47],cx=0;stops.forEach(function(s0){cx+=G*e(ss(s0-.045,s0,pf));});var close=ss(.62,.72,pf),fin=ss(.82,.9,pf);
+  var mx=5*G;var camX=L(cx,mx-.15,close),camZ=L(4.6,3.6,close)+1.2*fin,camY=L(-.1,TY+.2,close)+L(0,1.05,fin);
+  st.cam.position.set(camX+Math.sin(t*.2)*.05,camY,camZ);st.cam.lookAt(camX,camY-.02,0);
+  // states: each one arrives, then passes
+  st.forms.userData.seq(pf,[[0,0],[.13,1,.045],[.22,2,.045],[.31,3,.045],[.39,4,.045],[.47,5,.045]],.045);
+  var fm=st.forms.material.uniforms;fm.uT.value=t;fm.uAl.value=ss(0,.04,pf)*(1-ss(.5,.58,pf));
+  // thread closes into a circle at the mudrā's fingertips
+  var MC=new T.Vector3(mx-.469,TY+.1-.44,0.01);var tm=st.threadMat.uniforms;tm.uT.value=t;tm.uK.value=e(ss(.62,.72,pf));tm.uC.value.copy(MC);tm.uA.value=ss(0,.03,pf)*(1-fin);
+  var meX=L(cx,MC.x,close),meY=L(TY+.09,MC.y,close);st.me.position.set(meX,meY,.1);st.me.scale.setScalar((.22+.1*ss(.54,.62,pf)-.12*close)*(1+.06*Math.sin(t*2.4)));st.me.material.opacity=ss(0,.04,pf)*(1-fin);
+  st.meHalo.position.copy(st.me.position);st.meHalo.scale.setScalar(.8+.9*ss(.54,.62,pf)-.9*close);st.meHalo.material.opacity=(.35+.4*ss(.54,.62,pf))*ss(0,.04,pf)*(1-fin);
+  st.mudra.position.set(mx,TY+.1,0);var md=ss(.68,.8,pf);st.mudra.userData.draw(md,{x:156,y:350,r:50,a:ss(.76,.82,pf)});st.mudra.visible=md>0;st.mudra.material.opacity=1-fin;
+  st.art.position.set(mx,TY+.25+.95+.31,.4);var dA=ss(.86,.97,pf);st.art.userData.draw(dA,{x:206,y:384,r:40,a:ss(.92,.99,pf)});st.art.visible=dA>0;
+  st.mand.position.set(mx,TY+1.5,-1.2);st.mand.rotation.z=t*.02;st.mand.material.opacity=.22*fin;
+  st.motes.material.uniforms.uT.value=t;var bgU=st.bg.material.uniforms;bgU.uG.value.setRGB(.5,.3,.12);bgU.uGs.value=.18+.2*close;bgU.uGy.value=.4;}
+});
+
+/* Tattva 8 film: the dream of roles. A dreamer sees cause and effect, owner and owned, student and teacher, father and son;
+   every figure is spun out of the dreamer, and on waking they all return to him. */
+FILMS[8]=KIT.film({hold:[.1,.72],poster:.33,
+ labels:[{p:.03,dev:'विश्वं पश्यति',en:'one sees a world'},{p:.12,dev:'कार्यकारण',en:'cause and effect'},{p:.21,dev:'स्वस्वामि',en:'owned and owner'},{p:.3,dev:'शिष्याचार्य',en:'student and teacher'},{p:.39,dev:'पितृपुत्र',en:'father and son'},{p:.48,dev:'भेदतः',en:'all as division'},{p:.57,dev:'स्वप्ने जाग्रति वा',en:'in dream or waking'},{p:.66,dev:'मायापरिभ्रामितः',en:'spun round by māyā'},{p:.84,dev:'नमः',en:'salutations'}],
+ build:function(T){var K=KIT,st={},NP=K.NP,r=K.rng(808);
+  var scene=st.scene=new T.Scene();st.cam=K.camera(40,.05,60);
+  st.bg=K.bg(0x0d0819,0x030207);scene.add(st.bg);
+  st.motes=K.motes(200,[3.4,4.6,2],24);scene.add(st.motes);
+  var BC=new T.Vector3(0,.0,0),BR=.84;st.BC=BC;st.BR=BR;
+  var DY=-1.32;st.DY=DY;st.HEAD=new T.Vector3(-.5,DY+.02,.1);st.HEADS=new T.Vector3(0,DY+.62,.1);
+  // figure drawing helpers for the pairs
+  function fig(g,x,y,s){g.beginPath();g.arc(x,y-s*.82,s*.13,0,7);g.fill();g.beginPath();g.moveTo(x-s*.13,y-s*.66);g.lineTo(x+s*.13,y-s*.66);g.lineTo(x+s*.17,y-s*.25);g.lineTo(x+s*.08,y-s*.25);g.lineTo(x+s*.08,y);g.lineTo(x-s*.08,y);g.lineTo(x-s*.08,y-s*.25);g.lineTo(x-s*.17,y-s*.25);g.closePath();g.fill();}
+  function seated(g,x,y,s){g.beginPath();g.arc(x,y-s*.62,s*.12,0,7);g.fill();g.beginPath();g.moveTo(x,y-s*.5);g.bezierCurveTo(x+s*.18,y-s*.48,x+s*.2,y-s*.3,x+s*.18,y-s*.18);g.bezierCurveTo(x+s*.34,y-s*.12,x+s*.36,y,x+s*.3,y);g.lineTo(x-s*.3,y);g.bezierCurveTo(x-s*.36,y,x-s*.34,y-s*.12,x-s*.18,y-s*.18);g.bezierCurveTo(x-s*.2,y-s*.3,x-s*.18,y-s*.48,x,y-s*.5);g.fill();}
+  function arrow(g,x0,x1,y,w){g.lineWidth=w;g.lineCap='round';g.beginPath();g.moveTo(x0,y);g.lineTo(x1,y);g.moveTo(x1-w*3,y-w*2.4);g.lineTo(x1,y);g.lineTo(x1-w*3,y+w*2.4);g.stroke();}
+  function cause(g,w,h){g.beginPath();g.ellipse(w*.2,h*.66,w*.12,h*.08,0,0,7);g.fill();arrow(g,w*.37,w*.58,h*.6,w*.018);g.beginPath();g.ellipse(w*.78,h*.6,w*.13,h*.12,0,0,7);g.fill();g.fillRect(w*.72,h*.4,w*.12,h*.1);g.beginPath();g.ellipse(w*.78,h*.4,w*.08,h*.02,0,0,7);g.fill();}
+  function owner(g,w,h){fig(g,w*.26,h*.8,h*.5);arrow(g,w*.4,w*.56,h*.55,w*.016);g.beginPath();g.moveTo(w*.6,h*.55);g.lineTo(w*.78,h*.38);g.lineTo(w*.96,h*.55);g.closePath();g.fill();g.fillRect(w*.63,h*.55,w*.3,h*.25);}
+  function teach(g,w,h){seated(g,w*.3,h*.82,h*.62);seated(g,w*.74,h*.82,h*.42);g.lineWidth=w*.012;for(var i=1;i<4;i++){g.beginPath();g.arc(w*.42,h*.45,w*.05*i,-.6,.6);g.stroke();}}
+  function father(g,w,h){fig(g,w*.38,h*.86,h*.66);fig(g,w*.62,h*.86,h*.38);g.lineWidth=w*.016;g.beginPath();g.moveTo(w*.44,h*.5);g.quadraticCurveTo(w*.52,h*.62,w*.58,h*.62);g.stroke();}
+  function division(g,w,h){var cells=[[fig,.18,.42],[seated,.5,.42],[fig,.82,.42],[seated,.18,.86],[fig,.5,.86],[fig,.82,.86]];cells.forEach(function(c,k){c[0](g,w*c[1],h*c[2],h*(k%2?.28:.32));});g.fillRect(w*.33,h*.08,w*.008,h*.84);g.fillRect(w*.66,h*.08,w*.008,h*.84);g.fillRect(w*.04,h*.5,w*.92,h*.008);}
+  var SW=1.36,inHead=K.cloud(NP,function(r){var a=r()*Math.PI*2,rr=Math.pow(r(),.6)*.09;return[st.HEAD.x+Math.cos(a)*rr,st.HEAD.y+.05+Math.sin(a)*rr,.1];},81);
+  var tg=[inHead].concat([cause,owner,teach,father,division].map(function(f,k){return K.off(K.shape(f,NP,SW,82+k),BC.x,BC.y-.05,0);}));
+  st.dream=K.morph(tg,[new T.Color(.8,.65,1),new T.Color(1,.8,.5),new T.Color(1,.75,.55),new T.Color(.95,.85,.55),new T.Color(1,.78,.5),new T.Color(.9,.75,.95)],{size:.8,swirl:.4,seed:88});scene.add(st.dream);
+  // the dream bubble
+  var bp=[];for(var i=0;i<=160;i++){var a=i/160*Math.PI*2;bp.push(Math.cos(a)*BR,Math.sin(a)*BR*1.08,0);}
+  var bg=new T.BufferGeometry();bg.setAttribute('position',new T.Float32BufferAttribute(bp,3));
+  st.bubble=new T.Line(bg,new T.LineBasicMaterial(K.add({color:0xc9a6ff,opacity:0})));st.bubble.position.copy(BC);st.bubble.renderOrder=3;scene.add(st.bubble);
+  st.bubGlow=K.sprite('rgba(170,120,255,.25)','rgba(90,50,160,.1)',{opacity:0});st.bubGlow.position.copy(BC);st.bubGlow.scale.set(2.6,2.8,1);st.bubGlow.renderOrder=1;scene.add(st.bubGlow);
+  st.puffs=[.04,.065,.095].map(function(s,k){var m=new T.Mesh(new T.RingGeometry(.88,1,40),new T.MeshBasicMaterial(K.add({color:0xc9a6ff,opacity:0,side:T.DoubleSide})));m.scale.setScalar(s);m.renderOrder=3;scene.add(m);return m;});
+  // threads: every figure is spun from the dreamer's head
+  st.threads=[];for(i=0;i<30;i++){var tx=BC.x+(r()-.5)*1.5,ty=BC.y+(r()-.5)*1.4,pts=[],c1=new T.Vector3(K.lerp(st.HEAD.x,tx,.4)+(r()-.5)*.6,K.lerp(st.HEAD.y,ty,.5),.3);
+   for(var j=0;j<=40;j++){var u=j/40,v=1-u;pts.push(v*v*st.HEAD.x+2*v*u*c1.x+u*u*tx,v*v*(st.HEAD.y+.05)+2*v*u*c1.y+u*u*ty,v*v*.1+2*v*u*.3+u*u*.02);}
+   var g2=new T.BufferGeometry();g2.setAttribute('position',new T.Float32BufferAttribute(pts,3));var ln=new T.Line(g2,new T.LineBasicMaterial(K.add({color:0xf2c26a,opacity:0})));ln.userData.ph=r();ln.renderOrder=4;scene.add(ln);st.threads.push(ln);}
+  // the dreamer
+  function lying(g,w,h){g.beginPath();g.ellipse(w*.13,h*.47,w*.065,h*.1,0,0,Math.PI*2);g.fill();g.beginPath();g.moveTo(w*.24,h*.44);g.bezierCurveTo(w*.4,h*.36,w*.62,h*.38,w*.7,h*.44);g.bezierCurveTo(w*.84,h*.46,w*.94,h*.5,w*.95,h*.56);g.bezierCurveTo(w*.8,h*.6,w*.4,h*.62,w*.24,h*.58);g.closePath();g.fill();}
+  function sitting(g,w,h){g.beginPath();g.arc(w*.5,h*.17,w*.08,0,Math.PI*2);g.fill();g.beginPath();g.moveTo(w*.5,h*.27);g.bezierCurveTo(w*.66,h*.28,w*.7,h*.36,w*.68,h*.6);g.bezierCurveTo(w*.84,h*.66,w*.92,h*.74,w*.9,h*.82);g.bezierCurveTo(w*.8,h*.9,w*.2,h*.9,w*.1,h*.82);g.bezierCurveTo(w*.08,h*.74,w*.16,h*.66,w*.32,h*.6);g.bezierCurveTo(w*.3,h*.36,w*.34,h*.28,w*.5,h*.27);g.fill();}
+  var Ly=K.off(K.shape(lying,Math.round(NP*.5),1.4,91),0,DY,0),Si=K.off(K.shape(sitting,Math.round(NP*.5),1.0,92),0,DY+.38,0);
+  st.dreamer=K.morph([Ly,Si],[new T.Color(.7,.55,.95),new T.Color(1,.82,.55)],{size:.75,swirl:.2,seed:93,jitter:.006});scene.add(st.dreamer);
+  st.headGlow=K.sprite('rgba(210,170,255,1)','rgba(150,90,220,.4)',{opacity:0});st.headGlow.renderOrder=6;scene.add(st.headGlow);
+  st.art=K.art(K.guruPaths(),512,640,1.6);st.art.position.set(0,.56,.4);st.art.renderOrder=10;scene.add(st.art);
+  st.mand=K.mandala();st.mand.position.set(0,.66,-1.4);st.mand.material.opacity=0;scene.add(st.mand);
+  return st;},
+ render:function(st,pf,t,h){var K=KIT,ss=K.ss,e=K.eio,L=K.lerp,BC=st.BC;
+  var open=ss(.04,.11,pf),inside=e(ss(.1,.16,pf))*(1-e(ss(.54,.6,pf))),wake=ss(.72,.8,pf),fin=ss(.82,.9,pf),spin=ss(.64,.7,pf)*(1-ss(.72,.76,pf));
+  // camera: close on the dream while it plays, wide to show the dreamer behind it
+  var cz=L(5.6,4.5,inside),cy=L(-.3,BC.y,inside);cy=L(cy,.15,fin);st.cam.position.set(Math.sin(t*.13)*.08,cy,cz+.0*fin);st.cam.lookAt(0,cy,0);
+  // dream figures
+  st.dream.userData.seq(pf,[[0,0],[.13,1,.07],[.22,2,.06],[.31,3,.06],[.4,4,.06],[.49,5,.06],[.78,0,.08]],.06);
+  var dm=st.dream.material.uniforms;dm.uT.value=t;dm.uAl.value=ss(.04,.09,pf)*(1-ss(.79,.83,pf));dm.uSw.value=.4+2.2*spin;
+  st.dream.rotation.z=0;st.dream.position.set(0,0,0);if(spin>0){var ang=Math.sin(spin*Math.PI)*.9*Math.sin(t*1.7)+spin*(t-.0)*0;st.dream.position.set(BC.x,BC.y,0);st.dream.rotation.z=spin*Math.sin(t*1.2)*.6;st.dream.position.sub(new KIT.T.Vector3(BC.x,BC.y,0).applyAxisAngle(new KIT.T.Vector3(0,0,1),st.dream.rotation.z));}
+  // bubble
+  var ba=open*(1-ss(.74,.78,pf));st.bubble.material.opacity=.55*ba;st.bubble.scale.setScalar(L(.15,1,e(open))*(1+.01*Math.sin(t*2))*(1+.12*ss(.74,.78,pf)));
+  st.bubGlow.material.opacity=.6*ba;
+  st.puffs.forEach(function(m,k){var f=(k+1)/4;m.position.set(L(st.HEAD.x,BC.x-.2,f),L(st.HEAD.y+.15,BC.y-st.BR,f),.05);m.material.opacity=.5*ss(.03+k*.01,.07+k*.01,pf)*(1-ss(.74,.78,pf));});
+  // threads: shown when we pull back to see the dreamer
+  var thr=ss(.57,.63,pf)*(1-ss(.72,.76,pf));st.threads.forEach(function(ln){var n=Math.floor(41*Math.min(1,thr*1.4-ln.userData.ph*.4));ln.geometry.setDrawRange(0,Math.max(0,n));ln.material.opacity=.45*thr;});
+  // dreamer
+  st.dreamer.userData.seq(pf,[[0,0],[.8,1,.06]],.06);var dr=st.dreamer.material.uniforms;dr.uT.value=t;dr.uAl.value=ss(0,.04,pf)*(1-.65*inside)*(1-fin);
+  var hd=st.HEAD.clone().lerp(st.HEADS,wake);st.headGlow.position.copy(hd);st.headGlow.scale.setScalar(.45+.1*Math.sin(t*2)+.4*ss(.74,.8,pf));st.headGlow.material.opacity=(.3+.5*ss(.74,.8,pf))*(1-fin)*ss(0,.05,pf);
+  st.motes.material.uniforms.uT.value=t;var bgU=st.bg.material.uniforms;bgU.uG.value.setRGB(.4,.25,.55);bgU.uGs.value=.25*ba;bgU.uGy.value=.6;
+  st.mand.rotation.z=t*.02;st.mand.material.opacity=.22*fin;
+  var dA=ss(.86,.97,pf);st.art.userData.draw(dA,{x:256,y:300,r:46,a:ss(.92,.99,pf)});st.art.visible=dA>0;
+  if(fin>0){st.headGlow.position.set(0,L(hd.y,.44,e(fin)),.5);st.headGlow.material.opacity=.9;st.headGlow.material.color.setRGB(1,.9,.7);}else st.headGlow.material.color.setRGB(1,1,1);}
+});
+
+
 (function(){
 'use strict';
 const $=s=>document.querySelector(s);
 const AC=window.AudioContext||window.webkitAudioContext;
-const TT=[{n:1,bpm:TUNE1.bpm,total:TUNE1.total,notes:TUNE1.n.map(x=>({semi:x[0],beat:x[1],dur:x[2],dev:x[3],iast:x[4],line:x[5],sw:x[6]}))}];
+const TT=[1,2,3,4,5,6,7,8].map(n=>{const U=TUNES[n];return{n,bpm:U.bpm,total:U.total,notes:U.n.map(x=>({semi:x[0],beat:x[1],dur:x[2],dev:x[3],iast:x[4],line:x[5],sw:x[6]}))};});
 const INSTR={sitar:'Sitar',veena:'Veena',bansuri:'Bansuri',violin:'Violin',harmonium:'Harmonium',piano:'Piano',guitar:'Guitar',santoor:'Santoor',sarangi:'Sarangi',nadaswaram:'Nadaswaram',harp:'Harp',cello:'Cello'};
 const AUD={buf:{},ready:false};
-const T1={
- name:'The mirror city',
- dev:['विश्वं दर्पणदृश्यमाननगरीतुल्यं निजान्तर्गतं','पश्यन्नात्मनि मायया बहिरिवोद्भूतं यथा निद्रया ।','यः साक्षात्कुरुते प्रबोधसमये स्वात्मानमेवाद्वयं','तस्मै श्रीगुरुमूर्तये नम इदं श्रीदक्षिणामूर्तये ॥'],
- iast:['viśvaṁ darpaṇa-dṛśyamāna-nagarī-tulyaṁ nijāntargataṁ','paśyann ātmani māyayā bahir ivodbhūtaṁ yathā nidrayā','yaḥ sākṣāt kurute prabodha-samaye svātmānam evādvayaṁ','tasmai śrī-guru-mūrtaye nama idaṁ śrī-dakṣiṇāmūrtaye'],
- en:['The universe is like a city seen in a mirror. It exists within oneself.','Through māyā it seems to appear outside, as a dream does in sleep.','The one who, at the moment of awakening, sees directly his own Self, one without a second,','to that Guru in form, Śrī Dakṣiṇāmūrti, I offer this salutation.'],
- teach:'The world you see is like a city reflected in a mirror. It seems to be outside, yet it shines within you.',
- keep:['A reflection depends on the mirror. The world you see depends on the awareness that sees it.','A dream city feels real until you wake. Then you see it was in you all along.','The guru’s gift is that awakening: you are the one awareness, without a second.'],
- words:[['viśvam','the universe'],['darpaṇa','mirror'],['dṛśyamāna','being seen'],['nagarī','city'],['tulyam','just like'],['nija-antargatam','within oneself'],['māyayā','through māyā'],['bahiḥ iva','as if outside'],['nidrayā','in sleep'],['prabodha-samaye','at awakening'],['sva-ātmānam','one’s own Self'],['advayam','without a second'],['namaḥ','salutations']]
-};
-const TNAMES=['The mirror city','The seed and the sprout','The light of being','The lamp in the pot','Not the body','The eclipsed sun','The constant witness','Many roles, one Self'];
+const TA=r=>TATTVAS[((r&&r.style?r.style.Tattva:r&&r.Tattva)||1)-1]||TATTVAS[0];
+const TNAMES=TATTVAS.map(t=>t.name);
 const PADA_AT=[1,2,3,4].map(l=>TT[0].notes.find(n=>n.line===l).beat/TT[0].total);
 const TONES={'Tabla':1,'Mridangam':1,'Rock':1,'Lo-fi':1,'None':1};
 const LEG_T={Classical:'Tabla',Folk:'Mridangam'};
@@ -755,7 +1414,7 @@ const FD='"Rozha One",Georgia,serif';
 const SCALE=Math.min(window.innerWidth,window.innerHeight)<700?.6:1;
 const VISUALS=['Tattva film'].concat(ENGINES,['Beatbox text']);
 const HOLD={on:false};
-const DEF=()=>({Tone:'Tabla',Visuals:'Tattva film',Sound:['sitar'],Recitation:'None'});
+const DEF=()=>({Tattva:1,Tone:'Tabla',Visuals:'Tattva film',Sound:['sitar'],Recitation:'None'});
 const DEMOS=[];
 
 const IC={
@@ -791,9 +1450,10 @@ S.user=LS.get('tr-user',null);if(S.user&&!/^[\w.-]{1,24}$/.test(S.user.handle||'
 function localReels(){const mine=new Set(LS.get('tr-learnt',[]));return LS.get('tr-reels',[]).map(cleanReel).filter(Boolean).map(r=>Object.assign(r,{mine:mine.has(r.id),learnt:mine.has(r.id)?1:0}));}
 
 let cur=null;
-const EL={buf:null,busy:false,off:false,p:null};
-function elFetch(){if(EL.buf)return Promise.resolve(EL.buf);if(EL.off)return Promise.reject(501);if(EL.p)return EL.p;
- EL.p=fetch('/api/tts').then(async r=>{if(!r.ok){if(r.status===501)EL.off=true;throw r.status;}const ab=await r.arrayBuffer(),ac=new AC();EL.buf=await ac.decodeAudioData(ab);closeAC(ac);return EL.buf;}).finally(()=>{EL.p=null;});return EL.p;}
+const EL={bufs:{},busy:false,off:false,ps:{}};
+function elBuf(n){return EL.bufs[n||1]||null;}
+function elFetch(n){n=n||1;if(EL.bufs[n])return Promise.resolve(EL.bufs[n]);if(EL.off)return Promise.reject(501);if(EL.ps[n])return EL.ps[n];
+ EL.ps[n]=fetch('/api/tts?v='+n).then(async r=>{if(!r.ok){if(r.status===501)EL.off=true;throw r.status;}const ab=await r.arrayBuffer(),ac=new AC();const b=await ac.decodeAudioData(ab);closeAC(ac);EL.bufs[n]=b;return b;}).finally(()=>{EL.ps[n]=null;});return EL.ps[n];}
 const API=(p,o)=>fetch(p,Object.assign({credentials:'same-origin',headers:{'Content-Type':'application/json'}},o||{})).then(async r=>{let j={};try{j=await r.json();}catch(e){}if(!r.ok){const e=new Error(j.error||'Something went wrong. Try again.');e.status=r.status;throw e;}return j;});
 
 /* ---------- helpers ---------- */
@@ -806,12 +1466,12 @@ function handle(u){return u&&u.handle?u.handle:'you';}
 function fmt(n){return n>=1e6?(n/1e6).toFixed(1).replace(/\.0$/,'')+'M':n>=1e3?(n/1e3).toFixed(1).replace(/\.0$/,'')+'K':String(n);}
 function norm(s){const d=DEF();s=s&&typeof s==='object'?s:{};const tone=LEG_T[s.Tone]||s.Tone;
  let snd=Array.isArray(s.Sound)?s.Sound.map(x=>INSTR[x]?x:LEG_I[x]).filter(Boolean):null;if(snd)snd=[...new Set(snd)].slice(0,12);
- return{Tone:TONES[tone]?tone:d.Tone,Visuals:VISUALS.includes(s.Visuals)?s.Visuals:d.Visuals,Sound:snd||d.Sound,Recitation:s.Recitation==='AI voice (demo)'?'AI voice':['None','My recording','AI voice'].includes(s.Recitation)?s.Recitation:'None'};}
+ return{Tattva:Number.isInteger(s.Tattva)&&s.Tattva>=1&&s.Tattva<=8?s.Tattva:1,Tone:TONES[tone]?tone:d.Tone,Visuals:VISUALS.includes(s.Visuals)?s.Visuals:d.Visuals,Sound:snd||d.Sound,Recitation:s.Recitation==='AI voice (demo)'?'AI voice':['None','My recording','AI voice'].includes(s.Recitation)?s.Recitation:'None'};}
 function cleanReel(r){if(!r||typeof r!=='object'||typeof r.id!=='string'||!/^[\w-]{1,40}$/.test(r.id))return null;
  return{id:r.id,t:0,name:String(r.name||'seeker').slice(0,24),caption:String(r.caption||'').slice(0,140),style:norm(r.style),score:typeof r.score==='number'?Math.max(0,Math.min(100,Math.round(r.score))):null,createdAt:typeof r.createdAt==='number'?r.createdAt:0,learnt:Math.max(0,+r.learnt||0),mine:!!r.mine,hasTake:!!r.hasTake,takeOffset:Math.max(0,+r.takeOffset||0)};}
 
 /* ---------- timeline ---------- */
-function build(i,style){const T=TT[0],beat=60/T.bpm,ev=T.notes.map((n,idx)=>({t:n.beat*beat,dur:n.dur*beat,semi:n.semi,idx}));return{ev,total:T.total*beat+1.5,beat};}
+function build(i,style){const T=TT[((style&&style.Tattva)||1)-1]||TT[0],beat=60/T.bpm,ev=T.notes.map((n,idx)=>({t:n.beat*beat,dur:n.dur*beat,semi:n.semi,idx}));return{ev,total:T.total*beat+1.5,beat};}
 function adv(B,t,dt,A){let k=-1;for(let j=0;j<B.ev.length;j++){if(B.ev[j].t<=t)k=j;else break;}
  A.ons=(k!==A.idx&&k>=0);A.idx=k;
  if(k>=0){const e=B.ev[k];A.semi+=(e.semi-A.semi)*Math.min(1,dt*10);A.env=Math.exp(-(t-e.t)*3);}else A.env=0;
@@ -826,9 +1486,10 @@ function dBeat(g,t,B,HH){const W=360,H=560;g.fillStyle='#07050F';g.fillRect(0,0,
   if(j===0){g.shadowColor='rgba(233,180,76,.7)';g.shadowBlur=30;}
   g.fillText(txt,W/2+(j===0?0:(k2%2?-36:36)),j===0?H*.5:H*.5-72-j*50);g.shadowBlur=0;}
  g.globalAlpha=1;g.restore();}
-function visKind(style){if(style.Visuals==='Tattva film'){if(FILM.init())return 'film';return GLR.init()?'Mirror city':'beat';}if(ENG[style.Visuals]&&GLR.init())return style.Visuals;return 'beat';}
+function filmOf(style){const f=FILMS[(style&&style.Tattva)||1];return f&&f.init()?f:null;}
+function visKind(style){if(style.Visuals==='Tattva film'){if(filmOf(style))return 'film';return GLR.init()?'Mirror city':'beat';}if(ENG[style.Visuals]&&GLR.init())return style.Visuals;return 'beat';}
 function drawStatic(c,style,i){const B=build(i||0,style),g=ctx2(c),HH=c.__h,vk=visKind(style);
- if(vk==='film'){g.drawImage(FILM.render(.4,4,HH),0,0,360,HH);return;}
+ if(vk==='film'){const F=filmOf(style);g.drawImage(F.render(F.poster||.4,4,HH),0,0,360,HH);return;}
  if(vk!=='beat'){const sim=makeSim(vk,SCALE*.6),A=newA(),Tend=B.total*.5,dt=.1;GLR.clear();
   for(let t=0;t<Tend;t+=dt){adv(B,t,dt,A);sim.step(dt,A);if(sim.trail>0&&t>Tend-1.2)GLR.draw(sim.n,sim.trail);}
   GLR.draw(sim.n,sim.trail);g.fillStyle='#07050F';g.fillRect(0,0,360,HH);g.drawImage(GLR.canvas,0,(HH-560)/2,360,560);}
@@ -881,29 +1542,29 @@ function rhythm(ac,out,base,t0,B,tone,nb){if(tone!=='Rock'&&tone!=='Lo-fi')retur
 /* ---------- player ---------- */
 function stopCur(){if(cur)cur.stop();}
 function play(canvas,i,style,o){
- stopCur();o=o||{};const B=build(i,style),take=o.take||null;if(take)B.total=Math.max(B.total,take.duration+1.4);const elOn=style.Recitation==='AI voice'&&EL.buf;if(elOn)B.total=Math.max(B.total,EL.buf.duration+2);
+ stopCur();o=o||{};const B=build(i,style),take=o.take||null,vn=style.Tattva||1,elB=elBuf(vn);if(take)B.total=Math.max(B.total,take.duration+1.4);const elOn=style.Recitation==='AI voice'&&elB;if(elOn)B.total=Math.max(B.total,elB.duration+2);AUD.need(vn);
  let ac=null,master=null,t0=0,speaking=false;const p0=performance.now();
- if(o.sound&&AC&&AUD.ready){try{
+ if(o.sound&&AC&&AUD.has(vn)){try{
   ac=new AC();if(ac.resume)ac.resume();master=ac.createGain();master.gain.value=.85;const comp=ac.createDynamicsCompressor();master.connect(comp);comp.connect(ac.destination);t0=ac.currentTime+.12;
   const layer=(id,gain,off)=>{const b=AUD.buf[id];if(!b)return;const s=ac.createBufferSource(),gg=ac.createGain();gg.gain.value=gain;s.buffer=b;s.connect(gg);gg.connect(master);s.start(t0+(off||0));};
   layer('drone_tanpura',.4);
-  const ins=style.Sound,gi=((take||elOn)?.42:.72)/Math.sqrt(Math.max(1,ins.length));ins.forEach(id=>layer(id,gi));
+  const ins=style.Sound,gi=((take||elOn)?.42:.72)/Math.sqrt(Math.max(1,ins.length));ins.forEach(id=>layer(vn+'/'+id,gi));
   if(style.Tone==='Tabla')layer('rhythm_tabla',.45);else if(style.Tone==='Mridangam')layer('rhythm_mridangam',.45);else rhythm(ac,master,164.81,t0,B,style.Tone,noiseBuf(ac));
   if(take){const src=ac.createBufferSource(),tg=ac.createGain();tg.gain.value=1.15;src.buffer=take;src.connect(tg);tg.connect(master);src.start(t0,Math.max(0,o.takeOffset||0));}
-  if(elOn){const es=ac.createBufferSource(),eg=ac.createGain();eg.gain.value=1.1;es.buffer=EL.buf;es.connect(eg);eg.connect(master);es.start(t0+.6);}
-  if(style.Recitation==='AI voice'&&!elOn&&window.speechSynthesis){try{const u=new SpeechSynthesisUtterance(T1.dev.join(' '));u.lang='hi-IN';u.rate=.6;speechSynthesis.cancel();speechSynthesis.speak(u);speaking=true;}catch(e){}}
+  if(elOn){const es=ac.createBufferSource(),eg=ac.createGain();eg.gain.value=1.1;es.buffer=elB;es.connect(eg);eg.connect(master);es.start(t0+.6);}
+  if(style.Recitation==='AI voice'&&!elOn&&window.speechSynthesis){try{const u=new SpeechSynthesisUtterance(TA(style).dev.join(' '));u.lang='hi-IN';u.rate=.6;speechSynthesis.cancel();speechSynthesis.speak(u);speaking=true;}catch(e){}}
  }catch(e){ac=null;}}
  const g=ctx2(canvas),HH=canvas.__h;
- const vk=visKind(style),film=vk==='film';let sim=null,boost=0;if(!film&&vk!=='beat'){sim=makeSim(vk,SCALE);GLR.clear();}
+ const vk=visKind(style),film=vk==='film',F=film?filmOf(style):null;let sim=null,boost=0;if(!film&&vk!=='beat'){sim=makeSim(vk,SCALE);GLR.clear();}
  const A=newA();let raf=0,done=false,last=performance.now();
  const clock=()=>ac?ac.currentTime-t0:(performance.now()-p0)/1000-.08;
- const h={canvas,hasAudio:!!ac,
+ const h={canvas,hasAudio:!!ac,vn,
   stop(){end(false);},
   setMuted(m){if(master)master.gain.setTargetAtTime(m?0:.85,ac.currentTime,.04);if(m&&speaking){try{speechSynthesis.cancel();}catch(e){}speaking=false;}}};
  function end(fin){if(done)return;done=true;cancelAnimationFrame(raf);if(ac){closeAC(ac);}if(speaking){try{speechSynthesis.cancel();}catch(e){}}if(cur===h)cur=null;if(fin&&o.onEnd)o.onEnd();}
  function frame(){const now=performance.now(),dt=Math.min(.05,(now-last)/1000);last=now;let t=clock();if(t>=B.total){end(true);return;}t=Math.max(0,t);adv(B,t,dt,A);
   const p=t/B.total;let pf=p;
-  if(film){if(HOLD.on&&o.hold&&p+boost>.26&&p+boost<.82)boost+=dt*2.2/B.total;pf=Math.min(1,p+boost);g.drawImage(FILM.render(pf,t,HH),0,0,360,HH);FILM.overlay(g,pf,B.total,HH);}
+  if(film){const hr=F.hold||[.26,.82];if(HOLD.on&&o.hold&&p+boost>hr[0]&&p+boost<hr[1])boost+=dt*2.2/B.total;pf=Math.min(1,p+boost);g.drawImage(F.render(pf,t,HH),0,0,360,HH);F.overlay(g,pf,B.total,HH);}
   else if(sim){sim.step(dt,A);GLR.draw(sim.n,sim.trail);g.fillStyle='#07050F';g.fillRect(0,0,360,HH);g.drawImage(GLR.canvas,0,(HH-560)/2,360,560);}else dBeat(g,t,B,HH);
   if(o.onTick)o.onTick(p,pf,film);raf=requestAnimationFrame(frame);}
  cur=h;frame();return h;}
@@ -935,7 +1596,7 @@ function reelEl(r,ix){
   '<button class="rbtn" data-a="remix" aria-label="Remix this reel">'+ico('remix')+'<span>Remix</span></button>'+
   '<button class="rbtn" data-a="share" aria-label="Share">'+ico('share')+'<span>Share</span></button></div>'+
   '<div class="cap"><div class="who"><span class="ava"></span><span class="nm"></span></div>'+
-  '<div class="rtitle">Tattva 1 · <span>'+esc(T1.name)+'</span></div>'+
+  '<div class="rtitle">Tattva '+TA(r).n+' · <span>'+esc(TA(r).name)+'</span></div>'+
   (r.caption?'<div class="rcap"></div>':'')+
   '<div class="pada"><span class="dev"></span><span class="ia"></span></div>'+
   '<div class="music">'+ico('music')+'<div class="mq"><span></span></div></div></div>'+
@@ -944,8 +1605,8 @@ function reelEl(r,ix){
  const nm=el.querySelector('.nm');nm.textContent=r.name;if(r.score!=null){const p=document.createElement('span');p.className='pill';p.textContent='Tune '+r.score+'%';nm.after(p);}
  if(r.caption)el.querySelector('.rcap').textContent=r.caption;
  el.querySelector('.mq span').textContent=mus+'   ·   '+mus+'   ·   ';
- setPada(el,0,true);
  el.__r=r;el.__ix=ix;
+ setPada(el,0,true);
  el.addEventListener('click',e=>{if(el.__held){el.__held=false;return;}onReelTap(e,el);});
  let ht=0,sx=0,sy=0;const hg=el.querySelector('.holdglow');
  const endHold=()=>{clearTimeout(ht);if(HOLD.on){HOLD.on=false;hg.hidden=true;}};
@@ -956,7 +1617,7 @@ function reelEl(r,ix){
  el.addEventListener('contextmenu',e=>{if(el.__r.style.Visuals==='Tattva film')e.preventDefault();});
  return el;}
 function setPada(el,k,now){const p=el.querySelector('.pada');if(el.__pada===k)return;el.__pada=k;
- const put=()=>{p.querySelector('.dev').textContent=T1.dev[k];p.querySelector('.ia').textContent=T1.iast[k];p.classList.remove('swap');};
+ const put=()=>{const V=TA(el.__r);p.querySelector('.dev').textContent=V.dev[k];p.querySelector('.ia').textContent=V.iast[k];p.classList.remove('swap');};
  if(now){put();return;}p.classList.add('swap');setTimeout(put,300);}
 const posterIO=('IntersectionObserver' in window)?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){posterIO.unobserve(e.target);const el=e.target;queuePoster(el.querySelector('canvas'),el.__r.style,0);}}),{root:reelsEl,rootMargin:'100% 0px'}):null;
 function renderFeed(force){
@@ -972,7 +1633,7 @@ function renderFeed(force){
  if(S.view==='feed')requestAnimationFrame(()=>activate(currentIx(),true));}
 function emptyEl(){const el=document.createElement('div');el.className='reel emptyreel';
  const st=!S.loaded?['Loading reels…','']:S.offline?['Couldn’t load reels','Check your connection, then try again.']:['No reels yet','Sing the first verse or make a reel. Your reels show up here.'];
- el.innerHTML='<canvas></canvas><div class="shade"></div><div class="emptybox"><p class="eyebrow">Tattva 1 · '+esc(T1.name)+'</p><h2 class="sh-title"></h2><p class="note"></p>'+(S.loaded?'<div class="row2">'+(S.offline?'<button class="btn gold" id="em-retry">Try again</button>':'<button class="btn gold" id="em-create">'+ico('plus')+'Make a reel</button><button class="btn line" id="em-sing">'+ico('mic')+'Sing the verse</button>')+'</div>':'')+'</div>';
+ el.innerHTML='<canvas></canvas><div class="shade"></div><div class="emptybox"><p class="eyebrow">Dakṣiṇāmūrti Aṣṭakam · 8 tattvas</p><h2 class="sh-title"></h2><p class="note"></p>'+(S.loaded?'<div class="row2">'+(S.offline?'<button class="btn gold" id="em-retry">Try again</button>':'<button class="btn gold" id="em-create">'+ico('plus')+'Make a reel</button><button class="btn line" id="em-sing">'+ico('mic')+'Sing the verse</button>')+'</div>':'')+'</div>';
  el.querySelector('.sh-title').textContent=st[0];el.querySelector('.note').textContent=st[1];
  const b1=el.querySelector('#em-create'),b2=el.querySelector('#em-sing'),b3=el.querySelector('#em-retry');if(b1)b1.onclick=()=>openCreate();if(b2)b2.onclick=()=>openSing();if(b3)b3.onclick=()=>{S.loaded=false;renderFeed(true);loadReels();};
  queuePoster(el.querySelector('canvas'),DEF(),0);return el;}
@@ -986,9 +1647,9 @@ function startReel(el){const r=el.__r,bar=el.querySelector('.prog i');const ec=e
  const hh=el.querySelector('.holdhint');
  const rec=r.style.Recitation,tk=rec==='My recording'?TAKES[r.id]:null;
  if(rec==='My recording'&&r.hasTake&&!TAKES[r.id]&&!TAKES['_'+r.id]){TAKES['_'+r.id]=1;(S.local?Promise.resolve(LS.get('tr-take-'+r.id,null)).then(t=>{if(!t)throw 0;const bin=atob(t.b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer;}):fetch('/api/take?id='+encodeURIComponent(r.id)).then(x=>{if(!x.ok)throw 0;return x.arrayBuffer();})).then(ab=>{const ac=new AC();return ac.decodeAudioData(ab).finally(()=>closeAC(ac));}).then(b=>{TAKES[r.id]=b;if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});}
- if(rec==='AI voice'&&!EL.buf&&!EL.off)elFetch().then(()=>{if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});
+ if(rec==='AI voice'&&!elBuf(r.style.Tattva)&&!EL.off)elFetch(r.style.Tattva).then(()=>{if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});
  play(el.querySelector('canvas'),0,r.style,{sound:S.sound,hold:true,take:tk,takeOffset:r.takeOffset||0,onTick:(p,pf,film)=>{bar.style.width=(p*100).toFixed(2)+'%';let k=0;for(let j=0;j<4;j++)if(pf>=PADA_AT[j])k=j;setPada(el,k);
-  if(hh){const show=film&&pf>.27&&pf<.6;if(hh.hidden===show)hh.hidden=!show;hh.classList.toggle('on',HOLD.on);hh.lastChild.textContent=HOLD.on?'Awakening…':'Hold to awaken';}},onEnd:()=>showEnd(el)});}
+  if(hh){const hr=(FILMS[r.style.Tattva]||{}).hold||[.26,.82],show=film&&pf>hr[0]+.01&&pf<hr[1]-.2;if(hh.hidden===show)hh.hidden=!show;hh.classList.toggle('on',HOLD.on);hh.lastChild.textContent=HOLD.on?'Awakening…':'Hold to awaken';}},onEnd:()=>showEnd(el)});}
 let scrollT=0;
 reelsEl.addEventListener('scroll',()=>{clearTimeout(scrollT);scrollT=setTimeout(()=>activate(currentIx()),110);},{passive:true});
 let lastTap=0,tapT=0;
@@ -1013,7 +1674,7 @@ function showEnd(el){
  const ec=document.createElement('div');ec.className='endcard';
  ec.innerHTML='<div class="ecard"><p class="eyebrow">What I learnt</p><p class="teach"></p><p class="count ec-count"></p>'+
   '<button class="btn ec-learn"></button><div class="row2"><button class="btn line ec-replay">'+ico('replay')+'Replay</button><button class="btn line ec-read">'+ico('book')+'Read the shloka</button></div></div>';
- ec.querySelector('.teach').textContent=T1.teach;
+ ec.querySelector('.teach').textContent=TA(r).teach;
  ec.querySelector('.ec-learn').onclick=e=>{e.stopPropagation();const v=!isLearnt(r.id);setLearnt(r,v);if(v){popLearn(el);const rc=el.getBoundingClientRect(),bc=e.currentTarget.getBoundingClientRect();burst(el,bc.left-rc.left+bc.width/2,bc.top-rc.top);}};
  ec.querySelector('.ec-replay').onclick=e=>{e.stopPropagation();startReel(el);};
  ec.querySelector('.ec-read').onclick=e=>{e.stopPropagation();openLearn(r);};
@@ -1033,20 +1694,20 @@ function openSheet(kind,html,ctx){sheetFor=Object.assign({kind},ctx||{});$('#sbo
 function closeSheet(){sheetFor=null;$('#scrim').classList.remove('on');$('#sheet').classList.remove('open');}
 $('#scrim').onclick=closeSheet;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sheetFor)closeSheet();});
-function openLearn(r){
+function openLearn(r){const T1=TA(r);
  const lines=T1.dev.map((d,k)=>'<div class="ln"><span class="dev">'+esc(d)+'</span><span class="ia">'+esc(T1.iast[k])+'</span><span class="en">'+esc(T1.en[k])+'</span></div>').join('');
  const words=T1.words.map(w=>'<div class="word"><b>'+esc(w[0])+'</b><span>'+esc(w[1])+'</span></div>').join('');
  const keep=T1.keep.map(k=>'<li>'+ico('lotus')+'<span>'+esc(k)+'</span></li>').join('');
- openSheet('learn','<div class="shead"><div><p class="eyebrow">Tattva 1 · What I learnt</p><h2 class="sh-title">'+esc(T1.teach)+'</h2></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
+ openSheet('learn','<div class="shead"><div><p class="eyebrow">Tattva '+T1.n+' · What I learnt</p><h2 class="sh-title">'+esc(T1.teach)+'</h2></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
   '<div class="learnbox" id="lbox"><span class="bignum" id="lb-n">0</span><span class="lab">people learnt from this reel</span><p class="count" id="lb-line"></p><button class="btn" id="lb-btn"></button></div>'+
   '<button class="btn line" id="lb-sing">'+ico('mic')+'Sing this verse</button><div><p class="lab">Keep these three</p><ul class="keep" style="margin-top:10px">'+keep+'</ul></div>'+
-  '<div><p class="lab">The shloka · Dakṣiṇāmūrti Aṣṭakam, verse 1</p><div class="shloka">'+lines+'</div></div>'+
+  '<div><p class="lab">The shloka · Dakṣiṇāmūrti Aṣṭakam, verse '+T1.n+'</p><div class="shloka">'+lines+'</div></div>'+
   '<div><p class="lab" style="margin-bottom:10px">Word by word</p><div class="words">'+words+'</div></div>',{r});
- $('#sh-x').onclick=closeSheet;$('#lb-sing').onclick=()=>{closeSheet();openSing();};$('#lb-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);if(v){const n=$('#lb-n');n.classList.remove('bump');void n.offsetWidth;n.classList.add('bump');}};
+ $('#sh-x').onclick=closeSheet;$('#lb-sing').onclick=()=>{closeSheet();S.style=norm(Object.assign({},S.style,{Tattva:T1.n}));openSing();};$('#lb-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);if(v){const n=$('#lb-n');n.classList.remove('bump');void n.offsetWidth;n.classList.add('bump');}};
  paintLearnBox();}
 function paintLearnBox(){const r=sheetFor.r,n=counts()[r.id]||0,m=isLearnt(r.id),b=$('#lb-btn');if(!b)return;
  $('#lb-n').textContent=fmt(n);$('#lb-line').innerHTML=learnLine(n,m);b.className='btn '+(m?'done':'gold');b.innerHTML=ico(m?'check':'lotus')+(m?'You learnt this':'I learnt this');}
-function openShare(r){const url=location.origin+'/#r-'+r.id;if(navigator.share){navigator.share({title:'Tattva Reels',text:'Tattva 1 · '+T1.name,url}).catch(()=>{});return;}
+function openShare(r){const url=location.origin+'/#r-'+r.id;if(navigator.share){navigator.share({title:'Tattva Reels',text:'Tattva '+TA(r).n+' · '+TA(r).name,url}).catch(()=>{});return;}
  openSheet('share','<div class="shead"><h2 class="sh-title">Share this reel</h2><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
   '<div class="linkbox"><input id="sh-url" readonly aria-label="Reel link"><button class="btn gold" id="sh-copy">Copy</button></div>'+
   '<p class="note">The link opens this reel for anyone you’ve shared Tattva with.</p>');
@@ -1086,7 +1747,7 @@ function renderTop(){const c=counts(),list=allReels().map(r=>({r,n:c[r.id]||0}))
  if(!list.length){lb.innerHTML='<p class="note">No reels yet. Share one and it ranks here.</p>';return;}
  list.forEach((x,k)=>{const b=document.createElement('button');b.className='lrow';
   b.innerHTML='<span class="rk">'+(k+1)+'</span><span class="lthumb"><canvas></canvas></span><span class="lmid"><b></b><small></small></span><span class="lcount">'+ico('lotus')+fmt(x.n)+'<small>learnt</small></span>';
-  b.querySelector('b').textContent=x.r.caption||('Tattva 1 · '+T1.name);
+  b.querySelector('b').textContent=x.r.caption||('Tattva '+TA(x.r).n+' · '+TA(x.r).name);
   const sm=b.querySelector('small');sm.textContent=x.r.name+' · '+x.r.style.Visuals;if(x.r.score!=null){const s=document.createElement('span');s.className='score';s.textContent='Tune '+x.r.score+'%';sm.appendChild(s);}
   b.onclick=()=>{const ix=reelList.findIndex(r=>r.id===x.r.id);showView('feed');if(ix>=0){reelsEl.scrollTop=ix*reelsEl.clientHeight;activate(ix,true);}};
   lb.appendChild(b);queuePoster(b.querySelector('canvas'),x.r.style,0);});}
@@ -1097,7 +1758,7 @@ const GROUPS={
  rhythm:{k:'Tone',multi:false,title:'Rhythm',note:'Tabla and mridangam are pre-recorded on the tune’s beat.',opts:Object.keys(TONES),icon:'drum',label:'Rhythm'},
  recite:{k:'Recitation',multi:false,title:'Shloka recitation',note:'Use your own voice from Sing, or let an AI voice read the shloka.',opts:['None','My recording','AI voice'],icon:'book',label:'Recite'}};
 let recording=false,mr=null,stream=null,chunks=[],recTimer=0,recSec=0,guideRaf=0,prevT=0;
-function openCreate(style){S.style=norm(style||S.style||DEF());S.source=null;S.score=null;S.takeBuf=null;$('#rescard').hidden=true;
+function openCreate(style){S.style=norm(style||S.style||DEF());paintTattvaPill();S.source=null;S.score=null;S.takeBuf=null;$('#rescard').hidden=true;
  showView('create');renderTools();renderFx(true);startPreview();}
 function renderTools(){const t=$('#tools');t.innerHTML='';
  Object.keys(GROUPS).forEach(id=>{const G=GROUPS[id],v=S.style[G.k],b=document.createElement('button');b.className='tool';
@@ -1113,9 +1774,9 @@ function openGroup(id){const G=GROUPS[id];
   paint();renderTools();clearTimeout(prevT);prevT=setTimeout(startPreview,250);};}
 function elPanel(paint){const box=document.createElement('div');box.className='elbox';
  box.innerHTML='<div class="elhead"><p class="lab">AI voice</p><span class="elstat" id="el-stat"></span></div><p class="note">An ElevenLabs voice reads the shloka over your music.</p><button class="btn gold" id="el-gen">Preview AI recitation</button><p class="note" id="el-msg"></p>';
- $('#sbody').appendChild(box);const stat=$('#el-stat'),msg=$('#el-msg'),setStat=()=>{stat.textContent=EL.buf?'Ready · '+Math.round(EL.buf.duration)+'s':'';stat.classList.toggle('ok',!!EL.buf);};setStat();
+ $('#sbody').appendChild(box);const stat=$('#el-stat'),msg=$('#el-msg'),setStat=()=>{const eb=elBuf(S.style.Tattva);stat.textContent=eb?'Ready · '+Math.round(eb.duration)+'s':'';stat.classList.toggle('ok',!!eb);};setStat();
  $('#el-gen').onclick=async e=>{if(EL.busy)return;const b=e.currentTarget;msg.style.color='';
-  try{EL.busy=true;b.textContent='Loading…';await elFetch();S.style.Recitation='AI voice';paint();renderTools();setStat();msg.textContent='Ready. It plays over the music in your reel.';if(!S.sound)toast('Turn sound on to hear it');startPreview();}
+  try{EL.busy=true;b.textContent='Loading…';await elFetch(S.style.Tattva);S.style.Recitation='AI voice';paint();renderTools();setStat();msg.textContent='Ready. It plays over the music in your reel.';if(!S.sound)toast('Turn sound on to hear it');startPreview();}
   catch(r){msg.style.color='var(--bad)';msg.textContent=r===501?'AI voice isn’t switched on for this site yet, so your browser’s voice reads it instead.':'Couldn’t load the AI voice. Try again.';}
   finally{EL.busy=false;b.textContent='Preview AI recitation';}};}
 function renderFx(scroll){const fx=$('#fx');fx.innerHTML='';
@@ -1128,11 +1789,14 @@ function renderFx(scroll){const fx=$('#fx');fx.innerHTML='';
  if(scroll)requestAnimationFrame(()=>{const on=fx.querySelector('.on');if(on)fx.scrollLeft=on.offsetLeft-fx.clientWidth/2+on.clientWidth/2;});}
 function startPreview(){if(S.view!=='create')return;play($('#c-create'),0,S.style,{sound:S.sound&&!recording,onEnd:()=>startPreview()});}
 $('#cr-close').onclick=()=>showView('feed');
-$('#cr-tattva').innerHTML='<span>Tattva 1 · '+esc(T1.name)+'</span>'+ico('down');
+function paintTattvaPill(){const V=TA(S.style);$('#cr-tattva').innerHTML='<span>Tattva '+V.n+' · '+esc(V.name)+'</span>'+ico('down');}
+paintTattvaPill();
+function setTattva(n){if(S.style.Tattva===n)return;S.style.Tattva=n;S.takeBuf=null;S.takeBlob=null;S.score=null;S.source=null;if(S.style.Recitation==='My recording')S.style.Recitation='None';$('#rescard').hidden=true;
+ paintTattvaPill();renderTools();renderFx(true);startPreview();}
 $('#cr-tattva').onclick=()=>{openSheet('tattva','<div class="shead"><h2 class="sh-title">Choose a tattva</h2><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
- '<p class="note">Eight tattvas from the Dakṣiṇāmūrti Aṣṭakam. The set is fixed.</p>'+
- TNAMES.map((n,k)=>'<button class="trow'+(k===0?' on':'')+'"'+(k?' disabled':'')+' data-k="'+k+'"><span class="n">'+(k+1)+'</span><span class="t"><b>'+esc(n)+'</b><small>'+(k?'Coming soon':'Verse 1 · ready to create')+'</small></span>'+ico(k?'lock':'check')+'</button>').join(''));
- $('#sh-x').onclick=closeSheet;$('#sbody').querySelector('[data-k="0"]').onclick=closeSheet;};
+ '<p class="note">The eight tattvas of the Dakṣiṇāmūrti Aṣṭakam, one per verse.</p>'+
+ TATTVAS.map((t,k)=>'<button class="trow'+(t.n===S.style.Tattva?' on':'')+'" data-k="'+t.n+'"><span class="n">'+t.n+'</span><span class="t"><b>'+esc(t.name)+'</b><small>'+esc(t.teach)+'</small></span>'+(t.n===S.style.Tattva?ico('check'):'')+'</button>').join(''));
+ $('#sh-x').onclick=closeSheet;$('#sbody').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{closeSheet();setTattva(+b.dataset.k);});};
 $('#ic-up').innerHTML=ico('upload');
 $('#cr-next').innerHTML='Next'+ico('right');
 $('#cr-next').onclick=()=>{if(recording)return;S.source='generated';S.score=null;S.takeBuf=null;if(S.style.Recitation==='My recording')S.style.Recitation='None';openReview();};
@@ -1143,7 +1807,7 @@ function stopRecIfAny(){}
 /* ---------- review & publish ---------- */
 function openReview(){showView('review');$('#caption').value='';
  $('#rv-tag').innerHTML=(S.source==='recorded'||S.source==='sung')?ico('check')+'<span>Tune match '+S.score+'%</span>':'<span>Generated · not ranked</span>';
- const s=S.style;$('#rv-sum').innerHTML=[s.Visuals,s.Tone==='None'?'No rhythm':s.Tone].concat(s.Sound.map(x=>INSTR[x]),s.Recitation!=='None'?[s.Recitation==='My recording'?'Your voice':(EL.buf?'ElevenLabs recitation':'AI recitation')]:[]).map(x=>'<span>'+esc(x)+'</span>').join('');
+ const s=S.style;$('#rv-sum').innerHTML=[s.Visuals,s.Tone==='None'?'No rhythm':s.Tone].concat(s.Sound.map(x=>INSTR[x]),s.Recitation!=='None'?[s.Recitation==='My recording'?'Your voice':(elBuf(s.Tattva)?'ElevenLabs recitation':'AI recitation')]:[]).map(x=>'<span>'+esc(x)+'</span>').join('');
  startReview();}
 function startReview(){if(S.view!=='review')return;const take=S.style.Recitation==='My recording'?S.takeBuf:null;play($('#c-review'),0,S.style,{sound:S.sound,take,takeOffset:S.takeOffset||0,onEnd:()=>startReview()});}
 $('#rv-back').innerHTML=ico('back');$('#rv-back').onclick=()=>{showView('create');renderTools();renderFx(true);startPreview();};
@@ -1177,20 +1841,25 @@ async function publish(d){
  const list=LS.get('tr-reels',[]);list.unshift(r);LS.set('tr-reels',list.slice(0,40));
  clearDraft();const c=cleanReel(r);if(c)S.reels.unshift(c);showView('feed');renderFeed(true);reelsEl.scrollTop=0;requestAnimationFrame(()=>activate(0,true));toast('Shared to your reels');}
 
-/* ---------- saved audio ---------- */
-(function loadAudio(){
- const ids=['sitar','veena','bansuri','violin','harmonium','piano','guitar','santoor','sarangi','nadaswaram','harp','cello','drone_tanpura','rhythm_tabla','rhythm_mridangam'];let left=ids.length;
- let dec;try{dec=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,44100,44100);}catch(e){return;}
- ids.forEach(id=>{fetch('/audio/'+id+'.m4a').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(ab=>dec.decodeAudioData(ab)).then(b=>{AUD.buf[id]=b;}).catch(()=>{}).finally(()=>{if(--left===0){AUD.ready=true;onAudioReady();}});});
-})();
-function onAudioReady(){if(!S.sound||!cur||cur.hasAudio)return;
+/* ---------- saved audio: stems shared, instruments per verse, loaded on demand ---------- */
+const INS_IDS=['sitar','veena','bansuri','violin','harmonium','piano','guitar','santoor','sarangi','nadaswaram','harp','cello'],STEMS=['drone_tanpura','rhythm_tabla','rhythm_mridangam'];
+AUD.st={};AUD.dec=null;
+AUD.load=function(key,url,done){if(AUD.st[key])return done&&done();AUD.st[key]=1;
+ try{if(!AUD.dec)AUD.dec=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,44100,44100);}catch(e){return;}
+ fetch(url).then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(ab=>AUD.dec.decodeAudioData(ab)).then(b=>{AUD.buf[key]=b;}).catch(()=>{}).finally(()=>{AUD.st[key]=2;done&&done();});};
+AUD.need=function(n){n=n||1;if(AUD.st['v'+n])return;AUD.st['v'+n]=1;const keys=STEMS.map(id=>[id,'/audio/'+id+'.m4a']).concat(INS_IDS.map(id=>[n+'/'+id,n===1?'/audio/'+id+'.m4a':'/audio/v'+n+'/'+id+'.m4a']));
+ let left=keys.length;keys.forEach(k=>AUD.load(k[0],k[1],()=>{if(--left===0){AUD.st['v'+n]=2;AUD.ready=true;onAudioReady(n);}}));};
+AUD.has=function(n){return AUD.st['v'+(n||1)]===2;};
+AUD.need(1);
+function onAudioReady(n){if(!S.sound||!cur||cur.hasAudio||(n&&cur.vn!==n))return;
  if(S.view==='feed'){const el=reelNode(S.idx);if(el&&!el.querySelector('.endcard'))startReel(el);}else if(S.view==='create')startPreview();else if(S.view==='review')startReview();}
 
 /* ---------- sing: Yousician-style practice ---------- */
-const SN=TT[0].notes,SPB=60/TT[0].bpm,SONG=TT[0].total*SPB;
+let SN=TT[0].notes,SPB=60/TT[0].bpm,SONG=TT[0].total*SPB,SV=1;
 const SWN={'-5':'Pa','-2':'Ni',0:'Sa',1:'Ri',5:'Ma',7:'Pa',10:'Ni',12:'Sa',13:'Ri'};
 const PITCH_TOL=50,NOTE_HIT=.5,PASS_MARK=80;
 const PHRASES=[];[1,2,3,4].forEach(l=>{const ks=SN.map((n,k)=>k).filter(k=>SN[k].line===l);PHRASES.push({line:l,part:1,ks:ks.slice(0,12)},{line:l,part:2,ks:ks.slice(12)});});
+function setSingVerse(n){n=n||1;SV=n;const T=TT[n-1];SN=T.notes;SPB=60/T.bpm;SONG=T.total*SPB;AUD.need(n);const V=TATTVAS[n-1],h=$('#sg-title');if(h)h.textContent='Sing · Tattva '+n;}
 const G={st:'idle',ac:null,stream:null,an:null,buf:null,mr:null,chunks:[],t0:0,recStart:0,frames:[],res:[],raf:0,guideSrc:[],guide:'sitar',drone:true,anyKey:false,keyOff:0,keyLocked:true,lat:.08,streak:0,best:0,only:null,parts:[],pops:[],count:0};
 const circ=d=>((d+600)%1200+1200)%1200-600;
 function yinF(x,sr){const W=x.length>>1,tmin=Math.floor(sr/1000),tmax=Math.min(W-1,Math.floor(sr/70));let rms=0;for(let i=0;i<W;i++)rms+=x[i]*x[i];if(Math.sqrt(rms/W)<.008)return NaN;
@@ -1208,7 +1877,7 @@ function keyFrom(frames,ks){const dv=[];ks.forEach(k=>{const no=SN[k],a=no.beat*
 function totals(res){const w=SN.map(n=>n.dur);let sw=0,on=0,hit=0,nh=0;res.forEach((r,k)=>{if(!r)return;sw+=w[k];on+=w[k]*r.on;hit+=w[k]*(r.hit?1:0);nh+=r.hit?1:0;});return{score:sw?Math.round(100*(.5*on+.5*hit)/sw):0,hits:nh,judged:res.filter(Boolean).length};}
 
 const SG=$('#v-sing');
-function openSing(){stopCur();S.source=S.source;showView('sing');singReset();}
+function openSing(){stopCur();setSingVerse(S.style.Tattva||1);showView('sing');singReset();}
 function singReset(){singStop(true);G.st='idle';G.res=new Array(SN.length).fill(null);G.frames=[];G.streak=0;G.best=0;G.pops=[];G.only=null;G.keyOff=0;G.keyLocked=!G.anyKey;G.nowK=-1;G.lyLine=0;
  $('#sg-result').hidden=true;$('#sg-go').hidden=false;$('#sg-go').className='sg-go';$('#sg-go').innerHTML='<span>Start</span>';$('#sg-count').hidden=true;
  $('#sg-guide').innerHTML=ico('music')+'<span>'+INSTR[G.guide]+'</span>';$('#sg-key').innerHTML='<span>'+(G.anyKey?'Any key':'Key of G · any octave')+'</span>';
@@ -1244,7 +1913,7 @@ function singDraw(t){const{g,w,h}=laneCtx();const pps=w/4.6,nowX=w*.28,top=10,bo
 
 async function singStart(){if(G.st==='run'||G.st==='count'){singFinish();return;}
  singReset();
- if(!AUD.ready){toast('The guide audio is still loading. Try again in a second.');return;}
+ if(!AUD.has(SV)){AUD.need(SV);toast('The guide audio is still loading. Try again in a second.');return;}
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){singNoMic();return;}
  try{G.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:false,autoGainControl:false}});}catch(e){singNoMic();return;}
  const ac=G.ac=new AC();if(ac.resume)ac.resume();const src=ac.createMediaStreamSource(G.stream);G.an=ac.createAnalyser();G.an.fftSize=2048;src.connect(G.an);G.buf=new Float32Array(2048);
@@ -1254,7 +1923,7 @@ async function singStart(){if(G.st==='run'||G.st==='count'){singFinish();return;
  G.t0=ac.currentTime+lead+.15-from;G.end=to;
  const m=ac.createGain();m.gain.value=.9;m.connect(ac.destination);
  const lay=(id,gain)=>{const b=AUD.buf[id];if(!b)return;const s=ac.createBufferSource(),gg=ac.createGain();gg.gain.value=gain;s.buffer=b;s.connect(gg);gg.connect(m);s.start(G.t0+from,from,to-from+.3);G.guideSrc.push(s);};
- lay(G.guide,.8);if(G.drone)lay('drone_tanpura',.35);
+ lay(SV+'/'+G.guide,.8);if(G.drone)lay('drone_tanpura',.35);
  G.st=lead?'count':'run';$('#sg-go').className='sg-go live';$('#sg-go').innerHTML='<span>Stop</span>';$('#sg-tip').hidden=true;
  const W=1024,ds=new Float32Array(W),sr=ac.sampleRate/2;
  const loop=()=>{const t=ac.currentTime-G.t0;
@@ -1300,7 +1969,7 @@ function checkOffline(fr){const hop=.025;let first=fr.findIndex(f=>!isNaN(f.c)),
  return{res,tot:totals(res),start:a+first*hop,tempo:b,off:((off%1200)+1200)%1200};}
 function judgeAt(k,frames,keyOff,sh){const n=SN[k],s=n.beat*SPB,d=n.dur*SPB,a=s+.18*d+sh,b=s+.85*d+sh,dv=[];frames.forEach(f=>{if(f.t>=a&&f.t<=b&&!isNaN(f.c))dv.push(circ(f.c-keyOff-n.semi*100));});
  const on=dv.length?dv.filter(x=>Math.abs(x)<=PITCH_TOL).length/dv.length:0;return{on,hit:on>=NOTE_HIT};}
-async function singUpload(file){if(S.view!=='sing'){showView('sing');singReset();}toast('Checking your recording…');
+async function singUpload(file){if(S.view!=='sing'){setSingVerse(S.style.Tattva||1);showView('sing');singReset();}toast('Checking your recording…');
  try{const ac=new AC(),buf=await ac.decodeAudioData(await file.arrayBuffer());closeAC(ac);await new Promise(r=>setTimeout(r,30));const x=await to16k(buf),fr=trackOff(x,16000,.025),r=checkOffline(fr);
   if(!r){toast('We didn’t hear enough singing in that file.');return;}G.res=r.res;G.takeBuf=buf;G.takeBlob=file;G.takeOffset=Math.max(0,r.start);singDraw(-1.2);singResults(r.tot,r.res,true);}catch(e){toast('Couldn’t read that audio. Try another file.');}}
 function singResults(tot,res,offline,label){const box=$('#sg-result'),pass=tot.score>=PASS_MARK&&tot.judged>=SN.length*(G.only?0:1);

@@ -1,6 +1,6 @@
 # Tattva Reels
 
-Short reels that teach the eight tattvas of the Dakṣiṇāmūrti Aṣṭakam (verse 1 is live). Watch, sing the verse with live pitch scoring, and share what you learnt.
+Short reels that teach the eight tattvas of the Dakṣiṇāmūrti Aṣṭakam, one verse per tattva, each with its own 3D film. Watch, sing the verse with live pitch scoring, and share what you learnt.
 
 ## Go live on Vercel
 
