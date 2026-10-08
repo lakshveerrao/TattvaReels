@@ -3,3 +3,5 @@ node_modules
 .DS_Store
 tunes/audio/
 __pycache__/
+device/tools/out/
+device/sim/out/

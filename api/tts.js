@@ -28,20 +28,30 @@ export default async function handler(req, res) {
   const q = new URL(req.url, 'http://x').searchParams;
   const v = Math.min(8, Math.max(1, parseInt(q.get('v') || '1', 10) || 1));
   const meaning = q.get('m') === '1';
+  // fmt=pcm: 16 kHz mono WAV for the Hey Tattva device (no MP3 decoder needed there)
+  const pcm = q.get('fmt') === 'pcm';
   const key = process.env.ELEVENLABS_API_KEY;
   const json = (code, msg) => { res.statusCode = code; res.setHeader('Content-Type', 'application/json'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify({ error: msg })); };
   if (!key) return json(501, 'AI voice isn’t set up on the server.');
   const voice = (process.env.ELEVENLABS_VOICE_ID || 'JBFqnCBsd6RMkjVDRZzb').replace(/[^\w-]/g, '');
   try {
-    const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?output_format=mp3_44100_128', {
-      method: 'POST', headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
+    const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?output_format=' + (pcm ? 'pcm_16000' : 'mp3_44100_128'), {
+      method: 'POST', headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: pcm ? 'audio/pcm' : 'audio/mpeg' },
       body: JSON.stringify({ text: meaning ? MEANINGS[v - 1] : VERSES[v - 1], model_id: 'eleven_multilingual_v2', voice_settings: { stability: .55, similarity_boost: .75 } })
     });
     if (!r.ok) { console.error('elevenlabs', r.status, await r.text()); return json(502, 'ElevenLabs didn’t return audio. Check the API key and credits.'); }
-    const buf = Buffer.from(await r.arrayBuffer());
+    let buf = Buffer.from(await r.arrayBuffer());
+    if (pcm) buf = Buffer.concat([wavHeader(buf.length, 16000), buf]);
     res.statusCode = 200;
-    res.setHeader('Content-Type', 'audio/mpeg');
+    res.setHeader('Content-Type', pcm ? 'audio/wav' : 'audio/mpeg');
     res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=31536000, stale-while-revalidate=86400');
     res.end(buf);
   } catch (e) { console.error(e); json(502, 'Couldn’t reach ElevenLabs. Try again.'); }
+}
+
+function wavHeader(n, rate) {
+  const h = Buffer.alloc(44);
+  h.write('RIFF', 0); h.writeUInt32LE(36 + n, 4); h.write('WAVE', 8); h.write('fmt ', 12); h.writeUInt32LE(16, 16);
+  h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22); h.writeUInt32LE(rate, 24); h.writeUInt32LE(rate * 2, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34);
+  h.write('data', 36); h.writeUInt32LE(n, 40); return h;
 }
