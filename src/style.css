@@ -634,7 +634,7 @@ body{background:var(--night) radial-gradient(120% 70% at 50% -10%,#2A2268 0,tran
   .nav .create{width:100%;height:48px;border-radius:12px;margin-top:auto;box-shadow:none;background:var(--kumkum);color:#FFE9C4;flex-direction:row;justify-content:center}
   .nav .create::after{content:none}
   .nav .create span{display:inline}
-  #games.reels{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));align-items:start;grid-auto-rows:auto;padding:120px 32px 32px;gap:22px}
+  #games.reels{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));align-items:start;grid-auto-rows:max-content;align-content:start;padding:120px 32px 32px;gap:22px}
   #games .gcard{height:auto}
   #v-games .gtop{padding:22px 32px 18px}
   .gcover{height:170px}
