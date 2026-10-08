@@ -21,6 +21,7 @@ const DEF=()=>({Tattva:1,Tone:'Tabla',Visuals:'Tattva film',Sound:['sitar'],Reci
 const DEMOS=[];
 
 const IC={
+ play:'<path d="M8 5.5v13l10.5-6.5Z"/>',pause:'<path d="M8.5 5v14M15.5 5v14"/>',
  lotus:'<path d="M12 20c-2.4-1.9-3.8-4.7-3.8-7.8 0-2.8 1.4-5.6 3.8-7.7 2.4 2.1 3.8 4.9 3.8 7.7 0 3.1-1.4 5.9-3.8 7.8Z"/><path d="M12 20c-4.6 0-8.4-2.6-9.6-6.6 2.6-.4 5 .3 6.8 1.9"/><path d="M12 20c4.6 0 8.4-2.6 9.6-6.6-2.6-.4-5 .3-6.8 1.9"/>',
  remix:'<path d="M4 8h12l-3-3"/><path d="M20 16H8l3 3"/><path d="M4 8v3M20 16v-3"/>',
  share:'<path d="M21 3 10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7Z"/>',
@@ -409,16 +410,12 @@ async function loadMe(){try{const j=await API('/api/me');S.user=j.user&&j.user.h
  if(typeof GS!=='undefined'){S.scores.forEach(x=>{if(x.best>(GS.best[x.game]||0))GS.best[x.game]=x.best;});}
  paintNav();if(S.view==='top')renderTop();
  if(S.pendingEmail)openName(true);}
-// language: a full screen the first time the app opens, then a sheet from Me
+// language: the full screen lives in intro.js (askLang); this is the sheet from Me
 function langButtons(cls){return LANGS.map(l=>'<button class="lopt'+(cls?' '+cls:'')+(lang()===l[0]&&LANG?' on':'')+'" data-l="'+l[0]+'" lang="'+l[0]+'"><b>'+esc(l[1])+'</b><span>'+esc(l[2])+'</span><i>'+ico('check')+'</i></button>').join('');}
-function openLang(){openSheet('lang','<div class="shead"><div><h2 class="sh-title">'+esc(LX('Language'))+'</h2><p class="note">'+esc(LX('The whole app, the meanings and the shloka letters switch. Singing stays in Sanskrit sounds.'))+'</p></div><button class="icon-btn glass" id="sh-x" aria-label="'+esc(LX('Close'))+'">'+ico('x')+'</button></div><div class="lops">'+langButtons('sm')+'</div>');
- $('#sh-x').onclick=closeSheet;$('#sbody').querySelectorAll('.lopt').forEach(b=>b.onclick=()=>{closeSheet();setLang(b.dataset.l);});}
-function firstLang(){if(LANG)return;const el=document.createElement('div');el.className='langscreen';el.setAttribute('role','dialog');el.setAttribute('aria-label','Choose your language');let pick='en';
- el.innerHTML='<div class="lsy">'+yantra()+'</div><div class="lsom">ॐ</div><div class="lst"><h1>Hey Tattva</h1><p class="dv">हे तत्त्व</p><p class="sub">The eight tattvas of the Dakṣiṇāmūrti Aṣṭakam, in reels, songs and games.</p></div>'+
-  '<h2 class="lsh">Choose your language</h2><div class="lops">'+langButtons()+'</div><button class="btn gold" id="ls-go">Continue</button><p class="lsn">You can change it any time in Me.</p>';
- $('#app').appendChild(el);const paint=()=>el.querySelectorAll('.lopt').forEach(b=>b.classList.toggle('on',b.dataset.l===pick));paint();
- el.querySelectorAll('.lopt').forEach(b=>b.onclick=()=>{pick=b.dataset.l;paint();});
- $('#ls-go').onclick=()=>{if(pick!=='en'){setLang(pick);return;}setLang(pick,true);el.classList.add('out');setTimeout(()=>el.remove(),400);};}
+function openLang(){openSheet('lang','<div class="shead"><div><h2 class="sh-title">'+esc(LX('Language'))+'</h2><p class="note">'+esc(LX('The whole app, the meanings and the shloka letters switch. Singing stays in Sanskrit sounds.'))+'</p></div><button class="icon-btn glass" id="sh-x" aria-label="'+esc(LX('Close'))+'">'+ico('x')+'</button></div><div class="lops">'+langButtons('sm')+'</div>'+
+  '<button class="lkeep sm'+(FLOW.keep()?' on':'')+'" id="lg-keep" role="switch" aria-checked="'+FLOW.keep()+'"><i></i><div><b>'+esc(LX('Always use this language'))+'</b><span>'+esc(LX('Don’t ask again when I open the app.'))+'</span></div></button>');
+ $('#sh-x').onclick=closeSheet;const kb=$('#lg-keep');kb.onclick=()=>{const v=!kb.classList.contains('on');if(v&&!LANG)setLang(lang(),true);FLOW.setKeep(v);kb.classList.toggle('on',v);kb.setAttribute('aria-checked',v);};
+ $('#sbody').querySelectorAll('.lopt').forEach(b=>b.onclick=()=>{closeSheet();if(b.dataset.l===lang()){setLang(b.dataset.l,true);return;}try{sessionStorage.setItem('tr-resume','app');}catch(e){}setLang(b.dataset.l);});}
 function signOut(){API('/api/auth',{method:'POST',body:JSON.stringify({logout:true})}).catch(()=>{});S.user=null;S.scores=[];LS.del('tr-me');paintNav();toast('Signed out');loadReels();if(S.view==='top')renderTop();}
 function paintNav(){const u=S.user;$('#nv-top').innerHTML=(u?'<span class="ava sm">'+esc(u.handle[0].toUpperCase())+'</span>':ico('user'))+'<span>'+esc(LX('Me'))+'</span>';$('#nv-top').setAttribute('aria-label',u?LX('Me')+': '+u.handle:LX('Me'));}
 // pick or change my name (the handle everyone sees)
@@ -535,5 +532,5 @@ async function publish(d){
 /* ---------- boot ---------- */
 document.querySelectorAll('.crest').forEach(e=>e.innerHTML=yantra());applyI18n();startTranslator();
 window.addEventListener('langchange',()=>{paintNavLabels();setSoundIcons();renderFeed(true);requestAnimationFrame(()=>activate(currentIx(),true));if(S.view==='top')renderTop();if(sheetFor&&sheetFor.kind==='learn'){const r=sheetFor.r;openLearn(r);}if(typeof renderGames==='function')renderGames();});
-setSoundIcons();paintNav();renderFeed(true);loadReels();if(!linkSignin())loadMe();firstLang();
+startFlow();setSoundIcons();paintNav();renderFeed(true);loadReels();if(!linkSignin())loadMe();
 })();
