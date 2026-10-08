@@ -1,8 +1,8 @@
-import { sb, send, wrap, readBody, anon, REEL_ID, HttpError } from './_db.js';
+import { sb, send, wrap, readBody, who, REEL_ID, HttpError } from './_db.js';
 
 export default wrap(async (req, res) => {
   if (req.method !== 'POST') throw new HttpError(405, 'Use POST.');
-  const me = anon(req, res);
+  const me = (await who(req, res)).key; // one mark per account when signed in, else per browser
   const { id, val } = await readBody(req);
   if (typeof id !== 'string' || !REEL_ID.test(id)) throw new HttpError(400, 'Unknown reel.');
   if (val) {

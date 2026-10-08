@@ -15,13 +15,15 @@ A Reels-style web app (simple, like Instagram Reels) that teaches the 8 tattvas 
 - He explains in short, informal messages. Keep replies short and plain.
 
 ## Layout
+Phones: one tall column with a bottom tab bar. Screens ≥ 900 px wide (laptops): left menu, the reel in a tall column with the shloka/meaning panel beside it, games as a grid, full-screen flows centred, sheets as dialogs (all in the `@media (min-width:900px)` block at the end of style.css).
+
 ```
 index.html        BUILT file, served by Vercel. Never edit by hand; edit src/ and run build.py
 build.py          python3 build.py  → concatenates src/ into index.html
 src/
   body.html       markup (views: feed, top/leaderboard, create, review, sing; sheet; toast)
   style.css       all styles
-  app.js          main app: feed, Create, Review, sheets, simulated sign-in, API calls, local fallback
+  app.js          main app: feed (+ laptop side panel), Create, Review, sheets, email-code sign-in, Me page, API calls, local fallback
   sing.js         audio loading (/audio/*.m4a via Web Audio), Sing mode (live pitch scoring), file check
   film.js         Three.js "Tattva film" for verse 1 (hold-to-awaken fast-forward)
   engines.js      2D particle visual engines (Mirror city, Splat bloom, Sound sand, Flow rivers, Embers, ...)
@@ -39,9 +41,12 @@ api/              Vercel Node serverless functions (ESM)
   reels.js        GET list (with learnt counts + "mine") / POST share (12 per hour per browser)
   learn.js        POST "I learnt this" toggle, one per browser (tr_a cookie)
   take.js         GET a reel's recorded voice from the private Storage bucket "takes"
+  auth.js         POST {email} send code / {email,code} sign in / {logout}
+  me.js           GET me + scores / POST {handle} / POST {score}
   games.js        GET list / ?id= one, POST create (10 per hour per browser), POST {played:id} counts a play
   tts.js          ElevenLabs: /api/tts?v=1..8 recites the verse, &m=1 speaks its meaning; cached at the edge
 supabase/setup.sql  tables reels, learnt; view reel_feed; RLS on; bucket takes (ALREADY RUN on 2026-10-07)
+supabase/accounts.sql  profiles, sessions, scores, user_id on reels/games, session_view, record_score()
 supabase/games.sql  table games + game_played() (ALREADY RUN on 2026-10-08); games_arcade.sql allows type 'arcade' (ALREADY RUN)
 audio/            verse 1: 12 instruments + shared drone_tanpura, rhythm_tabla, rhythm_mridangam; audio/vN/ = 12 instruments for verse N (loaded on demand)
 vendor/three.min.js  Three.js r128; vendor/supabase.min.js supabase-js 2.117 (loaded only when a live game starts)
@@ -49,7 +54,7 @@ tunes/            tune library for all 8 verses (JSON + MIDI), specs and scripts
 ```
 
 ## Key decisions (agreed with Laksh)
-- **Sign-in is simulated.** Asks for an email; no email is sent; the part before @ becomes the handle (`tr-user` in localStorage). No Resend, no real auth.
+- **Sign-in is real (2026-10-08): email + 6-digit code.** `api/auth.js` asks Supabase Auth to email a code (`/auth/v1/otp`) and checks it (`/auth/v1/verify`), then issues its own random session token in an HttpOnly cookie `tr_s` (only its sha256 is stored in `public.sessions`, 90 days). First sign-in asks for a handle (`profiles.handle`, 3–20 a-z0-9_.). On sign-in the browser's anon "I learnt" marks, reels and games move to the account. Signed-in learnt marks use key `u<uuid without dashes>` in `learnt.anon`. Sharing a reel or publishing a game needs a signed-in user with a handle. `api/me.js`: GET me + best scores, POST {handle} rename, POST {score:{game,s}} keeps best (rpc `record_score`). Supabase's built-in mailer only reaches the Supabase team's addresses (~2/hour) — Laksh chose "team only for now"; add custom SMTP (e.g. Brevo) in Supabase to open it to everyone. Email templates (Magic Link + Confirm signup) must show `{{ .Token }}`.
 - **Real shared database = Supabase.** Only the server functions talk to it, using `SUPABASE_SECRET_KEY`. RLS is on with no policies, so the publishable key can do nothing and the browser never needs it.
 - If the DB env vars are missing, `/api/reels` returns 501 and the client falls back to device-only localStorage (`tr-reels`, `tr-learnt`, `tr-take-<id>`).
 - **Tune B (Revati)** is the approved tune: Sa = 196 Hz, 150 BPM, śārdūlavikrīḍita metre (guru = 2 beats, laghu = 1, pause after syllable 12), 76 notes per verse. The instruments are pre-rendered, not synthesised live.

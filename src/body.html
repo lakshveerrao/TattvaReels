@@ -1,21 +1,18 @@
 <div id="app">
   <section class="view" id="v-feed">
-    <div class="reels" id="reels" aria-label="Reels"></div>
-    <header class="topbar">
-      <div class="logo">Tattva <small>तत्त्व</small></div>
-      <button class="icon-btn glass" id="snd" aria-label="Turn sound on"></button>
-    </header>
-    <button class="hint glass" id="hint"></button>
+    <div class="feedcol">
+      <div class="reels" id="reels" aria-label="Reels"></div>
+      <header class="topbar">
+        <div class="logo">Tattva <small>तत्त्व</small></div>
+        <button class="icon-btn glass" id="snd" aria-label="Turn sound on"></button>
+      </header>
+      <button class="hint glass" id="hint"></button>
+    </div>
+    <aside class="rside" id="rside" aria-label="About this reel"></aside>
   </section>
 
   <section class="view" id="v-top" hidden>
-    <div class="top">
-      <div><p class="eyebrow">Leaderboard</p><h1>Your best reels</h1></div>
-      <div class="stats"><div class="stat"><b id="st-learn">0</b><span>Learnings</span></div><div class="stat"><b id="st-reels">0</b><span>Reels</span></div></div>
-      <p class="note">Your reels on this device, ranked by “I learnt this” and tune score.</p>
-      <div class="who top-who" id="who"></div>
-      <div class="lb" id="lb"></div>
-    </div>
+    <div class="top me"></div>
   </section>
 
   <section class="view" id="v-games" hidden>
@@ -27,10 +24,11 @@
   </section>
 
   <nav class="nav" aria-label="Main">
+    <div class="sidelogo">Tattva <small>तत्त्व</small><span>Dakṣiṇāmūrti Aṣṭakam · 8 tattvas</span></div>
     <button id="nv-feed" aria-current="page" aria-label="Reels"></button>
     <button id="nv-games" aria-label="Games"></button>
     <button id="nv-create" class="create" aria-label="Create a reel"></button>
-    <button id="nv-top" aria-label="Leaderboard"></button>
+    <button id="nv-top" aria-label="Me"></button>
   </nav>
 
   <section class="view full gmake" id="v-gmake" hidden>

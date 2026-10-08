@@ -12,6 +12,9 @@ GS.pick=Object.assign({stick:1,letters:1,build:1},LS.get('tr-gpick',{}));
 function cleanGame(g){if(!g||typeof g!=='object'||!/^(g[a-z0-9]{6,24}|o[slb][1-8])$/.test(g.id||''))return null;const s=g.settings||{},st=STYLES.includes(s.style)?s.style:'stick',n=Math.min(8,Math.max(1,+g.tattva||1));
  return{id:g.id,name:String(g.name||'seeker').slice(0,24),title:String(g.title||'').slice(0,60)||(ARCADE[st].name+' · '+TATTVAS[n-1].name),type:'arcade',tattva:n,
   settings:{style:st,level:[1,2,3].includes(+s.level)?+s.level:2,seed:+s.seed||1},plays:+g.plays||0,official:!!g.official||/^o/.test(g.id)};}
+// signed in: the server keeps my best per game (shown on the Me page)
+function saveScore(id,sc){if(!S.user||!/^(g[a-z0-9]{6,24}|o[slb][1-8])$/.test(id)||id==='gdraft000')return;
+ API('/api/me',{method:'POST',body:JSON.stringify({score:{game:id,s:sc}})}).then(j=>{const x=S.scores.find(y=>y.game===id);if(x){x.best=Math.max(x.best,j.best);x.plays++;}else S.scores.unshift({game:id,best:j.best,plays:1});}).catch(()=>{});}
 function setBest(id,sc){if(sc>(GS.best[id]||0)){GS.best[id]=sc;LS.set('tr-best',GS.best);return true;}return false;}
 
 /* ---------- live transport: Supabase Realtime broadcast + presence (a local relay can stand in for tests via ?live=ws://…) ---------- */
@@ -111,7 +114,7 @@ function finishRoom(R){if(R.phase==='done')return;R.phase='done';ARC.stop();broa
 function beginGame(R){if(R.phase!=='count')return;R.phase='play';paintPlay();
  const host=$('#ar-host');narrStop();const ok=ARC.start(styleOf(R.g),{host,seed:R.seed||Math.floor(Math.random()*1e9),level:R.g.settings.level,tattva:R.g.tattva,secs:secsOf(R.g),voice:gameVoice(R.g.tattva),
   onScore:sc=>{R.myScore=sc;if(!R.solo){const me=R.players[GS.me];if(me)me.score=sc;if(R.host){broadcastState();paintLiveBoard(R);}else if(Date.now()-R.lastSent>600){R.lastSent=Date.now();send({e:'sc',pid:GS.me,s:sc});}}},
-  onEnd:sc=>{if(GS.live!==R)return;R.myScore=sc;const me=R.players[GS.me];if(me){me.score=sc;me.fin=true;}
+  onEnd:sc=>{if(GS.live!==R)return;R.myScore=sc;saveScore(R.g.id,sc);const me=R.players[GS.me];if(me){me.score=sc;me.fin=true;}
    if(R.solo){R.phase='done';R.newBest=setBest(R.g.id,sc);if(!R.g.official)API('/api/games',{method:'POST',body:JSON.stringify({played:R.g.id})}).catch(()=>{});paintPlay();return;}
    R.newBest=setBest(R.g.id,sc);if(R.host){broadcastState(true);maybeDone(R);}else{send({e:'sc',pid:GS.me,s:sc,fin:true});}paintLiveBoard(R);}});
  if(!ok)playMsg('This game needs WebGL, which your browser has turned off.');
@@ -212,13 +215,13 @@ function paintMake(){const b=$('#gm-body'),V=TATTVAS[GM.tattva-1],A=ARCADE[GM.st
  b.querySelectorAll('[data-k]').forEach(el=>el.onclick=()=>{GM.title=$('#gm-title').value;const k=el.dataset.k;GM[k]=k==='style'?el.dataset.v:+el.dataset.v;paintMake();});
  $('#gm-title').oninput=e=>GM.title=e.target.value;
  $('#gm-try').onclick=()=>startRoom({g:draftGame(),solo:true,name:myName()||'you'});
- $('#gm-pub').onclick=()=>{if(S.user)publishGame();else openSignin(publishGame);};}
+ $('#gm-pub').onclick=()=>{if(S.user||GS.local)publishGame();else openSignin(publishGame,'Sign in to publish');};}
 function draftGame(){return cleanGame({id:'gdraft000',name:myName()||'you',title:GM.title.trim()||(ARCADE[GM.style].name+' · '+TATTVAS[GM.tattva-1].name),tattva:GM.tattva,settings:{style:GM.style,level:GM.level,seed:1}});}
-async function publishGame(){const d=draftGame(),body={name:S.user?S.user.handle:'seeker',title:d.title,type:'arcade',tattva:d.tattva,settings:d.settings};const btn=$('#gm-pub');if(btn)btn.disabled=true;
+async function publishGame(){const d=draftGame(),body={title:d.title,type:'arcade',tattva:d.tattva,settings:d.settings};const btn=$('#gm-pub');if(btn)btn.disabled=true;
  try{let g;if(!GS.local){try{g=cleanGame((await API('/api/games',{method:'POST',body:JSON.stringify(body)})).game);}catch(e){if(e.status===501)GS.local=true;else throw e;}}
   if(GS.local){g=cleanGame(Object.assign({},body,{id:'g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}));const l=LS.get('tr-games',[]);l.unshift(g);LS.set('tr-games',l.slice(0,40));}
   GS.games.unshift(g);GM.title='';showView('games');renderGames();const el=document.getElementById('g-'+g.id);if(el)el.scrollIntoView();toast('Published. Tap With friends to play it live');}
- catch(e){toast(e.message||'Couldn’t publish. Try again.');}finally{if(btn)btn.disabled=false;}}
+ catch(e){if(e.status===401){S.user=null;openSignin(publishGame,'Sign in to publish');}else if(e.status===403)openName(true,publishGame);else toast(e.message||'Couldn’t publish. Try again.');}finally{if(btn)btn.disabled=false;}}
 
 /* ---------- wiring ---------- */
 $('#gm-close').innerHTML=ico('x');$('#gm-close').onclick=()=>showView('games');

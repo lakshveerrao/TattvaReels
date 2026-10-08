@@ -41,6 +41,9 @@ const IC={
  check:'<path d="M5 12l5 5L20 7"/>',
  lock:'<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
  replay:'<path d="M4 12a8 8 0 1 0 2.3-5.7"/><path d="M4 4v5h5"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16v4Z"/>',
+ out:'<path d="M10 4H5v16h5"/><path d="m15 8 4 4-4 4M19 12H9"/>',
  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'
 };
 const ico=(k,cls)=>'<svg class="i'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+IC[k]+'</svg>';
@@ -49,8 +52,9 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const S={sound:false,user:null,emailOn:true,reels:[],loaded:false,offline:false,style:DEF(),t:0,source:null,score:null,takeBuf:null,takeBlob:null,takeOffset:0,view:'feed',idx:-1,feedIds:''};
 const TAKES={};
 const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:k=>{try{localStorage.removeItem(k);}catch(e){}}};
-S.user=LS.get('tr-user',null);if(S.user&&!/^[\w.-]{1,24}$/.test(S.user.handle||''))S.user=null;
-function localReels(){const mine=new Set(LS.get('tr-learnt',[]));return LS.get('tr-reels',[]).map(cleanReel).filter(Boolean).map(r=>Object.assign(r,{mine:mine.has(r.id),learnt:mine.has(r.id)?1:0}));}
+// the account comes from the server (/api/me); a cached copy only paints the first frame
+LS.del('tr-user');S.user=LS.get('tr-me',null);if(S.user&&!/^[a-z0-9_.]{3,20}$/.test(S.user.handle||''))S.user=null;S.scores=[];
+function localReels(){const mine=new Set(LS.get('tr-learnt',[]));return LS.get('tr-reels',[]).map(cleanReel).filter(Boolean).map(r=>Object.assign(r,{mine:mine.has(r.id),own:true,learnt:mine.has(r.id)?1:0}));}
 
 let cur=null;
 const EL={bufs:{},busy:false,off:false,ps:{}};
@@ -71,7 +75,7 @@ function norm(s){const d=DEF();s=s&&typeof s==='object'?s:{};const tone=LEG_T[s.
  let snd=Array.isArray(s.Sound)?s.Sound.map(x=>INSTR[x]?x:LEG_I[x]).filter(Boolean):null;if(snd)snd=[...new Set(snd)].slice(0,12);
  return{Tattva:Number.isInteger(s.Tattva)&&s.Tattva>=1&&s.Tattva<=8?s.Tattva:1,Tone:TONES[tone]?tone:d.Tone,Visuals:VISUALS.includes(s.Visuals)?s.Visuals:d.Visuals,Sound:snd||d.Sound,Recitation:s.Recitation==='AI voice (demo)'?'AI voice':['None','My recording','AI voice'].includes(s.Recitation)?s.Recitation:'None'};}
 function cleanReel(r){if(!r||typeof r!=='object'||typeof r.id!=='string'||!/^[\w-]{1,40}$/.test(r.id))return null;
- return{id:r.id,t:0,name:String(r.name||'seeker').slice(0,24),caption:String(r.caption||'').slice(0,140),style:norm(r.style),score:typeof r.score==='number'?Math.max(0,Math.min(100,Math.round(r.score))):null,createdAt:typeof r.createdAt==='number'?r.createdAt:0,learnt:Math.max(0,+r.learnt||0),mine:!!r.mine,hasTake:!!r.hasTake,takeOffset:Math.max(0,+r.takeOffset||0)};}
+ return{id:r.id,t:0,name:String(r.name||'seeker').slice(0,24),caption:String(r.caption||'').slice(0,140),style:norm(r.style),score:typeof r.score==='number'?Math.max(0,Math.min(100,Math.round(r.score))):null,createdAt:typeof r.createdAt==='number'?r.createdAt:0,learnt:Math.max(0,+r.learnt||0),mine:!!r.mine,own:!!r.own,hasTake:!!r.hasTake,takeOffset:Math.max(0,+r.takeOffset||0)};}
 
 /* ---------- timeline ---------- */
 function build(i,style){const T=TT[((style&&style.Tattva)||1)-1]||TT[0],beat=60/T.bpm,ev=T.notes.map((n,idx)=>({t:n.beat*beat,dur:n.dur*beat,semi:n.semi,idx}));return{ev,total:T.total*beat+1.5,beat};}
@@ -246,13 +250,28 @@ function activate(ix,force){
  if(S.view!=='feed')return;if(!force&&ix===S.idx&&cur)return;
  const prev=reelNode(S.idx);if(prev&&prev.__r){const ec=prev.querySelector('.endcard');if(ec)ec.remove();prev.querySelector('.prog i').style.width='0';}
  S.idx=ix;const el=reelNode(ix);if(!el||!el.__r)return;startReel(el);}
-function startReel(el){const r=el.__r,bar=el.querySelector('.prog i');const ec=el.querySelector('.endcard');if(ec)ec.remove();
+function startReel(el){const r=el.__r,bar=el.querySelector('.prog i');paintSide(r);const ec=el.querySelector('.endcard');if(ec)ec.remove();
  const hh=el.querySelector('.holdhint');
  const rec=r.style.Recitation,tk=rec==='My recording'?TAKES[r.id]:null;
  if(rec==='My recording'&&r.hasTake&&!TAKES[r.id]&&!TAKES['_'+r.id]){TAKES['_'+r.id]=1;(S.local?Promise.resolve(LS.get('tr-take-'+r.id,null)).then(t=>{if(!t)throw 0;const bin=atob(t.b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer;}):fetch('/api/take?id='+encodeURIComponent(r.id)).then(x=>{if(!x.ok)throw 0;return x.arrayBuffer();})).then(ab=>{const ac=new AC();return ac.decodeAudioData(ab).finally(()=>closeAC(ac));}).then(b=>{TAKES[r.id]=b;if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});}
  if(rec==='AI voice'&&!elBuf(r.style.Tattva)&&!EL.off)elFetch(r.style.Tattva).then(()=>{if(reelNode(S.idx)===el&&S.sound&&!el.querySelector('.endcard'))startReel(el);}).catch(()=>{});
- play(el.querySelector('canvas'),0,r.style,{sound:S.sound,hold:true,take:tk,takeOffset:r.takeOffset||0,onTick:(p,pf,film)=>{bar.style.width=(p*100).toFixed(2)+'%';let k=0;for(let j=0;j<4;j++)if(pf>=PADA_AT[j])k=j;setPada(el,k);
+ play(el.querySelector('canvas'),0,r.style,{sound:S.sound,hold:true,take:tk,takeOffset:r.takeOffset||0,onTick:(p,pf,film)=>{bar.style.width=(p*100).toFixed(2)+'%';let k=0;for(let j=0;j<4;j++)if(pf>=PADA_AT[j])k=j;setPada(el,k);sideLine(k);
   if(hh){const hr=(FILMS[r.style.Tattva]||{}).hold||[.26,.82],show=film&&pf>hr[0]+.01&&pf<hr[1]-.2;if(hh.hidden===show)hh.hidden=!show;hh.classList.toggle('on',HOLD.on);hh.lastChild.textContent=HOLD.on?'Awakening…':'Hold to awaken';}},onEnd:()=>showEnd(el)});}
+/* laptop layout: a panel beside the reel with the shloka (current line lit), its meaning and the learnt button */
+const WIDE=window.matchMedia('(min-width: 900px)');let sideR=null,sideK=-1;
+function paintSide(r){sideR=r;sideK=-1;if(!WIDE.matches)return;const box=$('#rside'),T1=TA(r);
+ box.innerHTML='<p class="eyebrow">Tattva '+T1.n+' · '+esc(T1.name)+'</p><h2 class="rs-teach">'+esc(T1.teach)+'</h2>'+
+  '<div class="rs-learn"><span class="bignum" id="rs-n">0</span><span class="lab">learnt from this reel</span><button class="btn" id="rs-btn"></button></div>'+
+  '<div class="rs-sh"><p class="lab">The shloka · verse '+T1.n+'</p>'+T1.dev.map((d,k)=>'<div class="ln" data-k="'+k+'"><span class="dev">'+esc(d)+'</span><span class="ia">'+esc(T1.iast[k])+'</span><span class="en">'+esc(T1.en[k])+'</span></div>').join('')+
+  '<div class="ln" data-k="3"><span class="dev">'+esc(L4.dev)+'</span><span class="ia">'+esc(L4.iast)+'</span><span class="en">'+esc(L4.en)+'</span></div></div>'+
+  '<div><p class="lab">Keep these three</p><ul class="keep">'+T1.keep.map(k=>'<li>'+ico('lotus')+'<span>'+esc(k)+'</span></li>').join('')+'</ul></div>'+
+  '<div class="row2"><button class="btn line" id="rs-sing">'+ico('mic')+'Sing this verse</button><button class="btn line" id="rs-share">'+ico('share')+'Share</button></div>'+
+  '<p class="note rs-by">'+(r.caption?'“'+esc(r.caption)+'” · ':'')+'by '+esc(r.name)+'</p>';
+ $('#rs-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);};$('#rs-sing').onclick=()=>{S.style=norm(Object.assign({},S.style,{Tattva:T1.n}));openSing();};$('#rs-share').onclick=()=>openShare(r);
+ paintSideCount();}
+function paintSideCount(){if(!sideR||!WIDE.matches)return;const b=$('#rs-btn');if(!b)return;const n=counts()[sideR.id]||0,m=isLearnt(sideR.id);$('#rs-n').textContent=fmt(n);b.className='btn '+(m?'done':'gold');b.innerHTML=ico(m?'check':'lotus')+(m?'You learnt this':'I learnt this');}
+function sideLine(k){if(k===sideK||!WIDE.matches)return;sideK=k;$('#rside').querySelectorAll('.ln').forEach(el=>el.classList.toggle('on',+el.dataset.k===k));}
+WIDE.addEventListener&&WIDE.addEventListener('change',()=>{if(sideR)paintSide(sideR);});
 let scrollT=0;
 reelsEl.addEventListener('scroll',()=>{clearTimeout(scrollT);scrollT=setTimeout(()=>activate(currentIx()),110);},{passive:true});
 let lastTap=0,tapT=0;
@@ -288,7 +307,7 @@ function refreshCounts(){const c=counts();
  reelsEl.querySelectorAll('.reel').forEach(el=>{if(!el.__r)return;const id=el.__r.id,n=c[id]||0,m=isLearnt(id),b=el.querySelector('[data-a="learn"]');
   b.classList.toggle('on',m);b.setAttribute('aria-pressed',String(m));b.querySelector('.ct').textContent=n?fmt(n):'I learnt';
   const ec=el.querySelector('.endcard');if(ec){ec.querySelector('.ec-count').innerHTML=learnLine(n,m);const lb=ec.querySelector('.ec-learn');lb.className='btn ec-learn '+(m?'done':'gold');lb.innerHTML=ico(m?'check':'lotus')+(m?'You learnt this':'I learnt this');}});
- if(sheetFor&&sheetFor.kind==='learn')paintLearnBox();
+ if(sheetFor&&sheetFor.kind==='learn')paintLearnBox();paintSideCount();
  if(S.view==='top')renderTop();}
 
 /* ---------- sheets ---------- */
@@ -334,7 +353,7 @@ function showView(v){
  if(v==='feed')requestAnimationFrame(()=>activate(currentIx(),true));
  if(v==='top')renderTop();}
 $('#snd').onclick=toggleSound;$('#hint').onclick=toggleSound;$('#cr-snd').onclick=toggleSound;
-$('#nv-feed').innerHTML=ico('home')+'Reels';$('#nv-create').innerHTML=ico('plus');$('#nv-top').innerHTML=ico('trophy')+'Top';
+$('#nv-feed').innerHTML=ico('home')+'Reels';$('#nv-create').innerHTML=ico('plus');
 $('#nv-feed').onclick=()=>{if(S.view==='feed'){reelsEl.scrollTo({top:0,behavior:'smooth'});return;}showView('feed');};
 $('#nv-create').onclick=()=>openCreate();
 $('#nv-top').onclick=()=>showView('top');
@@ -343,17 +362,54 @@ document.addEventListener('keydown',e=>{if(S.view!=='feed'||sheetFor||/input|tex
  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();reelsEl.scrollBy({top:(e.key==='ArrowDown'?1:-1)*reelsEl.clientHeight,behavior:'smooth'});}
  else if(e.key==='m'||e.key==='M')toggleSound();});
 
-/* ---------- leaderboard ---------- */
-function renderTop(){const c=counts(),list=allReels().map(r=>({r,n:c[r.id]||0})).sort((a,b)=>b.n-a.n||(b.r.score||0)-(a.r.score||0)||b.r.createdAt-a.r.createdAt);
- let total=0;for(const k in c)total+=c[k];$('#st-learn').textContent=fmt(total);$('#st-reels').textContent=fmt(list.length);
- const lb=$('#lb');lb.innerHTML='';const who=$('#who');who.innerHTML='';if(S.user){const sp=document.createElement('span');sp.textContent='Signed in as '+S.user.handle;const bo=document.createElement('button');bo.className='linkbtn';bo.textContent='Sign out';bo.onclick=()=>{S.user=null;LS.del('tr-user');renderTop();toast('Signed out');};who.append(sp,bo);}
- if(!list.length){lb.innerHTML='<p class="note">No reels yet. Share one and it ranks here.</p>';return;}
- list.forEach((x,k)=>{const b=document.createElement('button');b.className='lrow';
-  b.innerHTML='<span class="rk">'+(k+1)+'</span><span class="lthumb"><canvas></canvas></span><span class="lmid"><b></b><small></small></span><span class="lcount">'+ico('lotus')+fmt(x.n)+'<small>learnt</small></span>';
-  b.querySelector('b').textContent=x.r.caption||('Tattva '+TA(x.r).n+' · '+TA(x.r).name);
-  const sm=b.querySelector('small');sm.textContent=x.r.name+' · '+x.r.style.Visuals;if(x.r.score!=null){const s=document.createElement('span');s.className='score';s.textContent='Tune '+x.r.score+'%';sm.appendChild(s);}
-  b.onclick=()=>{const ix=reelList.findIndex(r=>r.id===x.r.id);showView('feed');if(ix>=0){reelsEl.scrollTop=ix*reelsEl.clientHeight;activate(ix,true);}};
-  lb.appendChild(b);queuePoster(b.querySelector('canvas'),x.r.style,0);});}
+/* ---------- me: my account, my reels, what I learnt, my game scores, and the top reels ---------- */
+S.meTab='mine';
+function reelRow(r,k,n){const b=document.createElement('button');b.className='lrow';
+ b.innerHTML='<span class="rk">'+(k+1)+'</span><span class="lthumb"><canvas></canvas></span><span class="lmid"><b></b><small></small></span><span class="lcount">'+ico('lotus')+fmt(n)+'<small>learnt</small></span>';
+ b.querySelector('b').textContent=r.caption||('Tattva '+TA(r).n+' · '+TA(r).name);
+ const sm=b.querySelector('small');sm.textContent=r.name+' · '+r.style.Visuals;if(r.score!=null){const s=document.createElement('span');s.className='score';s.textContent='Tune '+r.score+'%';sm.appendChild(s);}
+ b.onclick=()=>{const ix=reelList.findIndex(x=>x.id===r.id);showView('feed');if(ix>=0){reelsEl.scrollTop=ix*reelsEl.clientHeight;activate(ix,true);}};
+ queuePoster(b.querySelector('canvas'),r.style,0);return b;}
+function gameName(id){const m=/^o([slb])([1-8])$/.exec(id);if(m&&typeof ARCADE!=='undefined'){const st={s:'stick',l:'letters',b:'build'}[m[1]];return ARCADE[st].name+' · Tattva '+m[2];}
+ const g=typeof GS!=='undefined'&&GS.games.find(x=>x.id===id);return g?g.title:'A community game';}
+function renderTop(){const c=counts(),all=allReels(),mine=all.filter(r=>r.own),learnt=all.filter(r=>r.mine),u=S.user;
+ const plays=S.scores.reduce((a,x)=>a+(x.plays||0),0),best=S.scores.reduce((a,x)=>Math.max(a,x.best||0),0);
+ const box=$('#v-top .top');
+ box.innerHTML='<div class="mehead">'+(u?'<span class="ava big">'+esc(u.handle[0].toUpperCase())+'</span><div class="meid"><h1>'+esc(u.handle)+'</h1><p class="note">'+esc(u.email||'')+'</p></div>'+
+   '<div class="mebtns"><button class="tpill glass" id="me-edit">'+ico('edit')+'Name</button><button class="tpill glass" id="me-out">'+ico('out')+'Sign out</button></div>'
+  :'<span class="ava big ghost">'+ico('user')+'</span><div class="meid"><h1>Your space</h1><p class="note">Sign in with your email to keep your reels, learnings and game scores on every device.</p></div>')+'</div>'+
+  (u?'':'<button class="btn gold" id="me-in">'+ico('mail')+'Sign in with email</button>')+
+  '<div class="stats s4"><div class="stat"><b>'+fmt(learnt.length)+'</b><span>Learnt</span></div><div class="stat"><b>'+fmt(mine.length)+'</b><span>My reels</span></div><div class="stat"><b>'+fmt(plays)+'</b><span>Games played</span></div><div class="stat"><b>'+fmt(best)+'</b><span>Best score</span></div></div>'+
+  '<div class="metabs" role="tablist">'+[['mine','My reels'],['learnt','Learnt'],['scores','Game scores'],['top','Top reels']].map(t=>'<button role="tab" data-t="'+t[0]+'" aria-selected="'+(S.meTab===t[0])+'">'+t[1]+'</button>').join('')+'</div><div class="lb" id="lb"></div>';
+ if(u){$('#me-out').onclick=signOut;$('#me-edit').onclick=()=>openName(false);}else $('#me-in').onclick=()=>openSignin(()=>renderTop(),'Sign in');
+ box.querySelectorAll('.metabs button').forEach(b=>b.onclick=()=>{S.meTab=b.dataset.t;renderTop();});
+ const lb=$('#lb'),t=S.meTab;
+ if(t==='scores'){if(!u){lb.innerHTML='<p class="note">Sign in and your best score in every game is kept here.</p>';return;}
+  if(!S.scores.length){lb.innerHTML='<p class="note">No games yet. Play one from the Games tab.</p>';return;}
+  S.scores.slice().sort((a,b)=>b.best-a.best).forEach((x,k)=>{const r=document.createElement('div');r.className='lrow srow';r.innerHTML='<span class="rk">'+(k+1)+'</span><span class="lmid"><b></b><small></small></span><span class="lcount"><b class="sbest"></b><small>best</small></span>';
+   r.querySelector('b').textContent=gameName(x.game);r.querySelector('small').textContent='Played '+fmt(x.plays)+(x.plays===1?' time':' times');r.querySelector('.sbest').textContent=fmt(x.best);lb.appendChild(r);});return;}
+ let list=t==='mine'?mine:t==='learnt'?learnt:all.slice();
+ list=list.map(r=>({r,n:c[r.id]||0}));if(t==='top')list.sort((a,b)=>b.n-a.n||(b.r.score||0)-(a.r.score||0)||b.r.createdAt-a.r.createdAt);
+ if(!list.length){lb.innerHTML='<p class="note">'+(t==='mine'?(u?'You haven’t shared a reel yet. Tap + to make one.':'Reels you share show up here.'):t==='learnt'?'Tap the lotus on a reel when it clicks, and it’s kept here.':'No reels yet.')+'</p>';return;}
+ list.slice(0,100).forEach((x,k)=>lb.appendChild(reelRow(x.r,k,x.n)));}
+async function loadMe(){try{const j=await API('/api/me');S.user=j.user&&j.user.handle?j.user:null;S.pendingEmail=j.user&&!j.user.handle?j.user.email:null;S.scores=j.scores||[];}
+ catch(e){if(e.status===501||!e.status){S.user=null;}}
+ if(S.user)LS.set('tr-me',{handle:S.user.handle,email:S.user.email});else LS.del('tr-me');
+ if(typeof GS!=='undefined'){S.scores.forEach(x=>{if(x.best>(GS.best[x.game]||0))GS.best[x.game]=x.best;});}
+ paintNav();if(S.view==='top')renderTop();
+ if(S.pendingEmail)openName(true);}
+function signOut(){API('/api/auth',{method:'POST',body:JSON.stringify({logout:true})}).catch(()=>{});S.user=null;S.scores=[];LS.del('tr-me');paintNav();toast('Signed out');loadReels();if(S.view==='top')renderTop();}
+function paintNav(){const u=S.user;$('#nv-top').innerHTML=(u?'<span class="ava sm">'+esc(u.handle[0].toUpperCase())+'</span>':ico('user'))+'Me';$('#nv-top').setAttribute('aria-label',u?'Me · '+u.handle:'Me');}
+// pick or change my name (the handle everyone sees)
+function openName(first,after){const cur=S.user?S.user.handle:'',sug=first?((S.pendingEmail||'').split('@')[0]||'').toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20):cur;
+ openSheet('name','<div class="shead"><div><h2 class="sh-title">'+(first?'Pick your name':'Change your name')+'</h2><p class="note">Everyone sees it on your reels and in games. 3–20 letters, numbers, dots or underscores.</p></div>'+(first?'':'<button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button>')+'</div>'+
+  '<input class="field" id="nm-in" maxlength="20" autocapitalize="none" autocomplete="username" spellcheck="false" placeholder="e.g. laksh" value="'+esc(sug)+'"><p class="err" id="nm-err"></p><button class="btn gold" id="nm-go">'+(first?'Continue':'Save')+'</button>');
+ const x=$('#sh-x');if(x)x.onclick=closeSheet;const inp=$('#nm-in');setTimeout(()=>{inp.focus();inp.select();},350);inp.oninput=()=>{inp.value=inp.value.toLowerCase().replace(/[^a-z0-9_.]/g,'');$('#nm-err').textContent='';};
+ const go=async()=>{const v=inp.value.trim();if(!/^[a-z0-9_.]{3,20}$/.test(v)){$('#nm-err').textContent='Use 3–20 letters, numbers, dots or underscores.';return;}
+  const b=$('#nm-go');b.disabled=true;try{const j=await API('/api/me',{method:'POST',body:JSON.stringify({handle:v})});S.user=j.user;S.pendingEmail=null;LS.set('tr-me',S.user);closeSheet();paintNav();toast(first?'Welcome, '+S.user.handle:'Name saved');
+   if(!first)loadReels();if(S.view==='top')renderTop();if(typeof after==='function')after();}
+  catch(e){$('#nm-err').textContent=e.message;}finally{if($('#nm-go'))$('#nm-go').disabled=false;}};
+ $('#nm-go').onclick=go;inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go();}};}
 
 /* ---------- create ---------- */
 const GROUPS={
@@ -415,17 +471,29 @@ function openReview(){showView('review');$('#caption').value='';
 function startReview(){if(S.view!=='review')return;const take=S.style.Recitation==='My recording'?S.takeBuf:null;play($('#c-review'),0,S.style,{sound:S.sound,take,takeOffset:S.takeOffset||0,onEnd:()=>startReview()});}
 $('#rv-back').innerHTML=ico('back');$('#rv-back').onclick=()=>{showView('create');renderTools();renderFx(true);startPreview();};
 $('#cr-close').innerHTML=ico('x');
-$('#rv-share').onclick=async()=>{const b=$('#rv-share');if(b.disabled)return;b.disabled=true;try{const d=await makeDraft();if(S.user)await publish(d);else{saveDraft(d);openSignin();}}finally{b.disabled=false;}};
-function openSignin(after){
- openSheet('signin','<div class="shead"><div><h2 class="sh-title">Sign in to share</h2><p class="note">No password. Enter your email to get a sign-in link. Your reel is saved and shares as soon as you’re in.</p></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
-  '<div id="si-a" style="display:flex;flex-direction:column;gap:10px"><label class="lab" for="si-email">Email</label><input class="field" id="si-email" type="email" autocomplete="email" placeholder="you@example.com"><p class="err" id="si-err"></p><button class="btn gold" id="si-send">'+ico('mail')+'Send sign-in link</button></div>'+
-  '<div id="si-b" hidden style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center"><span class="icon-btn glass" style="width:56px;height:56px;color:var(--gold)">'+ico('mail')+'</span><h3 class="sh-title" style="font-size:22px">Your sign-in link is ready</h3><p class="note" id="si-msg"></p><button class="btn gold" id="si-open">Open sign-in link</button><button class="btn line" id="si-diff">Use a different email</button></div>');
- $('#sh-x').onclick=closeSheet;const em=$('#si-email');setTimeout(()=>em.focus(),350);
- const go=()=>{const v=em.value.trim().toLowerCase();if(!/^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/.test(v)){$('#si-err').textContent='Enter an email like you@example.com.';return;}
-  $('#si-err').textContent='';$('#si-a').hidden=true;$('#si-b').hidden=false;$('#si-msg').textContent='Email is simulated for now, so nothing lands in '+v+'. Open the link here to sign in.';
-  $('#si-open').onclick=()=>{const h=(v.split('@')[0]||'seeker').replace(/[^\w.-]/g,'').slice(0,24)||'seeker';S.user={handle:h};LS.set('tr-user',S.user);closeSheet();toast('Signed in as '+h);if(typeof after==='function'){after();return;}const d=loadDraft();if(d)publish(d);};};
- em.addEventListener('input',()=>$('#si-err').textContent='');em.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go();}});
- $('#si-send').onclick=go;$('#si-diff').onclick=()=>{$('#si-b').hidden=true;$('#si-a').hidden=false;em.focus();};}
+$('#rv-share').onclick=async()=>{const b=$('#rv-share');if(b.disabled)return;b.disabled=true;try{const d=await makeDraft();if(S.user||S.local)await publish(d);else{saveDraft(d);openSignin();}}finally{b.disabled=false;}};
+// Real sign-in: email → a code arrives by email (Supabase Auth) → enter it → pick a name the first time.
+function openSignin(after,title){
+ openSheet('signin','<div class="shead"><div><h2 class="sh-title">'+esc(title||'Sign in to share')+'</h2><p class="note" id="si-sub">No password. We email you a code.</p></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
+  '<div id="si-a" class="sistep"><label class="lab" for="si-email">Email</label><input class="field" id="si-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com"><p class="err" id="si-err"></p><button class="btn gold" id="si-send">'+ico('mail')+'Email me a code</button></div>'+
+  '<div id="si-b" class="sistep" hidden><label class="lab" for="si-code">Code</label><input class="field codein" id="si-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456"><p class="err" id="si-err2"></p><button class="btn gold" id="si-go">Sign in</button>'+
+  '<div class="sirow"><button class="linkbtn" id="si-again" disabled>Send a new code</button><button class="linkbtn" id="si-diff">Use a different email</button></div></div>');
+ $('#sh-x').onclick=closeSheet;const em=$('#si-email'),cd=$('#si-code');setTimeout(()=>em.focus(),350);let email='',tm=0;
+ const wait=n=>{const b=$('#si-again');if(!b)return;clearInterval(tm);b.disabled=true;let k=n;b.textContent='Send a new code ('+k+')';tm=setInterval(()=>{k--;if(!$('#si-again')){clearInterval(tm);return;}if(k<=0){clearInterval(tm);b.disabled=false;b.textContent='Send a new code';}else b.textContent='Send a new code ('+k+')';},1000);};
+ const send=async()=>{const v=em.value.trim().toLowerCase();if(!/^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/.test(v)){$('#si-err').textContent='Enter an email like you@example.com.';return;}
+  const b=$('#si-send');b.disabled=true;b.innerHTML='<span class="spin"></span>Sending…';$('#si-err').textContent='';
+  try{await API('/api/auth',{method:'POST',body:JSON.stringify({email:v})});email=v;$('#si-a').hidden=true;$('#si-b').hidden=false;$('#si-sub').innerHTML='We sent a code to <b>'+esc(v)+'</b>. It can take a minute; check spam too.';cd.value='';setTimeout(()=>cd.focus(),50);wait(60);}
+  catch(e){$('#si-err').textContent=e.status===501?'Sign-in isn’t available right now.':e.message;}finally{if($('#si-send')){b.disabled=false;b.innerHTML=ico('mail')+'Email me a code';}}};
+ const verify=async()=>{const c=cd.value.replace(/\D/g,'');if(c.length<6){$('#si-err2').textContent='Enter the code from the email.';return;}
+  const b=$('#si-go');if(b.disabled)return;b.disabled=true;b.innerHTML='<span class="spin"></span>Checking…';$('#si-err2').textContent='';
+  try{const j=await API('/api/auth',{method:'POST',body:JSON.stringify({email,code:c})});clearInterval(tm);
+   const done=()=>{loadReels();loadMe();if(typeof after==='function'){after();return;}const d=loadDraft();if(d)publish(d);};
+   if(j.user.handle){S.user=j.user;LS.set('tr-me',S.user);closeSheet();paintNav();toast('Signed in as '+j.user.handle);done();}
+   else{S.pendingEmail=j.user.email;openName(true,done);}}
+  catch(e){$('#si-err2').textContent=e.message;if($('#si-go')){b.disabled=false;b.textContent='Sign in';}}};
+ em.addEventListener('input',()=>$('#si-err').textContent='');em.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send();}});
+ cd.addEventListener('input',()=>{cd.value=cd.value.replace(/\D/g,'');$('#si-err2').textContent='';if(cd.value.length>=6&&cd.value.length===(+cd.dataset.len||6))verify();});cd.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();verify();}});
+ $('#si-send').onclick=send;$('#si-go').onclick=verify;$('#si-again').onclick=()=>{$('#si-a').hidden=false;$('#si-b').hidden=true;send();};$('#si-diff').onclick=()=>{clearInterval(tm);$('#si-b').hidden=true;$('#si-a').hidden=false;$('#si-sub').textContent='No password. We email you a code.';em.focus();};}
 function blobB64(b){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=no;r.readAsDataURL(b);});}
 async function makeDraft(){const d={caption:$('#caption').value.trim().slice(0,140),style:JSON.parse(JSON.stringify(S.style)),score:(S.source==='recorded'||S.source==='sung')?S.score:null,takeOffset:S.takeOffset||0,take:null};
  if(d.style.Recitation==='My recording'){if(S.takeBlob&&S.takeBlob.size<=880000){d.take={mime:(S.takeBlob.type||'audio/webm').replace(/\s/g,''),b64:await blobB64(S.takeBlob)};}else{if(S.takeBlob)toast('Your recording is too long to attach, so the reel shares without it');d.style.Recitation='None';}}
@@ -434,9 +502,9 @@ function saveDraft(d){try{localStorage.setItem('tr-draft',JSON.stringify(d));}ca
 function loadDraft(){try{return JSON.parse(localStorage.getItem('tr-draft')||'null');}catch(e){return null;}}
 function clearDraft(){try{localStorage.removeItem('tr-draft');}catch(e){}}
 async function publish(d){
- if(!S.local){try{const j=await API('/api/reels',{method:'POST',body:JSON.stringify({name:S.user?S.user.handle:'seeker',caption:d.caption,style:d.style,score:d.score,take:d.take,takeOffset:d.takeOffset})});
+ if(!S.local){try{const j=await API('/api/reels',{method:'POST',body:JSON.stringify({caption:d.caption,style:d.style,score:d.score,take:d.take,takeOffset:d.takeOffset})});
    const c=cleanReel(j.reel);if(c){if(c.hasTake&&S.takeBuf)TAKES[c.id]=S.takeBuf;S.reels.unshift(c);}clearDraft();showView('feed');renderFeed(true);reelsEl.scrollTop=0;requestAnimationFrame(()=>activate(0,true));toast('Shared. Everyone can see it now');}
-  catch(e){if(e.status===501){S.local=true;return publish(d);}saveDraft(d);toast(e.message||'Couldn’t share. Try again.');}
+  catch(e){if(e.status===501){S.local=true;return publish(d);}saveDraft(d);if(e.status===401){S.user=null;paintNav();openSignin();return;}if(e.status===403){openName(true,()=>publish(d));return;}toast(e.message||'Couldn’t share. Try again.');}
   return;}
  const id='r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);let hasTake=false;
  if(d.take){try{localStorage.setItem('tr-take-'+id,JSON.stringify(d.take));hasTake=true;if(S.takeBuf)TAKES[id]=S.takeBuf;}catch(e){toast('Not enough space on this device to keep your voice, so the reel saves without it');}}
@@ -445,5 +513,5 @@ async function publish(d){
  clearDraft();const c=cleanReel(r);if(c)S.reels.unshift(c);showView('feed');renderFeed(true);reelsEl.scrollTop=0;requestAnimationFrame(()=>activate(0,true));toast('Shared to your reels');}
 
 /* ---------- boot ---------- */
-setSoundIcons();renderFeed(true);loadReels();
+setSoundIcons();paintNav();renderFeed(true);loadReels();loadMe();
 })();

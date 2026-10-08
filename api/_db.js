@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { randomBytes, createHash } from 'node:crypto';
 
 // Server-only: the Supabase secret key never reaches the browser.
 const BASE = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '');
@@ -35,15 +35,44 @@ function cookies(req) {
   return out;
 }
 
-// An anonymous id per browser, so each person counts once on "I learnt this".
+const SECURE = process.env.VERCEL ? '; Secure' : '';
+export function addCookie(res, c) {
+  const prev = res.getHeader('Set-Cookie'); res.setHeader('Set-Cookie', (Array.isArray(prev) ? prev : prev ? [prev] : []).concat(c));
+}
+// An anonymous id per browser, so each person counts once on "I learnt this" even before signing in.
 export function anon(req, res) {
   let a = cookies(req).tr_a;
   if (!a || !/^[a-f0-9]{32}$/.test(a)) {
     a = randomBytes(16).toString('hex');
-    res.setHeader('Set-Cookie', `tr_a=${a}; Path=/; Max-Age=${60 * 60 * 24 * 400}; SameSite=Lax; HttpOnly${process.env.VERCEL ? '; Secure' : ''}`);
+    addCookie(res, `tr_a=${a}; Path=/; Max-Age=${60 * 60 * 24 * 400}; SameSite=Lax; HttpOnly${SECURE}`);
   }
   return a;
 }
+
+/* ---- accounts: Supabase Auth checks the emailed code, then the server keeps its own session cookie (tr_s) ---- */
+export const sha = s => createHash('sha256').update(s).digest('hex');
+export const SESSION_DAYS = 90;
+export function setSession(res, token) { addCookie(res, `tr_s=${token}; Path=/; Max-Age=${60 * 60 * 24 * SESSION_DAYS}; SameSite=Lax; HttpOnly${SECURE}`); }
+export function clearSession(res) { addCookie(res, `tr_s=; Path=/; Max-Age=0; SameSite=Lax; HttpOnly${SECURE}`); }
+export function sessionToken(req) { const t = cookies(req).tr_s; return t && /^[a-f0-9]{64}$/.test(t) ? t : null; }
+// Who is asking: the browser's anon id, the signed-in user (or null), and the key used for "I learnt this" marks.
+export async function who(req, res) {
+  const a = anon(req, res), t = sessionToken(req);
+  let user = null;
+  if (t) {
+    const rows = await sb(`/rest/v1/session_view?select=user_id,email,handle,expires_at&token_hash=eq.${sha(t)}`).then(r => r.json());
+    const s = rows[0];
+    if (s && Date.parse(s.expires_at) > Date.now()) user = { id: s.user_id, email: s.email, handle: s.handle || null };
+    else clearSession(res);
+  }
+  return { anon: a, user, key: user ? 'u' + user.id.replace(/-/g, '') : a };
+}
+export function needUser(w) {
+  if (!w.user) throw new HttpError(401, 'Sign in first.');
+  if (!w.user.handle) throw new HttpError(403, 'Pick a name first.');
+  return w.user;
+}
+export const HANDLE = /^[a-z0-9_.]{3,20}$/;
 
 export async function readBody(req) {
   if (req.body !== undefined && req.body !== null && req.body !== '') return typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
@@ -72,7 +101,8 @@ export function cleanStyle(s) {
   };
 }
 
-export function toClient(row, mine) {
+// mine = "I learnt this" is on for me; own = I made this reel
+export function toClient(row, mine, own) {
   return { id: row.id, t: 0, name: row.name, caption: row.caption || '', style: row.style, score: row.score, createdAt: Date.parse(row.created_at) || 0,
-    hasTake: !!row.has_take, takeOffset: row.take_offset || 0, learnt: row.learnt || 0, mine: !!mine };
+    hasTake: !!row.has_take, takeOffset: row.take_offset || 0, learnt: row.learnt || 0, mine: !!mine, own: !!own };
 }
