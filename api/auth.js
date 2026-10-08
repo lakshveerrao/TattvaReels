@@ -30,6 +30,18 @@ export default wrap(async (req, res) => {
   const email = String(b.email || '').trim().toLowerCase();
   if (!EMAIL.test(email) || email.length > 200) throw new HttpError(400, 'Enter an email like you@example.com.');
 
+  // Simulated sign-in (agreed 2026-10-08, until a mail service is added): no email is sent. The account is found or
+  // created with the Admin API, and the session starts straight away.
+  if (b.simulate) {
+    const c = await sb('/auth/v1/admin/users', { method: 'POST', headers: json, body: JSON.stringify({ email, email_confirm: true }) }, [400, 409, 422]);
+    let u = c.ok ? await c.json() : null;
+    if (!u || !u.id) {
+      const g = await sb('/auth/v1/admin/generate_link', { method: 'POST', headers: json, body: JSON.stringify({ type: 'magiclink', email }) });
+      const j = await g.json(); u = j.user || j;
+    }
+    return start(res, me, u, email);
+  }
+
   if (b.code == null) {
     const host = String(req.headers['x-forwarded-host'] || req.headers.host || '');
     const site = /^tattvareels\.vercel\.app$/.test(host) ? 'https://' + host + '/' : /^localhost:\d+$/.test(host) ? 'http://' + host + '/' : '';

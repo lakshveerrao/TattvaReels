@@ -2118,6 +2118,7 @@ const IC={
  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'
 };
 const ico=(k,cls)=>'<svg class="i'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+IC[k]+'</svg>';
+const t=s=>s; // replaced by the i18n table
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 const S={sound:false,user:null,emailOn:true,reels:[],loaded:false,offline:false,style:DEF(),t:0,source:null,score:null,takeBuf:null,takeBlob:null,takeOffset:0,view:'feed',idx:-1,feedIds:''};
@@ -2549,28 +2550,17 @@ $('#rv-share').onclick=async()=>{const b=$('#rv-share');if(b.disabled)return;b.d
 function finishSignin(user,after){const done=()=>{loadReels();loadMe();if(typeof after==='function'){after();return;}const d=loadDraft();if(d)publish(d);};
  if(user.handle){S.user=user;LS.set('tr-me',S.user);closeSheet();paintNav();toast('Signed in as '+user.handle);done();}
  else{S.pendingEmail=user.email;openName(true,done);}}
+// Simulated sign-in for now (Laksh, 2026-10-08): email, then a name the first time. No email is sent; the server
+// finds or creates the account. The email-link flow (linkSignin below) stays ready for when a mail service is added.
 function openSignin(after,title){
- openSheet('signin','<div class="shead"><div><h2 class="sh-title">'+esc(title||'Sign in to share')+'</h2><p class="note" id="si-sub">No password. We email you a sign-in link.</p></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
-  '<div id="si-a" class="sistep"><label class="lab" for="si-email">Email</label><input class="field" id="si-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com"><p class="err" id="si-err"></p><button class="btn gold" id="si-send">'+ico('mail')+'Email me a sign-in link</button></div>'+
-  '<div id="si-b" class="sistep" hidden><div class="siwait"><span class="icon-btn glass">'+ico('mail')+'</span><p>Open the email from <b>Supabase Auth</b> and tap <b>Sign in</b>. This page signs in by itself when you come back.</p><span class="spin"></span></div>'+
-  '<details class="sicode"><summary>Got a code instead?</summary><input class="field codein" id="si-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456"><button class="btn line" id="si-go">Sign in with code</button></details><p class="err" id="si-err2"></p>'+
-  '<div class="sirow"><button class="linkbtn" id="si-again" disabled>Send again</button><button class="linkbtn" id="si-diff">Use a different email</button></div></div>');
- $('#sh-x').onclick=closeSheet;const em=$('#si-email'),cd=$('#si-code');setTimeout(()=>em.focus(),350);let email='',tm=0,poll=0,half=0;
- const stop=()=>{clearInterval(tm);clearInterval(poll);};
- const wait=n=>{const b=$('#si-again');if(!b)return;clearInterval(tm);b.disabled=true;let k=n;b.textContent='Send again ('+k+')';tm=setInterval(()=>{k--;if(!$('#si-again')){clearInterval(tm);return;}if(k<=0){clearInterval(tm);b.disabled=false;b.textContent='Send again';}else b.textContent='Send again ('+k+')';},1000);};
- const watch=()=>{clearInterval(poll);poll=setInterval(async()=>{if(!$('#si-b')||sheetFor&&sheetFor.kind!=='signin'){clearInterval(poll);return;}if(document.hidden)return;
-   try{const j=await API('/api/me');if(j.user&&(j.user.handle||++half>=5)){stop();finishSignin(j.user,after);}}catch(e){}},2500);};
- const send=async()=>{const v=em.value.trim().toLowerCase();if(!/^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/.test(v)){$('#si-err').textContent='Enter an email like you@example.com.';return;}
-  const b=$('#si-send');b.disabled=true;b.innerHTML='<span class="spin"></span>Sending…';$('#si-err').textContent='';
-  try{await API('/api/auth',{method:'POST',body:JSON.stringify({email:v})});email=v;$('#si-a').hidden=true;$('#si-b').hidden=false;$('#si-sub').innerHTML='We sent a sign-in link to <b>'+esc(v)+'</b>. It can take a minute; check spam too.';wait(60);watch();}
-  catch(e){$('#si-err').textContent=e.status===501?'Sign-in isn’t available right now.':e.message;}finally{if($('#si-send')){b.disabled=false;b.innerHTML=ico('mail')+'Email me a sign-in link';}}};
- const verify=async()=>{const c=cd.value.replace(/\D/g,'');if(c.length<6){$('#si-err2').textContent='Enter the code from the email.';return;}
-  const b=$('#si-go');if(b.disabled)return;b.disabled=true;$('#si-err2').textContent='';
-  try{const j=await API('/api/auth',{method:'POST',body:JSON.stringify({email,code:c})});stop();finishSignin(j.user,after);}
-  catch(e){$('#si-err2').textContent=e.message;if($('#si-go'))b.disabled=false;}};
- em.addEventListener('input',()=>$('#si-err').textContent='');em.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send();}});
- cd.addEventListener('input',()=>{cd.value=cd.value.replace(/\D/g,'');$('#si-err2').textContent='';});cd.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();verify();}});
- $('#si-send').onclick=send;$('#si-go').onclick=verify;$('#si-again').onclick=()=>{$('#si-a').hidden=false;$('#si-b').hidden=true;send();};$('#si-diff').onclick=()=>{stop();$('#si-b').hidden=true;$('#si-a').hidden=false;$('#si-sub').textContent='No password. We email you a sign-in link.';em.focus();};}
+ openSheet('signin','<div class="shead"><div><h2 class="sh-title">'+esc(title||t('Sign in to share'))+'</h2><p class="note">'+esc(t('Just your email. No password, no code. We’ll remember you on this device.'))+'</p></div><button class="icon-btn glass" id="sh-x" aria-label="'+esc(t('Close'))+'">'+ico('x')+'</button></div>'+
+  '<div class="sistep"><label class="lab" for="si-email">'+esc(t('Email'))+'</label><input class="field" id="si-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com"><p class="err" id="si-err"></p><button class="btn gold" id="si-send">'+esc(t('Continue'))+'</button></div>');
+ $('#sh-x').onclick=closeSheet;const em=$('#si-email');setTimeout(()=>em.focus(),350);
+ const go=async()=>{const v=em.value.trim().toLowerCase();if(!/^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/.test(v)){$('#si-err').textContent=t('Enter an email like you@example.com.');return;}
+  const b=$('#si-send');if(b.disabled)return;b.disabled=true;b.innerHTML='<span class="spin"></span>';$('#si-err').textContent='';
+  try{const j=await API('/api/auth',{method:'POST',body:JSON.stringify({email:v,simulate:true})});finishSignin(j.user,after);}
+  catch(e){$('#si-err').textContent=e.status===501?t('Sign-in isn’t available right now.'):e.message;if($('#si-send')){b.disabled=false;b.textContent=t('Continue');}}};
+ em.addEventListener('input',()=>$('#si-err').textContent='');em.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go();}});$('#si-send').onclick=go;}
 // the email link lands here: #access_token=…&type=magiclink (or #error=…)
 function linkSignin(){const h=location.hash;if(!/(^#|&)(access_token|error)=/.test(h))return false;const q=new URLSearchParams(h.slice(1));history.replaceState(null,'',location.pathname+location.search);
  if(q.get('error')){toast(/expired/i.test(q.get('error_description')||q.get('error_code')||'')?'That sign-in link has expired. Ask for a new one.':'That sign-in link didn’t work. Ask for a new one.');return true;}
