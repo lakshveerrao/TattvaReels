@@ -2526,14 +2526,14 @@ async function liveOpen(code,me,h){
 const NARR={buf:{},src:null,ctx:null,run:0};
 function narrBuf(key,url){if(NARR.buf[key])return Promise.resolve(NARR.buf[key]);return fetch(url).then(r=>{if(!r.ok)throw r.status;return r.arrayBuffer();}).then(ab=>ARC.audio().decodeAudioData(ab)).then(b=>NARR.buf[key]=b);}
 function narrStop(){NARR.run++;if(NARR.src){try{NARR.src.stop();}catch(e){}NARR.src=null;}try{speechSynthesis.cancel();}catch(e){}}
-function narrPlay(buf){return new Promise(ok=>{const a=ARC.audio();if(!a||!buf){ok();return;}const s=a.createBufferSource();s.buffer=buf;s.connect(a.destination);s.onended=ok;s.start();NARR.src=s;});}
+function narrPlay(buf){return new Promise(ok=>{const a=ARC.audio();if(!a||!buf){ok();return;}let done=false;const fin=()=>{if(!done){done=true;ok();}};const s=a.createBufferSource();s.buffer=buf;s.connect(a.destination);s.onended=fin;s.start();NARR.src=s;setTimeout(fin,(buf.duration+.6)*1000);});}
 function narrSpeak(text,lang){return new Promise(ok=>{try{const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=lang==='en-IN'?.95:.7;u.onend=ok;u.onerror=ok;speechSynthesis.cancel();speechSynthesis.speak(u);setTimeout(ok,lang==='en-IN'?9000:30000);}catch(e){ok();}});}
 // Plays recitation then meaning; onStep(stage, lineIndex) drives the captions. Resolves when done (or skipped).
 async function narrate(n,onStep){narrStop();const my=++NARR.run,V=TATTVAS[n-1],alive=()=>NARR.run===my;
  let rec=null,mean=null;onStep('load');
  try{[rec,mean]=await Promise.all([narrBuf('r'+n,'/api/tts?v='+n),narrBuf('m'+n,'/api/tts?v='+n+'&m=1')]);}catch(e){}
  if(!alive())return;
- if(rec){onStep('verse',0);const t0=ARC.audio().currentTime,line=rec.duration/4,iv=setInterval(()=>{if(!alive()){clearInterval(iv);return;}onStep('verse',Math.min(3,Math.floor((ARC.audio().currentTime-t0)/line)));},200);await narrPlay(rec);clearInterval(iv);}
+ if(rec){onStep('verse',0);const t0=Date.now(),line=rec.duration*1000/4,iv=setInterval(()=>{if(!alive()){clearInterval(iv);return;}onStep('verse',Math.min(3,Math.floor((Date.now()-t0)/line)));},200);await narrPlay(rec);clearInterval(iv);}
  else{const t0=Date.now(),iv=setInterval(()=>{if(!alive()){clearInterval(iv);return;}onStep('verse',Math.min(3,Math.floor((Date.now()-t0)/2500)));},250);onStep('verse',0);await Promise.all([narrSpeak(V.dev.join(' '),'hi-IN'),new Promise(r=>setTimeout(r,10000))]);clearInterval(iv);}
  if(!alive())return;onStep('meaning');
  if(mean)await narrPlay(mean);else await Promise.all([narrSpeak(V.teach,'en-IN'),new Promise(r=>setTimeout(r,4500))]);
@@ -2541,7 +2541,7 @@ async function narrate(n,onStep){narrStop();const my=++NARR.run,V=TATTVAS[n-1],a
 
 /* ---------- a play session: solo, or a live room where the host's phone keeps time and scores ---------- */
 function newCode(){let c='';for(let i=0;i<6;i++)c+=CODE_AB[Math.floor(Math.random()*CODE_AB.length)];return c;}
-function startRoom(opts){closeRoom();narrStop();ARC.stop();
+function startRoom(opts){ARC.audio();closeRoom();narrStop();ARC.stop();
  const R=GS.live={code:opts.code||null,host:!!opts.host,solo:!!opts.solo,g:opts.g||null,phase:opts.solo?'intro':'lobby',players:{},online:{},net:null,lastState:0,stateSeq:0,startAt:0,seed:0,myScore:0,lastSent:0};
  R.players[GS.me]={pid:GS.me,name:opts.name,score:0,fin:false};
  showView('play');if(R.g)AUD.need(R.g.tattva);paintPlay();
