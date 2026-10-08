@@ -7,7 +7,8 @@ export default wrap(async (req, res) => {
   const w = await who(req, res), me = w.anon;
   if (req.method === 'GET') {
     const [feed, mine] = await Promise.all([
-      sb(`/rest/v1/reel_feed?select=${COLS}&order=created_at.desc&limit=200`).then(r => r.json()),
+      // falls back to the old columns until supabase/accounts.sql has been run
+      sb(`/rest/v1/reel_feed?select=${COLS}&order=created_at.desc&limit=200`, {}, [400]).then(r => r.ok ? r.json() : sb(`/rest/v1/reel_feed?select=${COLS.replace(',user_id', '')}&order=created_at.desc&limit=200`).then(x => x.json())),
       sb(`/rest/v1/learnt?select=reel_id&anon=eq.${w.key}&limit=2000`).then(r => r.json())
     ]);
     const m = new Set(mine.map(x => x.reel_id));

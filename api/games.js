@@ -23,11 +23,11 @@ export default wrap(async (req, res) => {
     const id = q.get('id');
     if (id) {
       if (!GID.test(id)) throw new HttpError(400, 'Unknown game.');
-      const rows = await sb(`/rest/v1/games?select=${COLS}&id=eq.${id}`).then(r => r.json());
+      const rows = await sb(`/rest/v1/games?select=${COLS}&id=eq.${id}`, {}, [400]).then(r => r.ok ? r.json() : sb(`/rest/v1/games?select=${COLS.replace(',user_id', '')}&id=eq.${id}`).then(x => x.json()));
       if (!rows.length) throw new HttpError(404, 'That game is gone.');
       return send(res, 200, { game: out(rows[0], w) });
     }
-    const rows = await sb(`/rest/v1/games?select=${COLS}&order=created_at.desc&limit=100`).then(r => r.json());
+    const rows = await sb(`/rest/v1/games?select=${COLS}&order=created_at.desc&limit=100`, {}, [400]).then(r => r.ok ? r.json() : sb(`/rest/v1/games?select=${COLS.replace(',user_id', '')}&order=created_at.desc&limit=100`).then(x => x.json()));
     // games made before the three styles (no settings.style) are retired
     return send(res, 200, { games: rows.filter(r => r.settings && STYLES.includes(r.settings.style)).map(r => out(r, w)) });
   }
