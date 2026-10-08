@@ -43,21 +43,29 @@ Open **https://heytattva.vercel.app/flash** in Chrome or Edge on a laptop, plug 
 
 ## Using it
 
-- **Home:** clock (from the internet), turning Sri Yantra. **Swipe left** to begin. The gear opens Settings; the square opens a QR code for the website.
+Minimal on purpose: a few big buttons per screen.
+
+- **Home:** turning Sri Yantra, then three buttons: **Learn**, **Sing**, **Settings**.
+- **Learn:** 8 big tiles, one per tattva. Tap one.
 - **A tattva:**
-  - **Swipe left/right** for the next or previous tattva.
-  - **Swipe up/down** for verse → meaning → remember.
-  - **Recite** plays the verse; **Meaning** speaks its meaning (in English). The first time, each one downloads from heytattva.vercel.app (about 1 MB). After that it's saved on the device and plays without Wi-Fi.
-- **Sing:**
+  - Three tabs: **Verse · Meaning · Idea**.
+  - **Listen** reads the verse on the Verse tab, and the meaning on the other tabs. Tap it again to stop.
+  - **Sing** opens Sing for this tattva.
+  - Swipe left or right for the next tattva. The round back button goes back.
+  - Each recording downloads once from heytattva.vercel.app, then plays without Wi-Fi.
+- **Sing (match the note):**
   - **Listen** plays the tune.
-  - **Sing** counts 3-2-1 and then scores you note by note, in any key. A score of 80 or more passes.
-- **Settings:** language, brightness, Wi-Fi name, **Reset Wi-Fi** (tap twice), open on phone.
-- **Buttons:**
-  - **BOOT** tap: go home.
-  - **BOOT** hold 5 seconds: forget the Wi-Fi and restart.
-  - **PWR:** the board's own power button.
-- **Screen sleep:** the screen dims after 1 minute and turns off after 3 minutes (not while playing or singing). Touch it to wake it.
-- **Time zone:** fixed to India time (IST). Change `configTzTime("IST-5:30", ...)` in `net.h` for elsewhere.
+  - **Sing** counts 3-2-1, then shows the syllable to sing, very large.
+  - The meter on the right shows your voice against the note: **Higher**, **Lower** or **In tune**. Any key works.
+  - The ring fills when you hold the note.
+  - At the end you get your score; 80% or more passes.
+- **Settings:**
+  - Language.
+  - Brightness (− / +).
+  - Wi-Fi (tap twice to forget it).
+  - Open on phone (QR code).
+- **BOOT button:** tap to go home; hold 5 s to forget the Wi-Fi.
+- **Screen sleep:** dims after 1 minute and turns off after 3 (not while playing or singing). Touch to wake it.
 
 ## How it's built
 

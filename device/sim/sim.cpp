@@ -44,63 +44,64 @@ int main(int argc, char **argv) {
   ui.lang = 0; env.net = NET_PORTAL; ui.lastNet = NET_PORTAL; ui.scr = SC_SETUP; shot(dir, "03_setup");
   env.net = NET_CONNECTING; ui.lastNet = NET_CONNECTING; ui.scr = SC_CONNECT; shot(dir, "04_connect");
   env.net = NET_OK; ui.lastNet = NET_OK; ui.scr = SC_HOME; shot(dir, "05_home");
+  ui.scr = SC_PICK; shot(dir, "06_pick"); ui.lang = 1; shot(dir, "06_pick_te"); ui.lang = 0;
   const char *ln[] = {"en", "te", "kn", "hi"};
   for (int l = 0; l < 4; l++) { ui.lang = l; for (int p = 0; p < 3; p++) { ui.scr = SC_TATTVA; ui.n = l == 0 ? 1 : l == 1 ? 3 : l == 2 ? 4 : 6; ui.page = p; char nm[32]; snprintf(nm, 32, "10_tattva_%s_%d", ln[l], p); shot(dir, nm); } }
   ui.lang = 0; ui.n = 2; ui.page = 0; env.audio = AU_PLAYING; env.audioN = 2; env.audioProg = .4f; shot(dir, "11_playing");
-  env.audio = AU_LOADING; env.audioMeaning = true; shot(dir, "12_loading");
-  env.audio = AU_ERR_NET; ui.watch(env); env.audio = AU_IDLE; shot(dir, "13_toast");
-  ui.toastKey = -1;
-  // slide mid-way home -> tattva 1
-  ui.scr = SC_HOME; ui.slide(SC_TATTVA, 1, 0, -SW, 0, env.ms); env.ms += 120; shot(dir, "14_slide"); ui.an.on = false;
+  env.audio = AU_LOADING; shot(dir, "12_loading");
+  env.audio = AU_ERR_NET; ui.watch(env); env.audio = AU_IDLE; shot(dir, "13_toast"); ui.toastKey = -1;
+  ui.an = {true, 2, 3, -SW, env.ms}; env.ms += 110; shot(dir, "14_slide"); ui.an.on = false;
   ui.lang = 1; ui.scr = SC_SETTINGS; env.bright = 3; shot(dir, "20_settings_te");
-  ui.lang = 0; ui.scr = SC_SETTINGS; shot(dir, "21_settings_en");
+  ui.lang = 0; shot(dir, "21_settings_en");
   ui.scr = SC_QR; shot(dir, "22_qr");
-  // Sing
   static SingScore sc; ui.scr = SC_SING; ui.n = 1; env.sc = &sc; sc.begin(&TUNE[1]);
   env.sing = SG_IDLE; shot(dir, "30_sing_idle");
   env.sing = SG_COUNT; env.singT = -2.2f; shot(dir, "31_sing_count");
-  env.sing = SG_SING; env.singT = 9.0f; for (int i = 0; i < 20; i++) sc.st[i] = i % 5 == 3 ? 2 : 1; sc.hits = 16;
-  for (int k = 0; k < 12; k++) { env.singT = 8.6f + k * .033f; env.pitch = 5.2f + .1f * sinf(k); ui.frame(env); }
-  env.singT = 9.0f; shot(dir, "32_sing_live");
-  env.sing = SG_DONE; for (int i = 0; i < TUNE[1].n; i++) sc.st[i] = i % 9 == 0 ? 2 : 1; sc.hits = TUNE[1].n - (TUNE[1].n + 8) / 9; shot(dir, "33_sing_done");
-  ui.lang = 3; shot(dir, "34_sing_done_hi");
+  env.sing = SG_SING; sc.offset = 0; { const Note &no = TUNE[1].notes[5]; float t0 = no.start / 4.f * .4f; for (int k = 0; k < 8; k++) { env.singT = t0 + k * .03f; env.pitch = no.semi + .1f; ui.frame(env); } env.pitch = no.semi + .2f; shot(dir, "32_sing_intune"); env.pitch = no.semi - 1.6f; shot(dir, "33_sing_low"); }
+  env.sing = SG_LISTEN; env.singT = 3.1f; shot(dir, "34_listen");
+  env.sing = SG_DONE; for (int i = 0; i < TUNE[1].n; i++) sc.st[i] = i % 9 == 0 ? 2 : 1; sc.hits = TUNE[1].n - (TUNE[1].n + 8) / 9; shot(dir, "35_sing_done");
+  ui.lang = 3; shot(dir, "36_sing_done_hi"); ui.lang = 0; env.sing = SG_IDLE;
   // scripted touches
   {
-    UI &u = ui; u.lang = 0; u.toastKey = -1; env.sing = SG_IDLE; env.audio = AU_IDLE; u.qn = 0; int fails = 0;
+    UI &u = ui; u.toastKey = -1; env.audio = AU_IDLE; u.qn = 0; int fails = 0;
     auto step = [&](uint32_t dt) { env.ms += dt; u.frame(env); };
     auto swipe = [&](int x0, int y0, int x1, int y1) { u.touchDown(x0, y0, env.ms); u.touchMove(x1, y1); u.touchUp(env); for (int i = 0; i < 12; i++) step(33); };
-    auto tapAt = [&](int x, int y) { step(33); u.touchDown(x, y, env.ms); u.touchUp(env); step(33); };
+    auto tapAt = [&](int x, int y) { step(33); u.touchDown(x, y, env.ms); step(33); u.touchUp(env); step(33); };
     auto check = [&](bool ok, const char *what) { printf("%s %s\n", ok ? "ok  " : "FAIL", what); if (!ok) fails++; };
+    Act a;
     u.go(SC_HOME, env.ms); step(33);
-    swipe(300, 220, 80, 230); check(u.scr == SC_TATTVA && u.n == 1 && u.page == 0, "home: swipe left opens tattva 1");
-    swipe(300, 220, 80, 230); check(u.n == 2, "swipe left: tattva 2");
-    swipe(180, 330, 180, 120); check(u.page == 1, "swipe up: meaning page");
-    swipe(180, 330, 180, 120); check(u.page == 2, "swipe up: remember page");
-    swipe(180, 330, 180, 120); check(u.page == 2, "no page after remember");
-    tapAt(60, 405); Act a; check(u.pop(a) && a.t == A_PLAY && a.a == 2 && a.b == 0, "tap Recite asks to play verse 2");
-    env.audio = AU_PLAYING; env.audioN = 2; env.audioMeaning = false; step(33);
-    tapAt(60, 405); check(u.pop(a) && a.t == A_STOP, "tap Recite while playing stops");
-    env.audio = AU_IDLE; tapAt(180, 405); check(u.pop(a) && a.t == A_PLAY && a.b == 1, "tap Meaning plays the meaning");
-    tapAt(300, 405); check(u.scr == SC_SING, "tap Sing opens Sing");
-    tapAt(260, 405); check(u.pop(a) && a.t == A_SING && a.a == 2, "Sing button starts singing tattva 2");
+    tapAt(184, 336); check(u.scr == SC_PICK && !u.pickSing, "Learn opens the 8 tattvas");
+    tapAt(270, 216); check(u.scr == SC_TATTVA && u.n == 4, "tile 4 opens tattva 4");
+    tapAt(184, 115); check(u.page == 1, "Meaning tab");
+    tapAt(90, 405); check(u.pop(a) && a.t == A_PLAY && a.a == 4 && a.b == 1, "Listen on Meaning plays the meaning");
+    env.audio = AU_PLAYING; env.audioN = 4; env.audioMeaning = true; step(33);
+    tapAt(90, 405); check(u.pop(a) && a.t == A_STOP, "Listen again stops"); env.audio = AU_IDLE;
+    tapAt(70, 115); check(u.page == 0, "Verse tab");
+    tapAt(90, 405); check(u.pop(a) && a.t == A_PLAY && a.b == 0, "Listen on Verse plays the verse");
+    swipe(300, 250, 60, 255); check(u.n == 5 && u.page == 0, "swipe left: tattva 5");
+    swipe(60, 250, 300, 255); check(u.n == 4, "swipe right: tattva 4");
+    tapAt(270, 405); check(u.scr == SC_SING, "Sing button opens Sing");
+    tapAt(270, 405); check(u.pop(a) && a.t == A_SING && a.a == 4, "Sing starts");
     tapAt(90, 405); check(u.pop(a) && a.t == A_LISTEN, "Listen plays the tune");
-    tapAt(30, 36); check(u.scr == SC_TATTVA, "back from Sing to the tattva");
-    u.qn = 0; swipe(80, 220, 300, 230); swipe(80, 220, 300, 230); check(u.scr == SC_HOME, "swipe right twice: home");
-    tapAt(336, 412); check(u.scr == SC_SETTINGS, "gear opens settings");
-    tapAt(260, 145); check(u.lang == 1 && u.pop(a) && a.t == A_LANG && a.a == 1, "settings: pick Telugu");
-    tapAt(150, 288); check(u.pop(a) && a.t == A_BRIGHT && a.a == 2, "settings: brightness 2");
-    tapAt(90, 400); check(!u.pop(a), "reset Wi-Fi needs a second tap"); tapAt(90, 400); check(u.pop(a) && a.t == A_WIFI_RESET, "second tap resets Wi-Fi");
-    tapAt(270, 400); check(u.scr == SC_QR, "open on phone shows the QR");
-    swipe(80, 220, 300, 230); check(u.scr == SC_HOME, "swipe right from QR: home");
-    // Wi-Fi flow
-    u.lang = 0; env.net = NET_PORTAL; step(33); check(u.scr == SC_SETUP, "no Wi-Fi: setup screen opens");
-    env.net = NET_CONNECTING; step(33); check(u.scr == SC_CONNECT, "after saving: connecting screen");
-    env.net = NET_FAILED; step(33); env.net = NET_PORTAL; step(33); check(u.scr == SC_SETUP, "connect failed: setup again");
-    tapAt(184, 422); check(u.scr == SC_HOME && u.pop(a) && a.t == A_WIFI_SKIP, "use without Wi-Fi goes home");
-    env.net = NET_CONNECTING; step(33); env.net = NET_OK; step(33); check(u.scr == SC_HOME, "background connect keeps you home");
-    // first boot
-    u.lang = -1; u.go(SC_BOOT, env.ms); step(2300); check(u.scr == SC_LANG, "first boot: language screen");
-    tapAt(260, 300); check(u.lang == 3 && u.scr == SC_HOME, "pick Hindi on first boot, then home");
+    tapAt(40, 38); check(u.scr == SC_TATTVA, "back to the tattva");
+    tapAt(40, 38); check(u.scr == SC_PICK, "back to the tiles");
+    tapAt(40, 38); check(u.scr == SC_HOME, "back home");
+    tapAt(98, 412); check(u.scr == SC_PICK && u.pickSing, "home Sing opens the tiles for Sing");
+    tapAt(90, 120); check(u.scr == SC_SING && u.n == 1, "tile 1 opens Sing for tattva 1");
+    u.qn = 0; u.go(SC_HOME, env.ms); tapAt(270, 412); check(u.scr == SC_SETTINGS, "Settings");
+    tapAt(184, 124); check(u.scr == SC_LANG, "language row opens languages");
+    tapAt(270, 236); check(u.lang == 1 && u.scr == SC_SETTINGS && u.pop(a) && a.t == A_LANG, "pick Telugu, back to settings");
+    env.bright = 3; tapAt(318, 214); check(u.pop(a) && a.t == A_BRIGHT && a.a == 4, "brighter");
+    tapAt(98, 214); check(u.pop(a) && a.t == A_BRIGHT && a.a == 2, "dimmer");
+    tapAt(184, 304); check(!u.pop(a), "Wi-Fi reset needs a second tap"); tapAt(184, 304); check(u.pop(a) && a.t == A_WIFI_RESET, "second tap resets Wi-Fi");
+    tapAt(184, 394); check(u.scr == SC_QR, "open on phone");
+    swipe(60, 250, 300, 255); check(u.scr == SC_SETTINGS, "swipe right from QR: settings");
+    u.lang = 0; env.net = NET_PORTAL; step(33); check(u.scr == SC_SETUP, "no Wi-Fi: setup screen");
+    env.net = NET_CONNECTING; step(33); check(u.scr == SC_CONNECT, "after saving: connecting");
+    env.net = NET_FAILED; step(33); env.net = NET_PORTAL; step(33); check(u.scr == SC_SETUP, "failed: setup again");
+    tapAt(184, 412); check(u.scr == SC_HOME && u.pop(a) && a.t == A_WIFI_SKIP, "use without Wi-Fi");
+    u.lang = -1; u.go(SC_BOOT, env.ms); step(2300); check(u.scr == SC_LANG, "first boot: languages");
+    tapAt(270, 360); check(u.lang == 3 && u.scr == SC_HOME, "pick Hindi, then home");
     printf("touch test: %d failed\n", fails);
   }
   // scorer tests

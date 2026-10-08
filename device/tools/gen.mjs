@@ -36,7 +36,11 @@ const D={
  'Choose your language':{te:'మీ భాష ఎంచుకోండి',kn:'ನಿಮ್ಮ ಭಾಷೆ ಆರಿಸಿ',hi:'अपनी भाषा चुनें'},'Saved. Restarting…':{te:'సేవ్ అయింది. రీస్టార్ట్ అవుతోంది…',kn:'ಉಳಿಸಲಾಗಿದೆ. ಮರುಪ್ರಾರಂಭವಾಗುತ್ತಿದೆ…',hi:'सेव हो गया। फिर से शुरू हो रहा है…'},
  'Tap again to reset':{te:'రీసెట్‌కు మళ్ళీ నొక్కండి',kn:'ಮರುಹೊಂದಿಸಲು ಮತ್ತೆ ಒತ್ತಿ',hi:'रीसेट के लिए फिर दबाएँ'},
  'Use without Wi-Fi':{te:'Wi-Fi లేకుండా వాడండి',kn:'Wi-Fi ಇಲ್ಲದೆ ಬಳಸಿ',hi:'बिना Wi-Fi चलाएँ'},'Tattva':{te:'తత్త్వం',kn:'ತತ್ತ್ವ',hi:'तत्त्व'},
- 'The eight tattvas of the Dakṣiṇāmūrti Aṣṭakam':null,'Playing':{te:'వినిపిస్తోంది',kn:'ಕೇಳಿಸುತ್ತಿದೆ',hi:'चल रहा है'},
+ 'The eight tattvas of the Dakṣiṇāmūrti Aṣṭakam':null,
+ 'Learn':{te:'నేర్చుకోండి',kn:'ಕಲಿಯಿರಿ',hi:'सीखें'},'Choose a tattva':{te:'ఒక తత్త్వం ఎంచుకోండి',kn:'ಒಂದು ತತ್ತ್ವ ಆರಿಸಿ',hi:'एक तत्त्व चुनें'},
+ 'Idea':{te:'భావం',kn:'ಭಾವ',hi:'भाव'},'Again':{te:'మళ్ళీ',kn:'ಮತ್ತೆ',hi:'फिर से'},'Back':{te:'వెనుకకు',kn:'ಹಿಂದೆ',hi:'वापस'},
+ 'Higher':{te:'పైకి',kn:'ಮೇಲೆ',hi:'ऊँचा'},'Lower':{te:'కిందికి',kn:'ಕೆಳಗೆ',hi:'नीचा'},'In tune':{te:'సరిగ్గా',kn:'ಸರಿಯಾಗಿದೆ',hi:'सुर में'},
+ 'Sing this':{te:'ఇది పాడండి',kn:'ಇದನ್ನು ಹಾಡಿ',hi:'यह गाएँ'},'Playing':{te:'వినిపిస్తోంది',kn:'ಕೇಳಿಸುತ್ತಿದೆ',hi:'चल रहा है'},
 };
 const KEYS=Object.keys(D).filter(k=>D[k]!==null);
 const LANGS=['en','te','kn','hi'];
@@ -72,30 +76,28 @@ async function shoot(id,colors,clip){const out=[];
 async function build(fn,arg){return p.evaluate(([fn,arg])=>{const s=document.getElementById('s');s.innerHTML='';return (0,eval)('('+fn+')')(s,arg);},[fn.toString(),arg]);}
 
 // ---- tattva pages: V verse, M meaning, K remember ----
-const page=function(s,arg){const [n,kind]=arg;const x=TL(n),D2=(t,c,css)=>{const e=document.createElement('div');e.dataset.c=c;e.style.cssText=css;e.textContent=t;s.appendChild(e);return e;};
+// tattva text for one tab, alone, sized to fit a 336x212 card (the device draws the header, tabs and buttons)
+const page=function(s,arg){const [n,kind]=arg;const x=TL(n);
  const scr={te:"'Noto Serif Telugu'",kn:"'Noto Serif Kannada'"}[LANG]||'var(--dev)';
- // header: medallion + Tattva N + name
- const med=document.createElement('div');med.dataset.c='gold';med.style.cssText='position:absolute;left:18px;top:38px;width:52px;height:52px;border-radius:50%;border:2px solid #fff;display:grid;place-items:center';
- med.innerHTML=n===3?'<span style="font-family:var(--dev);font-size:30px;line-height:1">ॐ</span>':'<svg viewBox="0 0 24 24" width="32" height="32" style="fill:none;stroke:#fff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round">'+TSYM[n]+'</svg>';s.appendChild(med);
- D2(T('Tattva')+' '+n,'gold','position:absolute;left:82px;top:33px;font-size:15px;line-height:1.25;font-weight:600;letter-spacing:.04em');
- D2(x.name,'ink','position:absolute;left:82px;top:58px;right:14px;font-family:var(--disp);font-weight:600;font-size:25px;line-height:1.25;white-space:nowrap;overflow:hidden');
- const box=document.createElement('div');box.style.cssText='position:absolute;left:18px;right:22px;top:104px;bottom:86px;display:flex;flex-direction:column;justify-content:center;gap:10px';s.appendChild(box);
+ const box=document.createElement('div');box.style.cssText='position:absolute;left:0;top:0;width:336px;height:212px;display:flex;flex-direction:column;justify-content:center;gap:8px';s.appendChild(box);
  const add=(t,c,css)=>{const e=document.createElement('div');e.dataset.c=c;e.style.cssText=css;e.textContent=t;box.appendChild(e);return e;};
- let fs0;
- if(kind==='V'){fs0=x.roman?19:22;x.verse.forEach((l,i)=>add(l,i===3?'muted':'ink','overflow-wrap:anywhere;font-family:'+(x.roman?'var(--disp)':scr)+';font-style:normal;line-height:1.38;font-size:'+fs0+'px'+(x.roman?';font-weight:500':'')));}
- if(kind==='M'){add(T('Meaning'),'gold','font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase');fs0=18;x.en.forEach((l,i)=>add(l,i===3?'muted':'ink','font-size:'+fs0+'px;line-height:1.38'));}
- if(kind==='K'){add(T('Remember'),'gold','font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase');fs0=18;add(x.teach,'ink','font-size:'+fs0+'px;line-height:1.38;font-family:var(--disp);font-weight:500');
-  x.keep.forEach(k=>{const e=add('','ink','font-size:16px;line-height:1.35;display:flex;gap:8px');e.innerHTML='<span data-c="gold" style="flex:none">●</span><span data-c="muted">'+k.replace(/[<&]/g,'')+'</span>';e.removeAttribute('data-c');});}
- // shrink until it fits
- let k=1;while(box.scrollHeight>box.clientHeight+1&&k>.55){k-=.04;box.querySelectorAll('div,span').forEach(e=>{const f=parseFloat(e.dataset.f||getComputedStyle(e).fontSize);e.dataset.f=f;e.style.fontSize=(f*k)+'px';});}
+ if(kind==='V')x.verse.forEach((l,i)=>add(l,i===3?'muted':'ink','overflow-wrap:anywhere;font-family:'+(x.roman?'var(--disp)':scr)+';line-height:1.32;font-size:'+(x.roman?21:25)+'px'+(x.roman?';font-weight:500':'')));
+ if(kind==='M')x.en.slice(0,3).forEach(l=>add(l,'ink','font-size:21px;line-height:1.32'));
+ if(kind==='K')add(x.teach,'ink','font-size:25px;line-height:1.3;font-family:var(--disp);font-weight:500;text-align:center');
+ let k=1;while(box.scrollHeight>box.clientHeight+1&&k>.5){k-=.03;box.querySelectorAll('div').forEach(e=>{const f=parseFloat(e.dataset.f||getComputedStyle(e).fontSize);e.dataset.f=f;e.style.fontSize=(f*k)+'px';});}
  return {k,over:box.scrollHeight>box.clientHeight+1};};
 for(const l of LANGS){await p.evaluate(l=>setL(l),l);
- for(let n=1;n<=8;n++)for(const kind of ['V','M','K']){const r=await build(page,[n,kind]);if(r.over||r.k<.7)console.log('fit',l,n,kind,r);await shoot(`P_${l}_${n}_${kind}`,['gold','ink','muted']);}
- // UI strings: each on its own, centred, wrapping inside 330px
+ for(let n=1;n<=8;n++){
+  for(const kind of ['V','M','K']){const r=await build(page,[n,kind]);if(r.over||r.k<.7)console.log('fit',l,n,kind,r);await shoot(`P_${l}_${n}_${kind}`,['ink','muted'],{x:0,y:0,width:336,height:212});}
+  // the name: one line for headers (shrinks to fit 250px), two lines for the picker tiles (104px wide)
+  await build(function(s,n){const e=document.createElement('div');e.dataset.c='w';e.style.cssText='position:absolute;left:0;top:0;white-space:nowrap;font-family:var(--disp);font-weight:600;font-size:24px;line-height:1.3';e.textContent=TL(n).name;s.appendChild(e);let f=24;while(e.getBoundingClientRect().width>250&&f>14){f-=1;e.style.fontSize=f+'px';}},n);
+  await shoot(`N_${l}_${n}`,['w'],{x:0,y:0,width:260,height:40});
+  await build(function(s,n){const e=document.createElement('div');e.dataset.c='w';e.style.cssText='position:absolute;left:0;top:0;width:104px;font-weight:600;font-size:18px;line-height:1.2';e.textContent=TL(n).name;s.appendChild(e);let f=18;while(e.getBoundingClientRect().height>46&&f>12){f-=1;e.style.fontSize=f+'px';}},n);
+  await shoot(`NT_${l}_${n}`,['w'],{x:0,y:0,width:110,height:50});}
+ // UI strings: centred, wrapping inside 330px; short ones bigger (they sit on buttons and headers)
  for(const [i,key] of KEYS.entries()){
-  await build(function(s,arg){const e=document.createElement('div');e.dataset.c='w';e.style.cssText='position:absolute;left:0;top:0;width:330px;font-size:'+arg[1]+'px;line-height:1.3;font-weight:'+arg[2]+';text-align:center';e.textContent=T(arg[0]);s.appendChild(e);},[key,key.length>34?16:18,600]);
-  await shoot(`S_${l}_${i}`,['w'],{x:0,y:0,width:330,height:120});}
- // big title for the language screen etc.
+  await build(function(s,arg){const e=document.createElement('div');e.dataset.c='w';e.style.cssText='position:absolute;left:0;top:0;width:330px;font-size:'+arg[1]+'px;line-height:1.28;font-weight:'+arg[2]+';text-align:center';e.textContent=T(arg[0]);s.appendChild(e);},[key,key.length>34?18:22,600]);
+  await shoot(`S_${l}_${i}`,['w'],{x:0,y:0,width:330,height:130});}
 }
 await p.evaluate(()=>setL('en'));
 // language names
@@ -124,6 +126,7 @@ for(let n=1;n<=8;n++){await build(function(s,n){s.innerHTML=n===3?'<div data-c="
 // tune syllables for the Sing lane (Devanagari, deduplicated)
 const syl=await p.evaluate(()=>{const u=[];for(let v=1;v<=8;v++)for(const x of TUNES[v].n)if(u.indexOf(x[3])<0)u.push(x[3]);return u;});
 for(const [i,t] of syl.entries()){await build(function(s,a){s.innerHTML='<span data-c="w" style="position:absolute;left:2px;top:0;font-family:var(--dev);font-size:19px;line-height:1.3;white-space:nowrap"></span>';s.firstChild.textContent=a;},t);await shoot('Y_'+i,['w'],{x:0,y:0,width:72,height:30});}
+for(const [i,t] of syl.entries()){await build(function(s,a){s.innerHTML='<span data-c="w" style="position:absolute;left:4px;top:0;font-family:var(--dev);font-size:76px;line-height:1.3;white-space:nowrap"></span>';s.firstChild.textContent=a;},t);await shoot('YB_'+i,['w'],{x:0,y:0,width:220,height:104});}
 const tunes=await p.evaluate(()=>{const o={};for(let v=1;v<=8;v++){const t=TUNES[v];o[v]={bpm:t.bpm,total:t.total,n:t.n.map(x=>[x[0],x[1],x[2],x[3]])};}return o;});
 fs.writeFileSync(path.join(OUT,'manifest.json'),JSON.stringify({man,keys:KEYS,syl,tunes}));
 await b.close();console.log('rendered',man.length,'items');
