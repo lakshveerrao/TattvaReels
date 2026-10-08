@@ -11,10 +11,10 @@ head=f'''<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Tattva Reels</title>
+<title>Hey Tattva</title>
 <meta name="description" content="Short reels that teach the eight tattvas of the Dakṣiṇāmūrti Aṣṭakam. Watch, sing the verse, and share what you learnt.">
 <meta name="theme-color" content="#07050F">
-<meta property="og:title" content="Tattva Reels"><meta property="og:description" content="The world, like a city in a mirror. Watch, sing and share the eight tattvas.">
+<meta property="og:title" content="Hey Tattva"><meta property="og:description" content="The world, like a city in a mirror. Watch, sing and share the eight tattvas.">
 <link rel="icon" href="{icon}">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Tiro+Devanagari+Sanskrit:ital@0;1&family=Mukta:wght@400;500;600;700&display=swap">

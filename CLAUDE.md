@@ -1,9 +1,9 @@
-# Tattva Reels: handoff for Claude Code
+# Hey Tattva (repo: TattvaReels): handoff for Claude Code
 
 Read this first. It is the full context for resuming work on this repo.
 
 ## What this is
-A Reels-style web app (simple, like Instagram Reels) that teaches the 8 tattvas of the **Dakṣiṇāmūrti Aṣṭakam**, one verse per tattva. **All 8 are built**: 1 The mirror city, 2 The seed, 3 That you are, 4 The lamp in the pot, 5 Not the body, 6 The eclipse, 7 The unchanging I, 8 The dream of roles. Owner: Laksh (Lakshveer Rao). It should look divine/Vedic, with world-class motion graphics.
+The app is called **Hey Tattva** (renamed from Tattva Reels on 2026-10-08). A Reels-style web app (simple, like Instagram Reels) that teaches the 8 tattvas of the **Dakṣiṇāmūrti Aṣṭakam**, one verse per tattva. **All 8 are built**: 1 The mirror city, 2 The seed, 3 That you are, 4 The lamp in the pot, 5 Not the body, 6 The eclipse, 7 The unchanging I, 8 The dream of roles. Owner: Laksh (Lakshveer Rao). It should look divine/Vedic, with world-class motion graphics.
 
 - Live: https://tattvareels.vercel.app (Vercel project `tattvareels`, team "Venkat's projects")
 - Repo: github.com/lakshveerrao/TattvaReels, branch `main`. Every push auto-deploys on Vercel.

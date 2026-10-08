@@ -7,7 +7,7 @@ const GS={games:[],loaded:false,local:false,live:null,me:LS.get('tr-pid',null),b
 if(!GS.me||!/^p[a-z0-9]{8}$/.test(GS.me)){GS.me='p'+Math.random().toString(36).slice(2,10).padEnd(8,'0');LS.set('tr-pid',GS.me);}
 const myName=()=>S.user&&S.user.handle?S.user.handle:(LS.get('tr-gname','')||'');
 const styleOf=g=>ARCADE[g&&g.settings&&g.settings.style]||ARCADE.stick,secsOf=g=>styleOf(g).secs||60;
-const official=(st,n)=>({id:'o'+SL[st]+n,name:'Tattva Reels',title:ARCADE[st].name+' · '+TATTVAS[n-1].name,type:'arcade',tattva:n,settings:{style:st,level:2,seed:1},plays:0,official:true});
+const official=(st,n)=>({id:'o'+SL[st]+n,name:'Hey Tattva',title:ARCADE[st].name+' · '+TATTVAS[n-1].name,type:'arcade',tattva:n,settings:{style:st,level:2,seed:1},plays:0,official:true});
 GS.pick=Object.assign({stick:1,letters:1,build:1},LS.get('tr-gpick',{}));
 function cleanGame(g){if(!g||typeof g!=='object'||!/^(g[a-z0-9]{6,24}|o[slb][1-8])$/.test(g.id||''))return null;const s=g.settings||{},st=STYLES.includes(s.style)?s.style:'stick',n=Math.min(8,Math.max(1,+g.tattva||1));
  return{id:g.id,name:String(g.name||'seeker').slice(0,24),title:String(g.title||'').slice(0,60)||(ARCADE[st].name+' · '+TATTVAS[n-1].name),type:'arcade',tattva:n,

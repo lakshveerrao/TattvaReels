@@ -2,10 +2,10 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Tattva Reels</title>
+<title>Hey Tattva</title>
 <meta name="description" content="Short reels that teach the eight tattvas of the Dakṣiṇāmūrti Aṣṭakam. Watch, sing the verse, and share what you learnt.">
 <meta name="theme-color" content="#07050F">
-<meta property="og:title" content="Tattva Reels"><meta property="og:description" content="The world, like a city in a mirror. Watch, sing and share the eight tattvas.">
+<meta property="og:title" content="Hey Tattva"><meta property="og:description" content="The world, like a city in a mirror. Watch, sing and share the eight tattvas.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307050F'/%3E%3Cg fill='none' stroke='%23E9B44C' stroke-width='3' stroke-linejoin='round'%3E%3Cpath d='M32 52c-6-5-9-11-9-19 0-7 3-14 9-19 6 5 9 12 9 19 0 8-3 14-9 19Z'/%3E%3Cpath d='M32 52c-11 0-20-6-23-16 6-1 12 1 16 5'/%3E%3Cpath d='M32 52c11 0 20-6 23-16-6-1-12 1-16 5'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Tiro+Devanagari+Sanskrit:ital@0;1&family=Mukta:wght@400;500;600;700&display=swap">
@@ -550,7 +550,7 @@ select.field{appearance:auto;font-size:14px;min-width:0;flex:1}
     <div class="feedcol">
       <div class="reels" id="reels" aria-label="Reels"></div>
       <header class="topbar">
-        <div class="logo">Tattva <small>तत्त्व</small></div>
+        <div class="logo">Hey Tattva <small>हे तत्त्व</small></div>
         <button class="icon-btn glass" id="snd" aria-label="Turn sound on"></button>
       </header>
       <button class="hint glass" id="hint"></button>
@@ -571,7 +571,7 @@ select.field{appearance:auto;font-size:14px;min-width:0;flex:1}
   </section>
 
   <nav class="nav" aria-label="Main">
-    <div class="sidelogo">Tattva <small>तत्त्व</small><span>Dakṣiṇāmūrti Aṣṭakam · 8 tattvas</span></div>
+    <div class="sidelogo">Hey Tattva <small>हे तत्त्व</small><span>Dakṣiṇāmūrti Aṣṭakam · 8 tattvas</span></div>
     <button id="nv-feed" aria-current="page" aria-label="Reels"></button>
     <button id="nv-games" aria-label="Games"></button>
     <button id="nv-create" class="create" aria-label="Create a reel"></button>
@@ -2400,7 +2400,7 @@ function openLearn(r){const T1=TA(r);
  paintLearnBox();}
 function paintLearnBox(){const r=sheetFor.r,n=counts()[r.id]||0,m=isLearnt(r.id),b=$('#lb-btn');if(!b)return;
  $('#lb-n').textContent=fmt(n);$('#lb-line').innerHTML=learnLine(n,m);b.className='btn '+(m?'done':'gold');b.innerHTML=ico(m?'check':'lotus')+(m?'You learnt this':'I learnt this');}
-function openShare(r){const url=location.origin+'/#r-'+r.id;if(navigator.share){navigator.share({title:'Tattva Reels',text:'Tattva '+TA(r).n+' · '+TA(r).name,url}).catch(()=>{});return;}
+function openShare(r){const url=location.origin+'/#r-'+r.id;if(navigator.share){navigator.share({title:'Hey Tattva',text:'Tattva '+TA(r).n+' · '+TA(r).name,url}).catch(()=>{});return;}
  openSheet('share','<div class="shead"><h2 class="sh-title">Share this reel</h2><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
   '<div class="linkbox"><input id="sh-url" readonly aria-label="Reel link"><button class="btn gold" id="sh-copy">Copy</button></div>'+
   '<p class="note">The link opens this reel for anyone you’ve shared Tattva with.</p>');
@@ -2758,7 +2758,7 @@ const GS={games:[],loaded:false,local:false,live:null,me:LS.get('tr-pid',null),b
 if(!GS.me||!/^p[a-z0-9]{8}$/.test(GS.me)){GS.me='p'+Math.random().toString(36).slice(2,10).padEnd(8,'0');LS.set('tr-pid',GS.me);}
 const myName=()=>S.user&&S.user.handle?S.user.handle:(LS.get('tr-gname','')||'');
 const styleOf=g=>ARCADE[g&&g.settings&&g.settings.style]||ARCADE.stick,secsOf=g=>styleOf(g).secs||60;
-const official=(st,n)=>({id:'o'+SL[st]+n,name:'Tattva Reels',title:ARCADE[st].name+' · '+TATTVAS[n-1].name,type:'arcade',tattva:n,settings:{style:st,level:2,seed:1},plays:0,official:true});
+const official=(st,n)=>({id:'o'+SL[st]+n,name:'Hey Tattva',title:ARCADE[st].name+' · '+TATTVAS[n-1].name,type:'arcade',tattva:n,settings:{style:st,level:2,seed:1},plays:0,official:true});
 GS.pick=Object.assign({stick:1,letters:1,build:1},LS.get('tr-gpick',{}));
 function cleanGame(g){if(!g||typeof g!=='object'||!/^(g[a-z0-9]{6,24}|o[slb][1-8])$/.test(g.id||''))return null;const s=g.settings||{},st=STYLES.includes(s.style)?s.style:'stick',n=Math.min(8,Math.max(1,+g.tattva||1));
  return{id:g.id,name:String(g.name||'seeker').slice(0,24),title:String(g.title||'').slice(0,60)||(ARCADE[st].name+' · '+TATTVAS[n-1].name),type:'arcade',tattva:n,

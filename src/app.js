@@ -329,7 +329,7 @@ function openLearn(r){const T1=TA(r);
  paintLearnBox();}
 function paintLearnBox(){const r=sheetFor.r,n=counts()[r.id]||0,m=isLearnt(r.id),b=$('#lb-btn');if(!b)return;
  $('#lb-n').textContent=fmt(n);$('#lb-line').innerHTML=learnLine(n,m);b.className='btn '+(m?'done':'gold');b.innerHTML=ico(m?'check':'lotus')+(m?'You learnt this':'I learnt this');}
-function openShare(r){const url=location.origin+'/#r-'+r.id;if(navigator.share){navigator.share({title:'Tattva Reels',text:'Tattva '+TA(r).n+' · '+TA(r).name,url}).catch(()=>{});return;}
+function openShare(r){const url=location.origin+'/#r-'+r.id;if(navigator.share){navigator.share({title:'Hey Tattva',text:'Tattva '+TA(r).n+' · '+TA(r).name,url}).catch(()=>{});return;}
  openSheet('share','<div class="shead"><h2 class="sh-title">Share this reel</h2><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
   '<div class="linkbox"><input id="sh-url" readonly aria-label="Reel link"><button class="btn gold" id="sh-copy">Copy</button></div>'+
   '<p class="note">The link opens this reel for anyone you’ve shared Tattva with.</p>');
