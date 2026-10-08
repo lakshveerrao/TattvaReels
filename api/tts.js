@@ -28,7 +28,9 @@ const MEANINGS = [
 // (api/_voice/singer.mp3, bundled with this function, not public). Created on first use, then found by name.
 import fs from 'fs';
 const SINGER_NAME = 'Hey Tattva singer';
-let singerId = null;
+// the voice Laksh set up in ElevenLabs (2026-10-09); the automatic clone below is only a fallback
+const SINGER_ID = 'vLzh1xHQkABgLETkKewE';
+let singerId = SINGER_ID;
 async function singerVoice(key) {
   if (singerId) return { id: singerId, created: false };
   const h = { 'xi-api-key': key };

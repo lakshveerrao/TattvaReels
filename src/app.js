@@ -58,7 +58,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const S={sound:false,user:null,emailOn:true,reels:[],loaded:false,offline:false,style:DEF(),t:0,source:null,score:null,takeBuf:null,takeBlob:null,takeOffset:0,view:'feed',idx:-1,feedIds:''};
 const TAKES={};
 // recitation voice: the AI voice, or the Agara singer's own (cloned) voice
-function VQ(){try{return localStorage.getItem('tr-voice')==='singer'?'&voice=singer':''}catch(e){return ''}}
+function VQ(){try{return localStorage.getItem('tr-voice')==='singer'?'&voice=singer&sv=2':''}catch(e){return ''}}
 const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:k=>{try{localStorage.removeItem(k);}catch(e){}}};
 // the account comes from the server (/api/me); a cached copy only paints the first frame
 LS.del('tr-user');S.user=LS.get('tr-me',null);if(S.user&&!/^[a-z0-9_.]{3,20}$/.test(S.user.handle||''))S.user=null;S.scores=[];

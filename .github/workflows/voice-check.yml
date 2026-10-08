@@ -24,9 +24,9 @@ jobs:
             B=$(curl -s "$SITE/api/tts?status=1" | python3 -c "import sys,json;print(json.load(sys.stdin).get('build',''))" 2>/dev/null)
             [ "$B" = "$SHA" ] && break; sleep 15
           done
-          S=$(curl -s -m 60 "$SITE/api/tts?v=1&voice=singer&status=1")
+          S=$(curl -s -m 60 "$SITE/api/tts?v=1&voice=singer&sv=2&status=1")
           echo "status: $S"
-          code=$(curl -s -m 60 -o v.mp3 -w "%{http_code}" "$SITE/api/tts?v=3&voice=singer")
+          code=$(curl -s -m 60 -o v.mp3 -w "%{http_code}" "$SITE/api/tts?v=3&voice=singer&sv=2")
           size=$(stat -c%s v.mp3); head -c 300 v.mp3 | grep -a -o '"error":"[^"]*"' > err.txt
           if [ "$code" = "200" ] && [ "$size" -gt 20000 ]; then state=success; else state=failure; fi
           desc=$(python3 - "$S" "$code" "$size" <<'P'

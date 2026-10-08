@@ -120,7 +120,7 @@ static void taskFn(void *) {
   }
 }
 // ---- recitations ----
-static String cachePath(int n, bool m) { return String(m ? "/sm" : "/sv") + n + ".pcm"; }  // s = the singer's voice
+static String cachePath(int n, bool m) { return String(m ? "/s2m" : "/s2v") + n + ".pcm"; }  // s = the singer's voice
 static bool loadCache(int n, bool m) {
   if (!ffatOk) return false;
   File f = FFat.open(cachePath(n, m), "r"); if (!f) return false;
@@ -133,7 +133,7 @@ static void fetchFn(void *) {
   if (WiFi.status() != WL_CONNECTED) { if (curN == n && curMeaning == m) status = 3; fetchTask = nullptr; vTaskDelete(nullptr); return; }
   WiFiClientSecure cli; cli.setInsecure(); cli.setTimeout(20);
   HTTPClient http; http.setTimeout(25000); http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
-  String url = String(SITE) + "/api/tts?v=" + n + (m ? "&m=1" : "") + "&fmt=pcm&voice=singer";
+  String url = String(SITE) + "/api/tts?v=" + n + (m ? "&m=1" : "") + "&fmt=pcm&voice=singer&sv=2";
   if (http.begin(cli, url)) {
     int code = http.GET();
     if (code == 200) {
