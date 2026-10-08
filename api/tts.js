@@ -24,7 +24,31 @@ const MEANINGS = [
  "Cause and effect, owner and owned, teacher and student, parent and child. One Self plays every role, like a dreamer who is every person in the dream."
 ];
 
+// The singer's own voice (voice=singer): an ElevenLabs instant voice clone made from his cleaned Agara recording
+// (api/_voice/singer.mp3, bundled with this function, not public). Created on first use, then found by name.
+import fs from 'fs';
+const SINGER_NAME = 'Hey Tattva singer';
+let singerId = null;
+async function singerVoice(key) {
+  if (singerId) return { id: singerId, created: false };
+  const h = { 'xi-api-key': key };
+  const list = await fetch('https://api.elevenlabs.io/v1/voices', { headers: h }).then(r => r.ok ? r.json() : Promise.reject(new Error('list ' + r.status)));
+  const found = (list.voices || []).find(x => x.name === SINGER_NAME);
+  if (found) { singerId = found.voice_id; return { id: singerId, created: false }; }
+  const mp3 = fs.readFileSync(new URL('./_voice/singer.mp3', import.meta.url));
+  const form = new FormData();
+  form.append('name', SINGER_NAME);
+  form.append('description', 'The singer of the Agara rock version of the Dakṣiṇāmūrti Aṣṭakam, cloned from his own recording for Hey Tattva.');
+  form.append('remove_background_noise', 'true');
+  form.append('files', new Blob([mp3], { type: 'audio/mpeg' }), 'singer.mp3');
+  const r = await fetch('https://api.elevenlabs.io/v1/voices/add', { method: 'POST', headers: h, body: form });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.voice_id) throw new Error('clone ' + r.status + ' ' + JSON.stringify(j).slice(0, 300));
+  singerId = j.voice_id; return { id: singerId, created: true };
+}
+
 export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
   const q = new URL(req.url, 'http://x').searchParams;
   const v = Math.min(8, Math.max(1, parseInt(q.get('v') || '1', 10) || 1));
   const meaning = q.get('m') === '1';
@@ -33,11 +57,18 @@ export default async function handler(req, res) {
   const key = process.env.ELEVENLABS_API_KEY;
   const json = (code, msg) => { res.statusCode = code; res.setHeader('Content-Type', 'application/json'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify({ error: msg })); };
   if (!key) return json(501, 'AI voice isn’t set up on the server.');
-  const voice = (process.env.ELEVENLABS_VOICE_ID || 'JBFqnCBsd6RMkjVDRZzb').replace(/[^\w-]/g, '');
+  const singer = q.get('voice') === 'singer';
+  let voice = (process.env.ELEVENLABS_VOICE_ID || 'JBFqnCBsd6RMkjVDRZzb').replace(/[^\w-]/g, '');
+  if (singer) {
+    try { const s = await singerVoice(key); voice = s.id;
+      if (q.get('status') === '1') { res.statusCode = 200; res.setHeader('Content-Type', 'application/json'); res.setHeader('Cache-Control', 'no-store'); return res.end(JSON.stringify({ ok: true, voice: s.id, created: s.created, build: process.env.VERCEL_GIT_COMMIT_SHA || '' })); }
+    } catch (e) { console.error('singer voice', e); return json(502, 'The singer voice isn’t ready: ' + String(e.message || e).slice(0, 200)); }
+  }
+  if (q.get('status') === '1') { res.statusCode = 200; res.setHeader('Content-Type', 'application/json'); res.setHeader('Cache-Control', 'no-store'); return res.end(JSON.stringify({ ok: true, build: process.env.VERCEL_GIT_COMMIT_SHA || '' })); }
   try {
     const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?output_format=' + (pcm ? 'pcm_16000' : 'mp3_44100_128'), {
       method: 'POST', headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: pcm ? 'audio/pcm' : 'audio/mpeg' },
-      body: JSON.stringify({ text: meaning ? MEANINGS[v - 1] : VERSES[v - 1], model_id: 'eleven_multilingual_v2', voice_settings: { stability: .55, similarity_boost: .75 } })
+      body: JSON.stringify({ text: meaning ? MEANINGS[v - 1] : VERSES[v - 1], model_id: 'eleven_multilingual_v2', voice_settings: singer ? { stability: .42, similarity_boost: .9, style: .35, use_speaker_boost: true } : { stability: .55, similarity_boost: .75 } })
     });
     if (!r.ok) { console.error('elevenlabs', r.status, await r.text()); return json(502, 'ElevenLabs didn’t return audio. Check the API key and credits.'); }
     let buf = Buffer.from(await r.arrayBuffer());

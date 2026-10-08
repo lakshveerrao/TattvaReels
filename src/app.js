@@ -57,6 +57,8 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 
 const S={sound:false,user:null,emailOn:true,reels:[],loaded:false,offline:false,style:DEF(),t:0,source:null,score:null,takeBuf:null,takeBlob:null,takeOffset:0,view:'feed',idx:-1,feedIds:''};
 const TAKES={};
+// recitation voice: the AI voice, or the Agara singer's own (cloned) voice
+function VQ(){try{return localStorage.getItem('tr-voice')==='singer'?'&voice=singer':''}catch(e){return ''}}
 const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:k=>{try{localStorage.removeItem(k);}catch(e){}}};
 // the account comes from the server (/api/me); a cached copy only paints the first frame
 LS.del('tr-user');S.user=LS.get('tr-me',null);if(S.user&&!/^[a-z0-9_.]{3,20}$/.test(S.user.handle||''))S.user=null;S.scores=[];
@@ -66,7 +68,7 @@ let cur=null;
 const EL={bufs:{},busy:false,off:false,ps:{}};
 function elBuf(n){return EL.bufs[n||1]||null;}
 function elFetch(n){n=n||1;if(EL.bufs[n])return Promise.resolve(EL.bufs[n]);if(EL.off)return Promise.reject(501);if(EL.ps[n])return EL.ps[n];
- EL.ps[n]=fetch('/api/tts?v='+n).then(async r=>{if(!r.ok){if(r.status===501)EL.off=true;throw r.status;}const ab=await r.arrayBuffer(),ac=new AC();const b=await ac.decodeAudioData(ab);closeAC(ac);EL.bufs[n]=b;return b;}).finally(()=>{EL.ps[n]=null;});return EL.ps[n];}
+ EL.ps[n]=fetch('/api/tts?v='+n+VQ()).then(async r=>{if(!r.ok){if(r.status===501)EL.off=true;throw r.status;}const ab=await r.arrayBuffer(),ac=new AC();const b=await ac.decodeAudioData(ab);closeAC(ac);EL.bufs[n]=b;return b;}).finally(()=>{EL.ps[n]=null;});return EL.ps[n];}
 const API=(p,o)=>fetch(p,Object.assign({credentials:'same-origin',headers:{'Content-Type':'application/json'}},o||{})).then(async r=>{let j={};try{j=await r.json();}catch(e){}if(!r.ok){const e=new Error(j.error||'Something went wrong. Try again.');e.status=r.status;throw e;}return j;});
 
 /* ---------- helpers ---------- */
@@ -386,10 +388,11 @@ function renderTop(){const c=counts(),all=allReels(),mine=all.filter(r=>r.own),l
  box.innerHTML='<div class="mecard"><div class="mehead">'+(u?'<span class="ava big">'+esc(u.handle[0].toUpperCase())+'</span><div class="meid"><h1>'+esc(u.handle)+'</h1><p class="note">'+esc(LX('{n} of 8 tattvas learnt').replace('{n}',got.size))+'</p></div>'
   :'<span class="ava big ghost">'+ico('user')+'</span><div class="meid"><h1>'+esc(LX('Your space'))+'</h1><p class="note">'+esc(LX('Sign in to keep your reels, learnings and game scores on every device.'))+'</p></div>')+'</div>'+
   (u?'':'<button class="btn gold" id="me-in">'+ico('mail')+esc(LX('Sign in with email'))+'</button>')+
-  '<div class="mebtns">'+(u?'<button class="mbtn" id="me-edit">'+ico('edit')+'<span>'+esc(LX('Name'))+'</span></button>':'')+'<button class="mbtn" id="me-lang">'+ico('globe')+'<span>'+esc(LN)+'</span></button>'+(u?'<button class="mbtn" id="me-out">'+ico('out')+'<span>'+esc(LX('Sign out'))+'</span></button>':'')+'</div>'+
+  '<div class="mebtns">'+(u?'<button class="mbtn" id="me-edit">'+ico('edit')+'<span>'+esc(LX('Name'))+'</span></button>':'')+'<button class="mbtn" id="me-lang">'+ico('globe')+'<span>'+esc(LN)+'</span></button><button class="mbtn" id="me-voice">'+ico('mic')+'<span>'+esc(LX(VQ()?'Singer voice':'AI voice'))+'</span></button>'+(u?'<button class="mbtn" id="me-out">'+ico('out')+'<span>'+esc(LX('Sign out'))+'</span></button>':'')+'</div>'+
   '<div class="mstats"><div><b>'+fmt(learnt.length)+'</b><span>'+esc(LX('Learnt'))+'</span></div><div><b>'+fmt(mine.length)+'</b><span>'+esc(LX('My reels'))+'</span></div><div><b>'+fmt(plays)+'</b><span>'+esc(LX('Games played'))+'</span></div><div><b>'+fmt(best)+'</b><span>'+esc(LX('Best score'))+'</span></div></div></div>'+
   '<div class="metabs" role="tablist">'+[['tattvas','Your tattvas'],['mine','My reels'],['learnt','Learnt'],['scores','Game scores'],['top','Top reels']].map(x=>'<button role="tab" data-tab="'+x[0]+'" aria-selected="'+(S.meTab===x[0])+'">'+esc(LX(x[1]))+'</button>').join('')+'</div><div class="lb" id="lb"></div>';
  $('#me-lang').onclick=()=>openLang();
+ $('#me-voice').onclick=()=>{try{localStorage.setItem('tr-voice',VQ()?'ai':'singer')}catch(e){}toast(VQ()?'Recitations now in the singer\'s voice':'Recitations now in the AI voice');try{sessionStorage.setItem('tr-resume','app')}catch(e){}setTimeout(()=>location.reload(),900);};
  if(u){$('#me-out').onclick=signOut;$('#me-edit').onclick=()=>openName(false);}else $('#me-in').onclick=()=>openSignin(()=>renderTop(),'Sign in');
  box.querySelectorAll('.metabs button').forEach(b=>b.onclick=()=>{S.meTab=b.dataset.tab;renderTop();const sel=box.querySelector('.metabs [aria-selected="true"]');if(sel)sel.scrollIntoView({block:'nearest',inline:'center'});});
  if(S.meTab==='tattvas'){$('#lb').innerHTML='<div class="mala"><svg viewBox="0 0 330 40" aria-hidden="true">'+beads+'</svg><p>'+esc(LX('Learning mala: {n} of 108 reels').replace('{n}',fmt(learnt.length)))+'</p></div>'+

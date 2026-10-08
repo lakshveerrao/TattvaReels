@@ -2515,6 +2515,8 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 
 const S={sound:false,user:null,emailOn:true,reels:[],loaded:false,offline:false,style:DEF(),t:0,source:null,score:null,takeBuf:null,takeBlob:null,takeOffset:0,view:'feed',idx:-1,feedIds:''};
 const TAKES={};
+// recitation voice: the AI voice, or the Agara singer's own (cloned) voice
+function VQ(){try{return localStorage.getItem('tr-voice')==='singer'?'&voice=singer':''}catch(e){return ''}}
 const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:k=>{try{localStorage.removeItem(k);}catch(e){}}};
 // the account comes from the server (/api/me); a cached copy only paints the first frame
 LS.del('tr-user');S.user=LS.get('tr-me',null);if(S.user&&!/^[a-z0-9_.]{3,20}$/.test(S.user.handle||''))S.user=null;S.scores=[];
@@ -2524,7 +2526,7 @@ let cur=null;
 const EL={bufs:{},busy:false,off:false,ps:{}};
 function elBuf(n){return EL.bufs[n||1]||null;}
 function elFetch(n){n=n||1;if(EL.bufs[n])return Promise.resolve(EL.bufs[n]);if(EL.off)return Promise.reject(501);if(EL.ps[n])return EL.ps[n];
- EL.ps[n]=fetch('/api/tts?v='+n).then(async r=>{if(!r.ok){if(r.status===501)EL.off=true;throw r.status;}const ab=await r.arrayBuffer(),ac=new AC();const b=await ac.decodeAudioData(ab);closeAC(ac);EL.bufs[n]=b;return b;}).finally(()=>{EL.ps[n]=null;});return EL.ps[n];}
+ EL.ps[n]=fetch('/api/tts?v='+n+VQ()).then(async r=>{if(!r.ok){if(r.status===501)EL.off=true;throw r.status;}const ab=await r.arrayBuffer(),ac=new AC();const b=await ac.decodeAudioData(ab);closeAC(ac);EL.bufs[n]=b;return b;}).finally(()=>{EL.ps[n]=null;});return EL.ps[n];}
 const API=(p,o)=>fetch(p,Object.assign({credentials:'same-origin',headers:{'Content-Type':'application/json'}},o||{})).then(async r=>{let j={};try{j=await r.json();}catch(e){}if(!r.ok){const e=new Error(j.error||'Something went wrong. Try again.');e.status=r.status;throw e;}return j;});
 
 /* ---------- helpers ---------- */
@@ -2844,10 +2846,11 @@ function renderTop(){const c=counts(),all=allReels(),mine=all.filter(r=>r.own),l
  box.innerHTML='<div class="mecard"><div class="mehead">'+(u?'<span class="ava big">'+esc(u.handle[0].toUpperCase())+'</span><div class="meid"><h1>'+esc(u.handle)+'</h1><p class="note">'+esc(LX('{n} of 8 tattvas learnt').replace('{n}',got.size))+'</p></div>'
   :'<span class="ava big ghost">'+ico('user')+'</span><div class="meid"><h1>'+esc(LX('Your space'))+'</h1><p class="note">'+esc(LX('Sign in to keep your reels, learnings and game scores on every device.'))+'</p></div>')+'</div>'+
   (u?'':'<button class="btn gold" id="me-in">'+ico('mail')+esc(LX('Sign in with email'))+'</button>')+
-  '<div class="mebtns">'+(u?'<button class="mbtn" id="me-edit">'+ico('edit')+'<span>'+esc(LX('Name'))+'</span></button>':'')+'<button class="mbtn" id="me-lang">'+ico('globe')+'<span>'+esc(LN)+'</span></button>'+(u?'<button class="mbtn" id="me-out">'+ico('out')+'<span>'+esc(LX('Sign out'))+'</span></button>':'')+'</div>'+
+  '<div class="mebtns">'+(u?'<button class="mbtn" id="me-edit">'+ico('edit')+'<span>'+esc(LX('Name'))+'</span></button>':'')+'<button class="mbtn" id="me-lang">'+ico('globe')+'<span>'+esc(LN)+'</span></button><button class="mbtn" id="me-voice">'+ico('mic')+'<span>'+esc(LX(VQ()?'Singer voice':'AI voice'))+'</span></button>'+(u?'<button class="mbtn" id="me-out">'+ico('out')+'<span>'+esc(LX('Sign out'))+'</span></button>':'')+'</div>'+
   '<div class="mstats"><div><b>'+fmt(learnt.length)+'</b><span>'+esc(LX('Learnt'))+'</span></div><div><b>'+fmt(mine.length)+'</b><span>'+esc(LX('My reels'))+'</span></div><div><b>'+fmt(plays)+'</b><span>'+esc(LX('Games played'))+'</span></div><div><b>'+fmt(best)+'</b><span>'+esc(LX('Best score'))+'</span></div></div></div>'+
   '<div class="metabs" role="tablist">'+[['tattvas','Your tattvas'],['mine','My reels'],['learnt','Learnt'],['scores','Game scores'],['top','Top reels']].map(x=>'<button role="tab" data-tab="'+x[0]+'" aria-selected="'+(S.meTab===x[0])+'">'+esc(LX(x[1]))+'</button>').join('')+'</div><div class="lb" id="lb"></div>';
  $('#me-lang').onclick=()=>openLang();
+ $('#me-voice').onclick=()=>{try{localStorage.setItem('tr-voice',VQ()?'ai':'singer')}catch(e){}toast(VQ()?'Recitations now in the singer\'s voice':'Recitations now in the AI voice');try{sessionStorage.setItem('tr-resume','app')}catch(e){}setTimeout(()=>location.reload(),900);};
  if(u){$('#me-out').onclick=signOut;$('#me-edit').onclick=()=>openName(false);}else $('#me-in').onclick=()=>openSignin(()=>renderTop(),'Sign in');
  box.querySelectorAll('.metabs button').forEach(b=>b.onclick=()=>{S.meTab=b.dataset.tab;renderTop();const sel=box.querySelector('.metabs [aria-selected="true"]');if(sel)sel.scrollIntoView({block:'nearest',inline:'center'});});
  if(S.meTab==='tattvas'){$('#lb').innerHTML='<div class="mala"><svg viewBox="0 0 330 40" aria-hidden="true">'+beads+'</svg><p>'+esc(LX('Learning mala: {n} of 108 reels').replace('{n}',fmt(learnt.length)))+'</p></div>'+
@@ -3190,7 +3193,7 @@ function narrSpeak(text,lang){return new Promise(ok=>{try{const u=new SpeechSynt
 // Plays recitation then meaning; onStep(stage, lineIndex) drives the captions. Resolves when done (or skipped).
 async function narrate(n,onStep){narrStop();const my=++NARR.run,V=TATTVAS[n-1],alive=()=>NARR.run===my;
  let rec=null,mean=null;onStep('load');
- try{[rec,mean]=await Promise.all([narrBuf('r'+n,'/api/tts?v='+n),narrBuf('m'+n,'/api/tts?v='+n+'&m=1')]);}catch(e){}
+ try{[rec,mean]=await Promise.all([narrBuf('r'+n,'/api/tts?v='+n+VQ()),narrBuf('m'+n,'/api/tts?v='+n+'&m=1'+VQ())]);}catch(e){}
  if(!alive())return;
  if(rec){onStep('verse',0);const t0=Date.now(),line=rec.duration*1000/4,iv=setInterval(()=>{if(!alive()){clearInterval(iv);return;}onStep('verse',Math.min(3,Math.floor((Date.now()-t0)/line)));},200);await narrPlay(rec);clearInterval(iv);}
  else{const t0=Date.now(),iv=setInterval(()=>{if(!alive()){clearInterval(iv);return;}onStep('verse',Math.min(3,Math.floor((Date.now()-t0)/2500)));},250);onStep('verse',0);await Promise.all([narrSpeak(V.dev.join(' '),'hi-IN'),new Promise(r=>setTimeout(r,10000))]);clearInterval(iv);}
@@ -3199,7 +3202,7 @@ async function narrate(n,onStep){narrStop();const my=++NARR.run,V=TATTVAS[n-1],a
  if(alive())onStep('done');}
 
 /* during play: one line of the recitation at a time (the verse has four lines of equal metre), and the meaning at the end */
-function narrPreload(n){narrBuf('r'+n,'/api/tts?v='+n).catch(()=>{});narrBuf('m'+n,'/api/tts?v='+n+'&m=1').catch(()=>{});}
+function narrPreload(n){narrBuf('r'+n,'/api/tts?v='+n+VQ()).catch(()=>{});narrBuf('m'+n,'/api/tts?v='+n+'&m=1'+VQ()).catch(()=>{});}
 function playSlice(buf,from,dur){const a=ARC.audio();if(!a||!buf)return;if(NARR.src){try{NARR.src.stop();}catch(e){}}const s=a.createBufferSource(),g=a.createGain();s.buffer=buf;g.gain.value=1.1;s.connect(g);g.connect(a.destination);s.start(0,from,dur);NARR.src=s;}
 function gameVoice(n){return{line:i=>{const b=NARR.buf['r'+n];if(b)playSlice(b,b.duration*i/4,b.duration/4+.25);},meaning:()=>{const b=NARR.buf['m'+n];if(b)playSlice(b,0,b.duration);}};}
 
@@ -3539,7 +3542,7 @@ const TRAILER=(function(){
    Every time the site opens: the landing page → "Enter the experience" → the language screen (skipped only when
    "Remember this language" was ticked; Me → Language changes it) → the app with a short tour (every time, skippable).
    A language change reloads the page; sessionStorage 'tr-resume' tells the reloaded page where to pick up. */
-Object.assign(UI18N.te,{"Enter":"ప్రవేశించు","Enter the experience":"అనుభవంలోకి ప్రవేశించండి","Watch the trailer":"ట్రైలర్ చూడండి","What":"ఏమిటి","Why":"ఎందుకు","How":"ఎలా",
+Object.assign(UI18N.te,{"Singer voice":"గాయకుడి గొంతు","AI voice":"AI గొంతు","Recitations now in the singer's voice":"ఇప్పుడు పఠనం గాయకుడి గొంతులో","Recitations now in the AI voice":"ఇప్పుడు పఠనం AI గొంతులో","Enter":"ప్రవేశించు","Enter the experience":"అనుభవంలోకి ప్రవేశించండి","Watch the trailer":"ట్రైలర్ చూడండి","What":"ఏమిటి","Why":"ఎందుకు","How":"ఎలా",
  "Dakṣiṇāmūrti Aṣṭakam · Ādi Śaṅkara":"దక్షిణామూర్తి అష్టకం · ఆది శంకర",
  "Eight verses. Eight truths about who you really are. Learn them the way you scroll.":"ఎనిమిది శ్లోకాలు. నువ్వు నిజంగా ఎవరో చెప్పే ఎనిమిది సత్యాలు. స్క్రోల్ చేస్తూనే నేర్చుకోండి.",
  "A reel for every verse":"ప్రతి శ్లోకానికి ఒక రీల్","Hey Tattva turns the Dakṣiṇāmūrti Aṣṭakam into short reels. Eight verses by Ādi Śaṅkara, each holding one tattva, a truth about the Self. Every verse comes with its meaning word by word, a 3D film, a song and games.":"హే తత్త్వ దక్షిణామూర్తి అష్టకాన్ని చిన్న రీల్స్‌గా మారుస్తుంది. ఆది శంకరుల ఎనిమిది శ్లోకాలు, ప్రతి దానిలో ఒక తత్త్వం, ఆత్మ గురించి ఒక సత్యం. ప్రతి శ్లోకానికి పదం పదంగా అర్థం, 3D చిత్రం, పాట, ఆటలు ఉన్నాయి.",
@@ -3556,7 +3559,7 @@ Object.assign(UI18N.te,{"Enter":"ప్రవేశించు","Enter the expe
  "Open the meaning of the verse, word by word.":"శ్లోకం అర్థాన్ని పదం పదంగా తెరవండి.","Make your own reel of this verse: your music, your voice.":"ఈ శ్లోకంతో మీ సొంత రీల్: మీ సంగీతం, మీ గొంతు.","Send this reel to a friend.":"ఈ రీల్‌ను స్నేహితుడికి పంపండి.",
  "Play the tattvas: four games, alone or live with friends.":"తత్త్వాలను ఆడండి: నాలుగు ఆటలు, ఒంటరిగా లేదా స్నేహితులతో లైవ్.","Create a reel: pick a tattva, instruments and sing the shloka.":"రీల్ చేయండి: తత్త్వం, వాయిద్యాలు ఎంచుకుని శ్లోకం పాడండి.","Your page: tattvas learnt, your reels, scores, name and language.":"మీ పేజీ: నేర్చుకున్న తత్త్వాలు, మీ రీల్స్, స్కోర్లు, పేరు, భాష.",
  "That’s it. Start with the first tattva.":"అంతే. మొదటి తత్త్వంతో మొదలుపెట్టండి.","Made with devotion by Laksh":"లక్ష్ భక్తితో చేసినది","{i} of {n}":"{n}లో {i}"});
-Object.assign(UI18N.kn,{"Enter":"ಪ್ರವೇಶಿಸಿ","Enter the experience":"ಅನುಭವಕ್ಕೆ ಪ್ರವೇಶಿಸಿ","Watch the trailer":"ಟ್ರೈಲರ್ ನೋಡಿ","What":"ಏನು","Why":"ಏಕೆ","How":"ಹೇಗೆ",
+Object.assign(UI18N.kn,{"Singer voice":"ಗಾಯಕನ ಧ್ವನಿ","AI voice":"AI ಧ್ವನಿ","Recitations now in the singer's voice":"ಈಗ ಪಠಣ ಗಾಯಕನ ಧ್ವನಿಯಲ್ಲಿ","Recitations now in the AI voice":"ಈಗ ಪಠಣ AI ಧ್ವನಿಯಲ್ಲಿ","Enter":"ಪ್ರವೇಶಿಸಿ","Enter the experience":"ಅನುಭವಕ್ಕೆ ಪ್ರವೇಶಿಸಿ","Watch the trailer":"ಟ್ರೈಲರ್ ನೋಡಿ","What":"ಏನು","Why":"ಏಕೆ","How":"ಹೇಗೆ",
  "Dakṣiṇāmūrti Aṣṭakam · Ādi Śaṅkara":"ದಕ್ಷಿಣಾಮೂರ್ತಿ ಅಷ್ಟಕಂ · ಆದಿ ಶಂಕರ",
  "Eight verses. Eight truths about who you really are. Learn them the way you scroll.":"ಎಂಟು ಶ್ಲೋಕಗಳು. ನೀನು ನಿಜವಾಗಿ ಯಾರು ಎಂಬ ಎಂಟು ಸತ್ಯಗಳು. ಸ್ಕ್ರೋಲ್ ಮಾಡುತ್ತಲೇ ಕಲಿಯಿರಿ.",
  "A reel for every verse":"ಪ್ರತಿ ಶ್ಲೋಕಕ್ಕೆ ಒಂದು ರೀಲ್","Hey Tattva turns the Dakṣiṇāmūrti Aṣṭakam into short reels. Eight verses by Ādi Śaṅkara, each holding one tattva, a truth about the Self. Every verse comes with its meaning word by word, a 3D film, a song and games.":"ಹೇ ತತ್ತ್ವ ದಕ್ಷಿಣಾಮೂರ್ತಿ ಅಷ್ಟಕವನ್ನು ಚಿಕ್ಕ ರೀಲ್‌ಗಳಾಗಿ ಮಾಡುತ್ತದೆ. ಆದಿ ಶಂಕರರ ಎಂಟು ಶ್ಲೋಕಗಳು, ಪ್ರತಿಯೊಂದರಲ್ಲೂ ಒಂದು ತತ್ತ್ವ, ಆತ್ಮದ ಬಗ್ಗೆ ಒಂದು ಸತ್ಯ. ಪ್ರತಿ ಶ್ಲೋಕಕ್ಕೆ ಪದ ಪದವಾಗಿ ಅರ್ಥ, 3D ಚಿತ್ರ, ಹಾಡು ಮತ್ತು ಆಟಗಳಿವೆ.",
@@ -3573,7 +3576,7 @@ Object.assign(UI18N.kn,{"Enter":"ಪ್ರವೇಶಿಸಿ","Enter the experie
  "Open the meaning of the verse, word by word.":"ಶ್ಲೋಕದ ಅರ್ಥವನ್ನು ಪದ ಪದವಾಗಿ ತೆರೆಯಿರಿ.","Make your own reel of this verse: your music, your voice.":"ಈ ಶ್ಲೋಕದ ನಿಮ್ಮದೇ ರೀಲ್: ನಿಮ್ಮ ಸಂಗೀತ, ನಿಮ್ಮ ಧ್ವನಿ.","Send this reel to a friend.":"ಈ ರೀಲ್ ಅನ್ನು ಸ್ನೇಹಿತರಿಗೆ ಕಳುಹಿಸಿ.",
  "Play the tattvas: four games, alone or live with friends.":"ತತ್ತ್ವಗಳನ್ನು ಆಡಿ: ನಾಲ್ಕು ಆಟಗಳು, ಒಬ್ಬರೇ ಅಥವಾ ಸ್ನೇಹಿತರೊಂದಿಗೆ ಲೈವ್.","Create a reel: pick a tattva, instruments and sing the shloka.":"ರೀಲ್ ಮಾಡಿ: ತತ್ತ್ವ, ವಾದ್ಯಗಳನ್ನು ಆರಿಸಿ ಶ್ಲೋಕ ಹಾಡಿ.","Your page: tattvas learnt, your reels, scores, name and language.":"ನಿಮ್ಮ ಪುಟ: ಕಲಿತ ತತ್ತ್ವಗಳು, ನಿಮ್ಮ ರೀಲ್‌ಗಳು, ಅಂಕಗಳು, ಹೆಸರು, ಭಾಷೆ.",
  "That’s it. Start with the first tattva.":"ಅಷ್ಟೇ. ಮೊದಲ ತತ್ತ್ವದಿಂದ ಆರಂಭಿಸಿ.","Made with devotion by Laksh":"ಲಕ್ಷ್ ಭಕ್ತಿಯಿಂದ ಮಾಡಿದ್ದು","{i} of {n}":"{n}ರಲ್ಲಿ {i}"});
-Object.assign(UI18N.hi,{"Enter":"प्रवेश","Enter the experience":"अनुभव में प्रवेश करें","Watch the trailer":"ट्रेलर देखें","What":"क्या","Why":"क्यों","How":"कैसे",
+Object.assign(UI18N.hi,{"Singer voice":"गायक की आवाज़","AI voice":"AI आवाज़","Recitations now in the singer's voice":"अब पाठ गायक की आवाज़ में","Recitations now in the AI voice":"अब पाठ AI आवाज़ में","Enter":"प्रवेश","Enter the experience":"अनुभव में प्रवेश करें","Watch the trailer":"ट्रेलर देखें","What":"क्या","Why":"क्यों","How":"कैसे",
  "Dakṣiṇāmūrti Aṣṭakam · Ādi Śaṅkara":"दक्षिणामूर्ति अष्टकम् · आदि शंकर",
  "Eight verses. Eight truths about who you really are. Learn them the way you scroll.":"आठ श्लोक। आप वास्तव में कौन हैं, इसके आठ सत्य। स्क्रॉल करते-करते सीखें।",
  "A reel for every verse":"हर श्लोक के लिए एक रील","Hey Tattva turns the Dakṣiṇāmūrti Aṣṭakam into short reels. Eight verses by Ādi Śaṅkara, each holding one tattva, a truth about the Self. Every verse comes with its meaning word by word, a 3D film, a song and games.":"हे तत्त्व दक्षिणामूर्ति अष्टकम् को छोटी रीलों में बदलता है। आदि शंकर के आठ श्लोक, हर एक में एक तत्त्व, आत्मा के बारे में एक सत्य। हर श्लोक के साथ शब्द-दर-शब्द अर्थ, एक 3D फ़िल्म, एक गीत और खेल हैं।",

@@ -45,7 +45,7 @@ function narrSpeak(text,lang){return new Promise(ok=>{try{const u=new SpeechSynt
 // Plays recitation then meaning; onStep(stage, lineIndex) drives the captions. Resolves when done (or skipped).
 async function narrate(n,onStep){narrStop();const my=++NARR.run,V=TATTVAS[n-1],alive=()=>NARR.run===my;
  let rec=null,mean=null;onStep('load');
- try{[rec,mean]=await Promise.all([narrBuf('r'+n,'/api/tts?v='+n),narrBuf('m'+n,'/api/tts?v='+n+'&m=1')]);}catch(e){}
+ try{[rec,mean]=await Promise.all([narrBuf('r'+n,'/api/tts?v='+n+VQ()),narrBuf('m'+n,'/api/tts?v='+n+'&m=1'+VQ())]);}catch(e){}
  if(!alive())return;
  if(rec){onStep('verse',0);const t0=Date.now(),line=rec.duration*1000/4,iv=setInterval(()=>{if(!alive()){clearInterval(iv);return;}onStep('verse',Math.min(3,Math.floor((Date.now()-t0)/line)));},200);await narrPlay(rec);clearInterval(iv);}
  else{const t0=Date.now(),iv=setInterval(()=>{if(!alive()){clearInterval(iv);return;}onStep('verse',Math.min(3,Math.floor((Date.now()-t0)/2500)));},250);onStep('verse',0);await Promise.all([narrSpeak(V.dev.join(' '),'hi-IN'),new Promise(r=>setTimeout(r,10000))]);clearInterval(iv);}
@@ -54,7 +54,7 @@ async function narrate(n,onStep){narrStop();const my=++NARR.run,V=TATTVAS[n-1],a
  if(alive())onStep('done');}
 
 /* during play: one line of the recitation at a time (the verse has four lines of equal metre), and the meaning at the end */
-function narrPreload(n){narrBuf('r'+n,'/api/tts?v='+n).catch(()=>{});narrBuf('m'+n,'/api/tts?v='+n+'&m=1').catch(()=>{});}
+function narrPreload(n){narrBuf('r'+n,'/api/tts?v='+n+VQ()).catch(()=>{});narrBuf('m'+n,'/api/tts?v='+n+'&m=1'+VQ()).catch(()=>{});}
 function playSlice(buf,from,dur){const a=ARC.audio();if(!a||!buf)return;if(NARR.src){try{NARR.src.stop();}catch(e){}}const s=a.createBufferSource(),g=a.createGain();s.buffer=buf;g.gain.value=1.1;s.connect(g);g.connect(a.destination);s.start(0,from,dur);NARR.src=s;}
 function gameVoice(n){return{line:i=>{const b=NARR.buf['r'+n];if(b)playSlice(b,b.duration*i/4,b.duration/4+.25);},meaning:()=>{const b=NARR.buf['m'+n];if(b)playSlice(b,0,b.duration);}};}
 
