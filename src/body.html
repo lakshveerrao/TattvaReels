@@ -18,11 +18,33 @@
     </div>
   </section>
 
+  <section class="view" id="v-games" hidden>
+    <div class="reels" id="games" aria-label="Games"></div>
+    <header class="topbar gtop">
+      <div class="logo">Games <small>क्रीडा</small></div>
+      <div class="gbtns"><button class="tpill glass" id="gx-join"></button><button class="tpill glass gold" id="gx-make"></button></div>
+    </header>
+  </section>
+
   <nav class="nav" aria-label="Main">
     <button id="nv-feed" aria-current="page" aria-label="Reels"></button>
+    <button id="nv-games" aria-label="Games"></button>
     <button id="nv-create" class="create" aria-label="Create a reel"></button>
     <button id="nv-top" aria-label="Leaderboard"></button>
   </nav>
+
+  <section class="view full gmake" id="v-gmake" hidden>
+    <div class="ctop"><button class="icon-btn glass" id="gm-close" aria-label="Close"></button><span class="tpill glass">Make a game</span><span style="width:40px"></span></div>
+    <div class="gm-body" id="gm-body"></div>
+  </section>
+
+  <section class="view full play" id="v-play" hidden>
+    <div class="playbg"></div>
+    <div class="ctop"><button class="icon-btn glass" id="pl-close" aria-label="Leave game"></button><span class="tpill glass pl-title" id="pl-title"></span><span class="codepill glass" id="pl-code" hidden></span></div>
+    <div class="pl-timer" id="pl-timer" hidden><b>0</b></div>
+    <p class="pl-net" id="pl-net"></p>
+    <div class="pl-body" id="pl-body"></div>
+  </section>
 
   <section class="view full" id="v-create" hidden>
     <canvas class="stagecv" id="c-create"></canvas>

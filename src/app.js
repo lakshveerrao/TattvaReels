@@ -328,8 +328,8 @@ function toggleSound(){S.sound=!S.sound;setSoundIcons();
 function showView(v){
  if(S.view==='create'&&v!=='create'){stopRecIfAny();}
  stopCur();closeSheet();S.view=v;
- $('#v-feed').hidden=v!=='feed';$('#v-top').hidden=v!=='top';$('#v-create').hidden=v!=='create';$('#v-review').hidden=v!=='review';$('#v-sing').hidden=v!=='sing';if(v!=='sing'&&typeof singStop==='function')singStop(true);
- $('#nv-feed').setAttribute('aria-current',v==='feed'?'page':'false');$('#nv-top').setAttribute('aria-current',v==='top'?'page':'false');
+ $('#v-feed').hidden=v!=='feed';$('#v-top').hidden=v!=='top';$('#v-games').hidden=v!=='games';$('#v-gmake').hidden=v!=='gmake';$('#v-play').hidden=v!=='play';if(v!=='play'&&typeof closeRoom==='function'&&GS.live)closeRoom();$('#v-create').hidden=v!=='create';$('#v-review').hidden=v!=='review';$('#v-sing').hidden=v!=='sing';if(v!=='sing'&&typeof singStop==='function')singStop(true);
+ $('#nv-feed').setAttribute('aria-current',v==='feed'?'page':'false');$('#nv-top').setAttribute('aria-current',v==='top'?'page':'false');$('#nv-games').setAttribute('aria-current',v==='games'?'page':'false');
  setSoundIcons();
  if(v==='feed')requestAnimationFrame(()=>activate(currentIx(),true));
  if(v==='top')renderTop();}
@@ -416,14 +416,14 @@ function startReview(){if(S.view!=='review')return;const take=S.style.Recitation
 $('#rv-back').innerHTML=ico('back');$('#rv-back').onclick=()=>{showView('create');renderTools();renderFx(true);startPreview();};
 $('#cr-close').innerHTML=ico('x');
 $('#rv-share').onclick=async()=>{const b=$('#rv-share');if(b.disabled)return;b.disabled=true;try{const d=await makeDraft();if(S.user)await publish(d);else{saveDraft(d);openSignin();}}finally{b.disabled=false;}};
-function openSignin(){
+function openSignin(after){
  openSheet('signin','<div class="shead"><div><h2 class="sh-title">Sign in to share</h2><p class="note">No password. Enter your email to get a sign-in link. Your reel is saved and shares as soon as you’re in.</p></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
   '<div id="si-a" style="display:flex;flex-direction:column;gap:10px"><label class="lab" for="si-email">Email</label><input class="field" id="si-email" type="email" autocomplete="email" placeholder="you@example.com"><p class="err" id="si-err"></p><button class="btn gold" id="si-send">'+ico('mail')+'Send sign-in link</button></div>'+
   '<div id="si-b" hidden style="display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center"><span class="icon-btn glass" style="width:56px;height:56px;color:var(--gold)">'+ico('mail')+'</span><h3 class="sh-title" style="font-size:22px">Your sign-in link is ready</h3><p class="note" id="si-msg"></p><button class="btn gold" id="si-open">Open sign-in link</button><button class="btn line" id="si-diff">Use a different email</button></div>');
  $('#sh-x').onclick=closeSheet;const em=$('#si-email');setTimeout(()=>em.focus(),350);
  const go=()=>{const v=em.value.trim().toLowerCase();if(!/^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/.test(v)){$('#si-err').textContent='Enter an email like you@example.com.';return;}
   $('#si-err').textContent='';$('#si-a').hidden=true;$('#si-b').hidden=false;$('#si-msg').textContent='Email is simulated for now, so nothing lands in '+v+'. Open the link here to sign in.';
-  $('#si-open').onclick=()=>{const h=(v.split('@')[0]||'seeker').replace(/[^\w.-]/g,'').slice(0,24)||'seeker';S.user={handle:h};LS.set('tr-user',S.user);closeSheet();toast('Signed in as '+h);const d=loadDraft();if(d)publish(d);};};
+  $('#si-open').onclick=()=>{const h=(v.split('@')[0]||'seeker').replace(/[^\w.-]/g,'').slice(0,24)||'seeker';S.user={handle:h};LS.set('tr-user',S.user);closeSheet();toast('Signed in as '+h);if(typeof after==='function'){after();return;}const d=loadDraft();if(d)publish(d);};};
  em.addEventListener('input',()=>$('#si-err').textContent='');em.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go();}});
  $('#si-send').onclick=go;$('#si-diff').onclick=()=>{$('#si-b').hidden=true;$('#si-a').hidden=false;em.focus();};}
 function blobB64(b){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=no;r.readAsDataURL(b);});}

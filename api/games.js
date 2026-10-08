@@ -1,0 +1,53 @@
+import { sb, send, wrap, readBody, anon, rid, HttpError } from './_db.js';
+
+// Games people make: a type (quiz or puzzle race), a tattva and a few settings. Live play itself runs peer to peer
+// over Supabase Realtime broadcast; this endpoint only stores and lists the games.
+const GID = /^g[a-z0-9]{6,24}$/;
+const THEMES = ['Gold', 'Lotus', 'Night', 'Ember'];
+function clean(b) {
+  const type = b.type === 'puzzle' ? 'puzzle' : 'quiz';
+  const tattva = Number.isInteger(b.tattva) && b.tattva >= 1 && b.tattva <= 8 ? b.tattva : 1;
+  const s = b.settings && typeof b.settings === 'object' ? b.settings : {};
+  const settings = type === 'quiz'
+    ? { count: [5, 8, 10].includes(s.count) ? s.count : 8, secs: [10, 15, 20].includes(s.secs) ? s.secs : 15 }
+    : { lines: [2, 4].includes(s.lines) ? s.lines : 4, hard: !!s.hard };
+  settings.theme = THEMES.includes(s.theme) ? s.theme : 'Gold';
+  settings.seed = Number.isInteger(s.seed) ? Math.abs(s.seed) % 1e9 : Math.floor(Math.random() * 1e9);
+  const title = String(b.title || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+  return { type, tattva, settings, title };
+}
+const out = r => ({ id: r.id, name: r.name, title: r.title, type: r.type, tattva: r.tattva, settings: r.settings, plays: r.plays || 0, createdAt: Date.parse(r.created_at) || 0 });
+const COLS = 'id,name,title,type,tattva,settings,plays,created_at';
+
+export default wrap(async (req, res) => {
+  const me = anon(req, res);
+  const q = new URL(req.url, 'http://x').searchParams;
+  if (req.method === 'GET') {
+    const id = q.get('id');
+    if (id) {
+      if (!GID.test(id)) throw new HttpError(400, 'Unknown game.');
+      const rows = await sb(`/rest/v1/games?select=${COLS}&id=eq.${id}`).then(r => r.json());
+      if (!rows.length) throw new HttpError(404, 'That game is gone.');
+      return send(res, 200, { game: out(rows[0]) });
+    }
+    const rows = await sb(`/rest/v1/games?select=${COLS}&order=created_at.desc&limit=100`).then(r => r.json());
+    return send(res, 200, { games: rows.map(out) });
+  }
+  if (req.method === 'POST') {
+    const b = await readBody(req);
+    if (b.played) {
+      if (typeof b.played !== 'string' || !GID.test(b.played)) throw new HttpError(400, 'Unknown game.');
+      const r = await sb('/rest/v1/rpc/game_played', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ gid: b.played }) }).then(r => r.json());
+      return send(res, 200, { plays: typeof r === 'number' ? r : 0 });
+    }
+    const since = new Date(Date.now() - 3600e3).toISOString();
+    const cr = await sb(`/rest/v1/games?select=id&anon=eq.${me}&created_at=gte.${encodeURIComponent(since)}`, { method: 'HEAD', headers: { Prefer: 'count=exact' } });
+    if (+((cr.headers.get('content-range') || '').split('/')[1] || 0) >= 10) throw new HttpError(429, 'You’ve made a lot of games this hour. Try again a bit later.');
+    const g = clean(b);
+    const name = String(b.name || '').replace(/[^\w.-]/g, '').slice(0, 24) || 'seeker';
+    const row = { id: 'g' + Date.now().toString(36) + rid(3), anon: me, name, ...g, title: g.title || 'Tattva ' + g.tattva + (g.type === 'quiz' ? ' quiz' : ' puzzle race') };
+    const ins = await sb('/rest/v1/games', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(row) }).then(r => r.json());
+    return send(res, 201, { game: out(ins[0]) });
+  }
+  throw new HttpError(405, 'Use GET or POST.');
+});
