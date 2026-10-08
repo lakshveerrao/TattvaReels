@@ -328,7 +328,7 @@ function toggleSound(){S.sound=!S.sound;setSoundIcons();
 function showView(v){
  if(S.view==='create'&&v!=='create'){stopRecIfAny();}
  stopCur();closeSheet();S.view=v;
- $('#v-feed').hidden=v!=='feed';$('#v-top').hidden=v!=='top';$('#v-games').hidden=v!=='games';$('#v-gmake').hidden=v!=='gmake';$('#v-play').hidden=v!=='play';if(v!=='play'&&typeof closeRoom==='function'&&GS.live)closeRoom();$('#v-create').hidden=v!=='create';$('#v-review').hidden=v!=='review';$('#v-sing').hidden=v!=='sing';if(v!=='sing'&&typeof singStop==='function')singStop(true);
+ $('#v-feed').hidden=v!=='feed';$('#v-top').hidden=v!=='top';$('#v-games').hidden=v!=='games';$('#v-gmake').hidden=v!=='gmake';$('#v-play').hidden=v!=='play';if(v!=='play'&&typeof closeRoom==='function'&&GS.live)closeRoom();if(typeof watchLobby==='function')watchLobby(v==='games');$('#v-create').hidden=v!=='create';$('#v-review').hidden=v!=='review';$('#v-sing').hidden=v!=='sing';if(v!=='sing'&&typeof singStop==='function')singStop(true);
  $('#nv-feed').setAttribute('aria-current',v==='feed'?'page':'false');$('#nv-top').setAttribute('aria-current',v==='top'?'page':'false');$('#nv-games').setAttribute('aria-current',v==='games'?'page':'false');
  setSoundIcons();
  if(v==='feed')requestAnimationFrame(()=>activate(currentIx(),true));

@@ -37,17 +37,19 @@ function puzzleLines(g){const r=rngOf(g.settings.seed),V=TATTVAS[g.tattva-1],n=g
 /* ---------- live transport: Supabase Realtime broadcast + presence (a local relay can stand in for tests via ?live=ws://…) ---------- */
 let sbLoad=null;
 function loadSB(){if(window.supabase)return Promise.resolve();if(sbLoad)return sbLoad;sbLoad=new Promise((ok,no)=>{const s=document.createElement('script');s.src='/vendor/supabase.min.js';s.onload=ok;s.onerror=()=>{sbLoad=null;no(new Error('load'));};document.head.appendChild(s);});return sbLoad;}
+let sbClient=null;
+function sbc(){if(!sbClient)sbClient=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:false},realtime:{params:{eventsPerSecond:30}}});return sbClient;}
 async function liveOpen(code,me,h){
  const wsu=new URLSearchParams(location.search).get('live');
  if(wsu&&/^wss?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/.test(wsu)){const ws=new WebSocket(wsu);let open=false;
   ws.onopen=()=>{open=true;ws.send(JSON.stringify({join:code,me}));h.ready();};ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.presence)h.presence(m.presence);else if(m.m)h.msg(m.m);};ws.onclose=()=>{if(open)h.lost();};ws.onerror=()=>{if(!open)h.fail();};
-  return{send:m=>{if(ws.readyState===1)ws.send(JSON.stringify({m}));},close:()=>{open=false;try{ws.close();}catch(e){}}};}
- await loadSB();const cl=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:false},realtime:{params:{eventsPerSecond:30}}});
+  return{send:m=>{if(ws.readyState===1)ws.send(JSON.stringify({m}));},track:x=>{if(ws.readyState===1)ws.send(JSON.stringify({track:x}));},close:()=>{open=false;try{ws.close();}catch(e){}}};}
+ await loadSB();const cl=sbc();
  const ch=cl.channel('tr-room-'+code,{config:{broadcast:{self:false},presence:{key:me.pid}}});let joined=false;
  ch.on('broadcast',{event:'m'},({payload})=>h.msg(payload));
  ch.on('presence',{event:'sync'},()=>{const st=ch.presenceState();h.presence(Object.keys(st).map(k=>st[k][0]).filter(Boolean));});
  ch.subscribe(async s=>{if(s==='SUBSCRIBED'){joined=true;try{await ch.track(me);}catch(e){}h.ready();}else if(s==='CHANNEL_ERROR'||s==='TIMED_OUT'){if(joined)h.lost();else h.fail();}});
- return{send:m=>{ch.send({type:'broadcast',event:'m',payload:m});},close:()=>{try{cl.removeChannel(ch);}catch(e){}}};}
+ return{send:m=>{ch.send({type:'broadcast',event:'m',payload:m});},track:x=>{if(joined)ch.track(x).catch(()=>{});},close:()=>{try{cl.removeChannel(ch);}catch(e){}}};}
 
 /* ---------- a game room: the host's phone is the referee; everyone (host included) plays ---------- */
 function newCode(){let c='';for(let i=0;i<6;i++)c+=CODE_AB[Math.floor(Math.random()*CODE_AB.length)];return c;}
@@ -58,13 +60,28 @@ function startRoom(opts){closeRoom();
  showView('play');paintPlay();
  if(R.solo){R.host=true;hostBegin();return;}
  const me={pid:GS.me,name:opts.name};$('#pl-net').textContent='Connecting…';
- liveOpen(R.code,me,{ready:()=>{if(GS.live!==R)return;$('#pl-net').textContent='';if(!R.host)send({e:'hello',pid:GS.me,name:opts.name});else broadcastState(true);},
+ liveOpen(R.code,me,{ready:()=>{if(GS.live!==R)return;$('#pl-net').textContent='';if(!R.host)send({e:'hello',pid:GS.me,name:opts.name});else{broadcastState(true);announce(R);}},
   fail:()=>{if(GS.live!==R)return;$('#pl-net').textContent='';playMsg('Couldn’t connect to the live room. Check your connection and try again.');},
   lost:()=>{if(GS.live!==R)return;$('#pl-net').textContent='Reconnecting…';},
-  presence:list=>{if(GS.live!==R)return;R.online={};list.forEach(p=>{if(p&&p.pid)R.online[p.pid]=p.name;});if(R.host){list.forEach(p=>{if(p&&p.pid&&!R.players[p.pid])R.players[p.pid]={pid:p.pid,name:String(p.name||'player').slice(0,24),score:0,streak:0,delta:0,ok:null};});broadcastState(true);}paintPlay();},
+  presence:list=>{if(GS.live!==R)return;R.online={};list.forEach(p=>{if(p&&p.pid)R.online[p.pid]=p.name;});announce(R);if(R.host){list.forEach(p=>{if(p&&p.pid&&!R.players[p.pid])R.players[p.pid]={pid:p.pid,name:String(p.name||'player').slice(0,24),score:0,streak:0,delta:0,ok:null};});broadcastState(true);}paintPlay();},
   msg:m=>{if(GS.live===R)onMsg(R,m);}}).then(n=>{if(GS.live===R)R.net=n;else n.close();}).catch(()=>{if(GS.live===R)playMsg('Couldn’t load live play. Check your connection.');});
  R.t=setInterval(()=>tick(R),200);}
-function closeRoom(){const R=GS.live;if(!R)return;clearInterval(R.t);clearInterval(R.anim);if(R.net)R.net.close();GS.live=null;}
+function closeRoom(){const R=GS.live;if(!R)return;clearInterval(R.t);clearInterval(R.anim);if(R.net)R.net.close();if(R.ann)R.ann.close();GS.live=null;}
+/* public lobby: every live room is listed here, so anyone on the site can join without a code */
+function roomInfo(R){return{pid:'room-'+R.code,code:R.code,gid:R.g.id,title:R.g.title,type:R.g.type,tattva:R.g.tattva,n:Object.keys(R.online).length||1,phase:R.phase,host:(R.players[GS.me]||{}).name||''};}
+function announce(R){if(!R.host||R.solo||!R.g||!R.code)return;const info=roomInfo(R),k=JSON.stringify(info);
+ if(R.ann){if(k!==R.annKey){R.annKey=k;R.ann.track(info);}return;}if(R.annPending)return;R.annPending=true;
+ liveOpen('LOBBY',info,{ready:()=>{if(GS.live===R&&R.ann){R.annKey=JSON.stringify(roomInfo(R));R.ann.track(roomInfo(R));}},fail:()=>{R.annPending=false;},lost:()=>{},presence:()=>{},msg:()=>{}})
+  .then(n=>{if(GS.live===R){R.ann=n;R.annKey=JSON.stringify(roomInfo(R));n.track(roomInfo(R));}else n.close();}).catch(()=>{R.annPending=false;});}
+const LOBBY={net:null,rooms:[],on:false};
+function watchLobby(on){if(on===LOBBY.on)return;LOBBY.on=on;if(!on){if(LOBBY.net)LOBBY.net.close();LOBBY.net=null;return;}
+ liveOpen('LOBBY',{pid:GS.me,watch:1},{ready:()=>{},fail:()=>{},lost:()=>{},msg:()=>{},presence:list=>{LOBBY.rooms=list.filter(x=>x&&x.code&&x.gid&&/^[A-Z0-9]{6}$/.test(x.code)&&x.phase!=='done');paintLive();if(GS.loaded&&LOBBY.rooms.some(r=>!GS.games.find(g=>g.id===r.gid))&&Date.now()-(LOBBY.reload||0)>8000){LOBBY.reload=Date.now();loadGames();}}})
+  .then(n=>{if(LOBBY.on)LOBBY.net=n;else n.close();}).catch(()=>{});}
+function paintLive(){gamesEl.querySelectorAll('.gcard').forEach(el=>{const id=el.id.slice(2),box=el.querySelector('.glive');if(!box)return;const rs=LOBBY.rooms.filter(r=>r.gid===id);
+  if(!rs.length){box.hidden=true;box.innerHTML='';return;}box.hidden=false;
+  box.innerHTML=rs.slice(0,3).map(r=>'<button class="btn joinlive" data-code="'+esc(r.code)+'"><span class="dot"></span><span>Join '+esc(r.host||'a')+'’s game</span><small>'+(r.phase==='lobby'?'waiting':'playing')+' · '+(+r.n||1)+' in</small></button>').join('');
+  box.querySelectorAll('.joinlive').forEach(b=>b.onclick=()=>askName(name=>startRoom({code:b.dataset.code,name})));});
+ const live=LOBBY.rooms.length,pill=$('#gx-live');if(pill){pill.hidden=!live;pill.textContent=live+' live';}}
 function send(m){const R=GS.live;if(R&&R.net)R.net.send(m);}
 function playMsg(t){const R=GS.live;if(R){R.err=t;paintPlay();}}
 function onMsg(R,m){
@@ -77,7 +94,7 @@ function onMsg(R,m){
  else if(m.e==='ans'&&R.phase==='q'&&m.qi===R.qi&&R.players[m.pid]&&!R.answers[m.pid]){R.answers[m.pid]={c:+m.c,ms:Math.max(0,+m.ms||0)};maybeReveal(R);paintPlay();}
  else if(m.e==='prog'&&R.phase==='race'&&R.players[m.pid]){R.prog[m.pid]={line:+m.line||0,done:!!m.done,ms:+m.ms||0};broadcastState();maybeEndRace(R);paintPlay();}}
 function snapshot(R){return Object.values(R.players).map(p=>({pid:p.pid,name:p.name,score:p.score,streak:p.streak,delta:p.delta,ok:p.ok}));}
-function broadcastState(force){const R=GS.live;if(!R||!R.host||R.solo)return;const now=Date.now();if(!force&&now-R.lastState<300)return;R.lastState=now;
+function broadcastState(force){const R=GS.live;if(!R||!R.host||R.solo)return;announce(R);const now=Date.now();if(!force&&now-R.lastState<300)return;R.lastState=now;
  send({e:'state',seq:++R.stateSeq,g:R.g,phase:R.phase,qi:R.qi,rem:Math.max(0,R.deadline-now),players:snapshot(R),prog:R.prog,over:R.over||null});}
 function tick(R){if(GS.live!==R)return;const now=Date.now();
  if(R.host){if(R.phase==='q'&&now>=R.deadline)reveal(R);else if(R.phase==='reveal'&&now>=R.nextAt)nextQ(R);else if(R.phase==='race'&&now>=R.deadline)endRace(R);
@@ -157,7 +174,7 @@ async function loadGames(){
  try{const j=await API('/api/games');GS.local=false;GS.games=(j.games||[]).map(cleanGame).filter(Boolean);}
  catch(e){GS.local=true;GS.games=LS.get('tr-games',[]).map(cleanGame).filter(Boolean);}
  GS.loaded=true;renderGames();}
-function renderGames(){gamesEl.innerHTML='';
+function renderGames(){gamesEl.innerHTML='';setTimeout(paintLive,0);
  if(!GS.games.length){const el=document.createElement('div');el.className='gcard gempty';
   el.innerHTML='<canvas></canvas><div class="shade"></div><div class="emptybox"><p class="eyebrow">Games</p><h2 class="sh-title">'+(GS.loaded?'No games yet':'Loading games…')+'</h2><p class="note">'+(GS.loaded?'Make a quiz or a puzzle race on any tattva, then play it live with friends.':'')+'</p>'+(GS.loaded?'<button class="btn gold" id="ge-make">'+ico('plus')+'Make a game</button>':'')+'</div>';
   gamesEl.appendChild(el);queuePoster(el.querySelector('canvas'),DEF(),0);const b=el.querySelector('#ge-make');if(b)b.onclick=()=>openMake();return;}
@@ -165,7 +182,7 @@ function renderGames(){gamesEl.innerHTML='';
   el.innerHTML='<canvas></canvas><div class="shade"></div><div class="gtint"></div>'+
    '<div class="gcap"><span class="gtype">'+ico(GTYPES[g.type].icon)+esc(GTYPES[g.type].name)+'</span><h2 class="gtitle"></h2>'+
    '<p class="gsub">Tattva '+g.tattva+' · '+esc(V.name)+'</p><p class="note gmeta"></p>'+
-   '<div class="row2"><button class="btn line g-solo">'+ico('replay')+'Play solo</button><button class="btn gold g-host">'+ico('share')+'Host live</button></div></div>';
+   '<div class="glive" hidden></div><div class="row2"><button class="btn line g-solo">'+ico('replay')+'Play solo</button><button class="btn gold g-host">'+ico('share')+'Host live</button></div></div>';
   el.querySelector('.gtitle').textContent=g.title;
   el.querySelector('.gmeta').textContent='by '+g.name+' · '+(g.type==='quiz'?g.settings.count+' questions · '+g.settings.secs+'s each':g.settings.lines+' lines'+(g.settings.hard?' · hard':''))+(g.plays?' · played '+fmt(g.plays)+'×':'');
   el.querySelector('.g-solo').onclick=()=>startRoom({g,solo:true,name:myName()||'you'});
@@ -211,6 +228,7 @@ async function publishGame(){const d=draftGame(),body={name:S.user?S.user.handle
 /* ---------- wiring ---------- */
 $('#gm-close').innerHTML=ico('x');$('#gm-close').onclick=()=>showView('games');
 $('#pl-close').innerHTML=ico('x');$('#pl-close').onclick=()=>{closeRoom();showView('games');};
+$('#gx-live').onclick=()=>{const r=LOBBY.rooms[0];const el=r&&document.getElementById('g-'+r.gid);if(el)el.scrollIntoView({behavior:'smooth'});};
 $('#gx-join').innerHTML=ico('right')+'Join';$('#gx-join').onclick=()=>openJoin();
 $('#gx-make').innerHTML=ico('plus')+'Make';$('#gx-make').onclick=()=>openMake();
 $('#nv-games').innerHTML=ico('drum')+'Games';$('#nv-games').onclick=()=>{if(S.view==='games'){gamesEl.scrollTo({top:0,behavior:'smooth'});return;}showView('games');if(!GS.loaded)loadGames();};

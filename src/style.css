@@ -354,3 +354,10 @@ select.field{appearance:auto;font-size:14px;min-width:0;flex:1}
 .prow.me .bn{color:var(--th);font-weight:700}
 .prow svg{width:18px;height:18px;color:var(--ok)}
 .codein{text-align:center;font-size:26px;letter-spacing:.3em;text-transform:uppercase;font-weight:700}
+.glive{display:flex;flex-direction:column;gap:8px}
+.joinlive{background:rgba(127,209,166,.14);border:1px solid rgba(127,209,166,.55);color:var(--ink);justify-content:flex-start;gap:10px}
+.joinlive small{margin-left:auto;font-weight:600;font-size:12px;color:var(--ok)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(127,209,166,.7);animation:livepulse 1.6s infinite;flex:none}
+@keyframes livepulse{70%{box-shadow:0 0 0 9px rgba(127,209,166,0)}100%{box-shadow:0 0 0 0 rgba(127,209,166,0)}}
+.livepill{height:36px;padding:0 10px;font-size:12px;color:var(--ok);border-color:rgba(127,209,166,.5)}
+.livepill::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok)}
