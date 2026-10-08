@@ -42,7 +42,7 @@ ARCADE.build=(function(){
   var tb=c.tools('<div class="bt-mode"><button class="on" data-m="build">Build</button><button data-m="erase">Erase</button></div><div class="bt-pal">'+PAL.map(function(p,i){return'<button data-c="'+p+'" style="--c:'+p+'"'+(i===0?' class="on"':'')+'></button>';}).join('')+'</div>');
   tb.querySelectorAll('[data-m]').forEach(function(b){b.onclick=function(){s.mode=b.dataset.m;tb.querySelectorAll('[data-m]').forEach(function(x){x.classList.toggle('on',x===b);});};});
   tb.querySelectorAll('[data-c]').forEach(function(b){b.onclick=function(){s.col=b.dataset.c;s.mode='build';tb.querySelectorAll('[data-c]').forEach(function(x){x.classList.toggle('on',x===b);});tb.querySelectorAll('[data-m]').forEach(function(x){x.classList.toggle('on',x.dataset.m==='build');});};});
-  c.word('<div class="ww"><span class="wk">Build</span><b class="bname">'+NAME[n]+'</b><span class="wm" id="bpct">0% built · '+s.total+' blocks</span></div>');
+  c.word('<div class="ww"><span class="wk">'+LX('Build')+'</span><b class="bname">'+LX(NAME[n])+'</b><span class="wm" id="bpct">'+LX('{p}% built · {n} blocks').replace('{p}',0).replace('{n}',s.total)+'</span></div>');
   c.help('Tap the outline to build · drag to turn');place(s);};
  function key(x,y,z){return x+','+y+','+z;}
  function addBlock(s,x,y,z,col){var c=s.c,k=key(x,y,z);if(s.cells[k]||Math.abs(x)>5||Math.abs(z)>5||y<0||y>10)return false;
@@ -51,7 +51,7 @@ ARCADE.build=(function(){
  function delBlock(s,m){var c=s.c,p=m.userData.cell,k=key(p[0],p[1],p[2]);c.remove(m);delete s.cells[k];s.solids.splice(s.solids.indexOf(m),1);
   if(s.goal[k]){s.ghosts[k].visible=true;s.filled--;}c.SFX.bad();progress(s);}
  function progress(s){var c=s.c,pct=Math.round(s.filled/s.total*100);if(pct!==s.shown){c.score(pct-s.shown);s.shown=pct;}
-  var el=c.hud.querySelector('#bpct');if(el)el.textContent=pct+'% built · '+(s.total-s.filled)+' to go';
+  var el=c.hud.querySelector('#bpct');if(el)el.textContent=LX('{p}% built · {n} to go').replace('{p}',pct).replace('{n}',s.total-s.filled);
   if(s.lamp)s.lamp.visible=s.filled>=s.total-3;
   if(pct>=100&&!s.done){s.done=true;var bonus=Math.ceil(c.left);c.score(bonus,0,c.HH-6,'time bonus');c.SFX.big();c.help('Complete!');setTimeout(function(){if(G.s===s)c.end();},1400);}
   if(!s.done&&s.filled>0&&s.filled%Math.max(6,Math.round(s.total/4))===0&&c.t-s.lastLine>6){c.recite(s.line++);s.lastLine=c.t;}}
@@ -73,6 +73,6 @@ ARCADE.build=(function(){
   s.ghostList.forEach(function(m,i){if(m.visible){var o=s.gop+.07*Math.sin(t*3-m.position.y*.8);m.material.opacity=o;m.children[0].material.opacity=Math.min(1,o*2.8);}});
   placeCam(s);};
  G.finish=function(c){var s=G.s;s.ghostList.forEach(function(m){m.visible=false;});c.tools('');c.help('');if(c.voice.meaning)c.voice.meaning();
-  c.word('<div class="ww done"><span class="wk">You built</span><b class="bname">'+NAME[s.n]+'</b><span class="wm">'+Math.round(s.filled/s.total*100)+'% of the shape</span></div>');return 4200;};
+  c.word('<div class="ww done"><span class="wk">'+LX('You built')+'</span><b class="bname">'+LX(NAME[s.n])+'</b><span class="wm">'+LX('{p}% of the shape').replace('{p}',Math.round(s.filled/s.total*100))+'</span></div>');return 4200;};
  G.after=function(dt,c){var s=G.s;s.yaw+=dt*.9;s.pitch+=(.45-s.pitch)*Math.min(1,dt*2);placeCam(s);};
  return G;})();

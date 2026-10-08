@@ -15,7 +15,7 @@ var WORDS=(function(){
  // akṣara: (consonant (virama consonant)*) or independent vowel, then optional vowel sign, then optional anusvāra/visarga/virama
  var AK=/(?:[क-हक़-य़](?:्[क-हक़-य़])*|[ऄ-औॠॡ])[ा-ौॢॣ]?[ऀ-ः]?्?|ऽ|[^\s]/g;
  function aksharas(dev){return(dev.match(AK)||[]).filter(function(x){return x.trim();});}
- function forTattva(n){var T=TATTVAS[n-1],seen={},out=[];
+ function forTattva(n){var T=typeof TL==='function'?TL(n):TATTVAS[n-1],seen={},out=[];
   var VOW=/^[aāiīuūṛeo]/,add=function(iast,mean){var dev=toDev(iast),ak=aksharas(dev);if(ak.length<2||ak.length>6||seen[dev])return;seen[dev]=1;out.push({iast:iast,dev:dev,ak:ak,mean:mean});};
   T.words.forEach(function(w){w[0].split(/\s+/).forEach(function(p){var seg=p.split('-');
     // join compound parts only where no vowel sandhi is needed; t+m/n becomes n (sat-mātraḥ → sanmātraḥ)

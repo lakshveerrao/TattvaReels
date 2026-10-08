@@ -14,6 +14,10 @@ The app is called **Hey Tattva** (renamed from Tattva Reels on 2026-10-08). A Re
 - Check work hard before calling it done: test it, look at it (screenshots, frame by frame), fix what's wrong.
 - He explains in short, informal messages. Keep replies short and plain.
 
+## Look and languages (2026-10-08)
+- **Modern Vedic design:** night blue `--night #15123A`, kumkum `--kumkum #C4262E`, haldi gold `--gold #F4B73A`, chandan `--chandan #F2E3C6`; fonts Eczar (display), Mukta (UI), Tiro Devanagari Sanskrit (verses), Noto Telugu/Kannada as fallbacks. Logo = slowly turning Sri Yantra (`src/vedic.js` `yantra()`). Each tattva has a symbol (`tsym(n)`): 1 mirror, 2 seed, 3 ॐ, 4 diya, 5 not-the-body figure, 6 eclipse, 7 thread with beads, 8 moon. "I learnt" = diya that lights; Share = conch; Games icon = chakra; + = red bindu. Reel text sits on a solid panel. Game cards use real game pictures (`img/g_*.jpg`). Me page: tattva medallions + 108-bead learning mala + language row. Mockups: see the flow image shared on 2026-10-08.
+- **Languages:** English, Telugu, Kannada, Hindi (`src/i18n.js`). Picker on first open (full screen) and in Me → Language; changing reloads the page. `TL(n)` = tattva in the chosen language: verse in that script (Devanagari→Telugu/Kannada by code-point offset; Roman IAST for English) + translated meaning/teaching/keep/words (TI18N, drafted by AI on 2026-10-08, needs a native review). App text stays English in code; a MutationObserver translator (`startTranslator`) swaps any text node / placeholder / aria-label whose whole text is in `UI18N[lang]` (plus a few patterns like 'Tattva N'); user content opts out with `data-notr`. New strings: add the English key to UI18N for te/kn/hi, or use `LX('...')` with `{n}` placeholders. Singing and letter games keep Sanskrit sounds; films still have English subtitles burned into the canvas.
+
 ## Layout
 Phones: one tall column with a bottom tab bar. Screens ≥ 900 px wide (laptops): left menu, the reel in a tall column with the shloka/meaning panel beside it, games as a grid, full-screen flows centred, sheets as dialogs (all in the `@media (min-width:900px)` block at the end of style.css).
 
@@ -33,6 +37,8 @@ src/
   arcade/         00_core.js voxel game engine (ortho or perspective camera, HUD, word panel, verse captions, tools bar, letter tiles, sfx, seeded rng);
                   00_words.js IAST→Devanagari + akṣara split + each tattva's words; 10_stick.js Stickman Quest (75 s), 20_letters.js Letter Builder (60 s),
                   30_build.js Block Builder (90 s). ARCADE.stick / .letters / .build, each takes ctx.tattva
+  i18n.js         LANGS, TI18N (tattva translations), UI18N (app text), LX(), TL(n), setLang, screen translator
+  vedic.js        TSYM (8 tattva symbols), Sri Yantra SVG, tsym(n), yantra()
   tattvas.js      const TATTVAS = per-verse text (dev/iast/en), teaching, keep points, word glossary
   films/          00_kit.js shared film toolkit (one WebGL renderer, morphing particles, line art, labels);
                   02_seed.js … 08_dream.js one 3D film per tattva (film 1 is film.js). FILMS[n] registry.

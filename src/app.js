@@ -44,10 +44,14 @@ const IC={
  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
  edit:'<path d="M4 20h4L19 9l-4-4L4 16v4Z"/>',
  out:'<path d="M10 4H5v16h5"/><path d="m15 8 4 4-4 4M19 12H9"/>',
+ diya:'<path d="M3.5 14.5c1.9 3.3 4.8 5 8.5 5s6.6-1.7 8.5-5Z"/><path class="flame" d="M12 13c-1.9-1.5-2.1-3.8-.6-6 .4 1.2 1 1.7 1.7 1.9.2-2.1.9-3.8 2.1-5 .8 3.6.4 7-3.2 9.1Z"/>',
+ conch:'<path d="M5 13.5c0-4.6 3.4-8.5 8-8.5 3.4 0 6 2.4 6 5.4 0 3.8-3 6.6-7 6.6l-2.6 3.6-1.6-3.2C6 16.6 5 15.2 5 13.5Z"/><path d="M11 9.2c1.6-.6 3.4.2 3.8 1.8"/>',
+ chakra:'<circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="2.2"/><path d="M12 3.4v6.4M12 14.2v6.4M3.4 12h6.4M14.2 12h6.4M5.9 5.9l4.5 4.5M13.6 13.6l4.5 4.5M5.9 18.1l4.5-4.5M13.6 10.4l4.5-4.5"/>',
+ bell:'<path d="M12 3v1.6M7 17V11a5 5 0 0 1 10 0v6l1.6 1.6H5.4Z"/><path d="M10.4 21h3.2"/>',
+ globe:'<circle cx="12" cy="12" r="8.6"/><path d="M3.4 12h17.2M12 3.4c2.4 2.4 3.6 5.3 3.6 8.6s-1.2 6.2-3.6 8.6c-2.4-2.4-3.6-5.3-3.6-8.6S9.6 5.8 12 3.4Z"/>',
  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>'
 };
 const ico=(k,cls)=>'<svg class="i'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" aria-hidden="true">'+IC[k]+'</svg>';
-const t=s=>s; // replaced by the i18n table
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 const S={sound:false,user:null,emailOn:true,reels:[],loaded:false,offline:false,style:DEF(),t:0,source:null,score:null,takeBuf:null,takeBlob:null,takeOffset:0,view:'feed',idx:-1,feedIds:''};
@@ -197,16 +201,16 @@ async function loadReels(){S.offline=false;
 const reelsEl=$('#reels');let reelList=[];
 function reelEl(r,ix){
  const el=document.createElement('article');el.className='reel';el.dataset.id=r.id;el.id='r-'+r.id;
- const s=r.style,mus=s.Sound.map(x=>INSTR[x]).concat([s.Tone==='None'?'no rhythm':s.Tone]).join(' · ');
+ const s=r.style,mus=s.Sound.map(x=>LX(INSTR[x])).concat([LX(s.Tone==='None'?'no rhythm':s.Tone)]).join(' · ');
  el.innerHTML='<canvas></canvas><div class="shade"></div>'+
-  '<div class="rail"><button class="rbtn" data-a="learn" aria-label="I learnt this">'+ico('lotus')+'<span class="ct">0</span></button>'+
-  '<button class="rbtn" data-a="read" aria-label="What I learnt">'+ico('book')+'<span>Meaning</span></button>'+
-  '<button class="rbtn" data-a="remix" aria-label="Remix this reel">'+ico('remix')+'<span>Remix</span></button>'+
-  '<button class="rbtn" data-a="share" aria-label="Share">'+ico('share')+'<span>Share</span></button></div>'+
-  '<div class="cap"><div class="who"><span class="ava"></span><span class="nm"></span></div>'+
-  '<div class="rtitle">Tattva '+TA(r).n+' · <span>'+esc(TA(r).name)+'</span></div>'+
-  (r.caption?'<div class="rcap"></div>':'')+
-  '<div class="pada"><span class="dev"></span><span class="ia"></span></div>'+
+  '<div class="rail"><button class="rbtn" data-a="learn" aria-label="'+esc(LX('I learnt this'))+'">'+ico('diya')+'<span class="ct">0</span></button>'+
+  '<button class="rbtn" data-a="read" aria-label="'+esc(LX('Meaning'))+'">'+ico('book')+'<span>'+esc(LX('Meaning'))+'</span></button>'+
+  '<button class="rbtn" data-a="remix" aria-label="'+esc(LX('Remix'))+'">'+ico('remix')+'<span>'+esc(LX('Remix'))+'</span></button>'+
+  '<button class="rbtn" data-a="share" aria-label="'+esc(LX('Share'))+'">'+ico('conch')+'<span>'+esc(LX('Share'))+'</span></button></div>'+
+  '<div class="cap"><div class="crow"><span class="tmed">'+tsym(TA(r).n)+'</span><div class="ctt"><span class="tno">'+esc(LX('Tattva'))+' '+TA(r).n+'</span><span class="rtitle">'+esc(TL(TA(r).n).name)+'</span></div>'+
+  '<div class="who" data-notr><span class="ava"></span><span class="nm"></span></div></div>'+
+  (r.caption?'<div class="rcap" data-notr></div>':'')+
+  '<div class="pada"><span class="dev"></span><span class="mean"></span></div>'+
   '<div class="music">'+ico('music')+'<div class="mq"><span></span></div></div></div>'+
   '<div class="prog"><i></i></div><div class="holdhint glass" hidden><span class="ring"></span><span>Hold to awaken</span></div><div class="holdglow" hidden></div>';
  el.querySelector('.ava').textContent=(r.name[0]||'t').toUpperCase();
@@ -225,7 +229,7 @@ function reelEl(r,ix){
  el.addEventListener('contextmenu',e=>{if(el.__r.style.Visuals==='Tattva film')e.preventDefault();});
  return el;}
 function setPada(el,k,now){const p=el.querySelector('.pada');if(el.__pada===k)return;el.__pada=k;
- const put=()=>{const V=TA(el.__r);p.querySelector('.dev').textContent=V.dev[k];p.querySelector('.ia').textContent=V.iast[k];p.classList.remove('swap');};
+ const put=()=>{const V=TL(TA(el.__r).n),d=p.querySelector('.dev');d.textContent=V.verse[k];d.classList.toggle('roman',V.roman);p.querySelector('.mean').textContent=V.en[k];p.classList.remove('swap');};
  if(now){put();return;}p.classList.add('swap');setTimeout(put,300);}
 const posterIO=('IntersectionObserver' in window)?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){posterIO.unobserve(e.target);const el=e.target;queuePoster(el.querySelector('canvas'),el.__r.style,0);}}),{root:reelsEl,rootMargin:'100% 0px'}):null;
 function renderFeed(force){
@@ -260,17 +264,16 @@ function startReel(el){const r=el.__r,bar=el.querySelector('.prog i');paintSide(
   if(hh){const hr=(FILMS[r.style.Tattva]||{}).hold||[.26,.82],show=film&&pf>hr[0]+.01&&pf<hr[1]-.2;if(hh.hidden===show)hh.hidden=!show;hh.classList.toggle('on',HOLD.on);hh.lastChild.textContent=HOLD.on?'Awakening…':'Hold to awaken';}},onEnd:()=>showEnd(el)});}
 /* laptop layout: a panel beside the reel with the shloka (current line lit), its meaning and the learnt button */
 const WIDE=window.matchMedia('(min-width: 900px)');let sideR=null,sideK=-1;
-function paintSide(r){sideR=r;sideK=-1;if(!WIDE.matches)return;const box=$('#rside'),T1=TA(r);
- box.innerHTML='<p class="eyebrow">Tattva '+T1.n+' · '+esc(T1.name)+'</p><h2 class="rs-teach">'+esc(T1.teach)+'</h2>'+
-  '<div class="rs-learn"><span class="bignum" id="rs-n">0</span><span class="lab">learnt from this reel</span><button class="btn" id="rs-btn"></button></div>'+
-  '<div class="rs-sh"><p class="lab">The shloka · verse '+T1.n+'</p>'+T1.dev.map((d,k)=>'<div class="ln" data-k="'+k+'"><span class="dev">'+esc(d)+'</span><span class="ia">'+esc(T1.iast[k])+'</span><span class="en">'+esc(T1.en[k])+'</span></div>').join('')+
-  '<div class="ln" data-k="3"><span class="dev">'+esc(L4.dev)+'</span><span class="ia">'+esc(L4.iast)+'</span><span class="en">'+esc(L4.en)+'</span></div></div>'+
-  '<div><p class="lab">Keep these three</p><ul class="keep">'+T1.keep.map(k=>'<li>'+ico('lotus')+'<span>'+esc(k)+'</span></li>').join('')+'</ul></div>'+
-  '<div class="row2"><button class="btn line" id="rs-sing">'+ico('mic')+'Sing this verse</button><button class="btn line" id="rs-share">'+ico('share')+'Share</button></div>'+
-  '<p class="note rs-by">'+(r.caption?'“'+esc(r.caption)+'” · ':'')+'by '+esc(r.name)+'</p>';
- $('#rs-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);};$('#rs-sing').onclick=()=>{S.style=norm(Object.assign({},S.style,{Tattva:T1.n}));openSing();};$('#rs-share').onclick=()=>openShare(r);
+function paintSide(r){sideR=r;sideK=-1;if(!WIDE.matches)return;const box=$('#rside'),n=TA(r).n,V=TL(n);
+ box.innerHTML='<div class="lhead"><span class="tmed">'+tsym(n)+'</span><div><p class="tno">'+esc(LX('Tattva'))+' '+n+'</p><h2 class="rs-name">'+esc(V.name)+'</h2></div></div><p class="rs-teach">'+esc(V.teach)+'</p>'+
+  '<div class="rs-learn"><span class="bignum" id="rs-n">0</span><span class="lab">'+esc(LX('people learnt from this reel'))+'</span><button class="btn" id="rs-btn"></button></div>'+
+  '<div class="rs-sh"><p class="lab">'+esc(LX('The shloka'))+'</p>'+V.verse.map((d,k)=>'<div class="ln" data-k="'+k+'"><span class="dev'+(V.roman?' roman':'')+'">'+esc(d)+'</span><span class="en">'+esc(V.en[k])+'</span></div>').join('')+'</div>'+
+  '<div><p class="lab">'+esc(LX('Keep these three'))+'</p><ul class="keep">'+V.keep.map(k=>'<li>'+tsym(n,'tsy ksym')+'<span>'+esc(k)+'</span></li>').join('')+'</ul></div>'+
+  '<div class="row2"><button class="btn line" id="rs-sing">'+ico('mic')+esc(LX('Sing this verse'))+'</button><button class="btn line" id="rs-share">'+ico('conch')+esc(LX('Share'))+'</button></div>'+
+  '<p class="note rs-by" data-notr>'+(r.caption?'“'+esc(r.caption)+'” · ':'')+esc(r.name)+'</p>';
+ $('#rs-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);};$('#rs-sing').onclick=()=>{S.style=norm(Object.assign({},S.style,{Tattva:n}));openSing();};$('#rs-share').onclick=()=>openShare(r);
  paintSideCount();}
-function paintSideCount(){if(!sideR||!WIDE.matches)return;const b=$('#rs-btn');if(!b)return;const n=counts()[sideR.id]||0,m=isLearnt(sideR.id);$('#rs-n').textContent=fmt(n);b.className='btn '+(m?'done':'gold');b.innerHTML=ico(m?'check':'lotus')+(m?'You learnt this':'I learnt this');}
+function paintSideCount(){if(!sideR||!WIDE.matches)return;const b=$('#rs-btn');if(!b)return;const n=counts()[sideR.id]||0,m=isLearnt(sideR.id);$('#rs-n').textContent=fmt(n);b.className='btn '+(m?'done':'gold');b.innerHTML=ico(m?'check':'diya')+esc(LX(m?'You learnt this':'I learnt this'));}
 function sideLine(k){if(k===sideK||!WIDE.matches)return;sideK=k;$('#rside').querySelectorAll('.ln').forEach(el=>el.classList.toggle('on',+el.dataset.k===k));}
 WIDE.addEventListener&&WIDE.addEventListener('change',()=>{if(sideR)paintSide(sideR);});
 let scrollT=0;
@@ -317,19 +320,19 @@ function openSheet(kind,html,ctx){sheetFor=Object.assign({kind},ctx||{});$('#sbo
 function closeSheet(){sheetFor=null;$('#scrim').classList.remove('on');$('#sheet').classList.remove('open');}
 $('#scrim').onclick=closeSheet;
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&sheetFor)closeSheet();});
-function openLearn(r){const T1=TA(r);
- const lines=T1.dev.map((d,k)=>'<div class="ln"><span class="dev">'+esc(d)+'</span><span class="ia">'+esc(T1.iast[k])+'</span><span class="en">'+esc(T1.en[k])+'</span></div>').join('');
- const words=T1.words.map(w=>'<div class="word"><b>'+esc(w[0])+'</b><span>'+esc(w[1])+'</span></div>').join('');
- const keep=T1.keep.map(k=>'<li>'+ico('lotus')+'<span>'+esc(k)+'</span></li>').join('');
- openSheet('learn','<div class="shead"><div><p class="eyebrow">Tattva '+T1.n+' · What I learnt</p><h2 class="sh-title">'+esc(T1.teach)+'</h2></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
-  '<div class="learnbox" id="lbox"><span class="bignum" id="lb-n">0</span><span class="lab">people learnt from this reel</span><p class="count" id="lb-line"></p><button class="btn" id="lb-btn"></button></div>'+
-  '<button class="btn line" id="lb-sing">'+ico('mic')+'Sing this verse</button><div><p class="lab">Keep these three</p><ul class="keep" style="margin-top:10px">'+keep+'</ul></div>'+
-  '<div><p class="lab">The shloka · Dakṣiṇāmūrti Aṣṭakam, verse '+T1.n+'</p><div class="shloka">'+lines+'</div></div>'+
-  '<div><p class="lab" style="margin-bottom:10px">Word by word</p><div class="words">'+words+'</div></div>',{r});
- $('#sh-x').onclick=closeSheet;$('#lb-sing').onclick=()=>{closeSheet();S.style=norm(Object.assign({},S.style,{Tattva:T1.n}));openSing();};$('#lb-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);if(v){const n=$('#lb-n');n.classList.remove('bump');void n.offsetWidth;n.classList.add('bump');}};
+function openLearn(r){const n=TA(r).n,V=TL(n);
+ const lines=V.verse.map((d,k)=>'<div class="ln"><span class="dev'+(V.roman?' roman':'')+'">'+esc(d)+'</span>'+(V.roman||lang()==='hi'?'':'<span class="ia">'+esc(V.iast[k])+'</span>')+'<span class="en">'+esc(V.en[k])+'</span></div>').join('');
+ const words=V.words.map(w=>'<div class="word"><b>'+esc(w[0])+'</b><span>'+esc(w[1])+'</span></div>').join('');
+ const keep=V.keep.map(k=>'<li>'+tsym(n,'tsy ksym')+'<span>'+esc(k)+'</span></li>').join('');
+ openSheet('learn','<div class="shead"><div class="lhead"><span class="tmed">'+tsym(n)+'</span><div><p class="tno">'+esc(LX('Tattva'))+' '+n+' · '+esc(V.name)+'</p><h2 class="sh-title">'+esc(V.teach)+'</h2></div></div><button class="icon-btn glass" id="sh-x" aria-label="'+esc(LX('Close'))+'">'+ico('x')+'</button></div>'+
+  '<div class="learnbox" id="lbox"><span class="bignum" id="lb-n">0</span><span class="lab">'+esc(LX('people learnt from this reel'))+'</span><p class="count" id="lb-line"></p><button class="btn" id="lb-btn"></button></div>'+
+  '<button class="btn line" id="lb-sing">'+ico('mic')+esc(LX('Sing this verse'))+'</button><div><p class="lab">'+esc(LX('Keep these three'))+'</p><ul class="keep" style="margin-top:10px">'+keep+'</ul></div>'+
+  '<div><p class="lab">'+esc(LX('The shloka'))+'</p><div class="shloka">'+lines+'</div></div>'+
+  '<div><p class="lab" style="margin-bottom:10px">'+esc(LX('Word by word'))+'</p><div class="words">'+words+'</div></div>',{r});
+ $('#sh-x').onclick=closeSheet;$('#lb-sing').onclick=()=>{closeSheet();S.style=norm(Object.assign({},S.style,{Tattva:n}));openSing();};$('#lb-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);if(v){const e=$('#lb-n');e.classList.remove('bump');void e.offsetWidth;e.classList.add('bump');}};
  paintLearnBox();}
 function paintLearnBox(){const r=sheetFor.r,n=counts()[r.id]||0,m=isLearnt(r.id),b=$('#lb-btn');if(!b)return;
- $('#lb-n').textContent=fmt(n);$('#lb-line').innerHTML=learnLine(n,m);b.className='btn '+(m?'done':'gold');b.innerHTML=ico(m?'check':'lotus')+(m?'You learnt this':'I learnt this');}
+ $('#lb-n').textContent=fmt(n);$('#lb-line').innerHTML=learnLine(n,m);b.className='btn '+(m?'done':'gold');b.innerHTML=ico(m?'check':'diya')+esc(LX(m?'You learnt this':'I learnt this'));}
 function openShare(r){const url=location.origin+'/#r-'+r.id;if(navigator.share){navigator.share({title:'Hey Tattva',text:'Tattva '+TA(r).n+' · '+TA(r).name,url}).catch(()=>{});return;}
  openSheet('share','<div class="shead"><h2 class="sh-title">Share this reel</h2><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
   '<div class="linkbox"><input id="sh-url" readonly aria-label="Reel link"><button class="btn gold" id="sh-copy">Copy</button></div>'+
@@ -354,7 +357,8 @@ function showView(v){
  if(v==='feed')requestAnimationFrame(()=>activate(currentIx(),true));
  if(v==='top')renderTop();}
 $('#snd').onclick=toggleSound;$('#hint').onclick=toggleSound;$('#cr-snd').onclick=toggleSound;
-$('#nv-feed').innerHTML=ico('home')+'Reels';$('#nv-create').innerHTML=ico('plus');
+function paintNavLabels(){$('#nv-feed').innerHTML=ico('home')+'<span>'+esc(LX('Reels'))+'</span>';$('#nv-create').innerHTML=ico('plus')+'<span class="cl">'+esc(LX('Create a reel'))+'</span>';$('#nv-create').setAttribute('aria-label',LX('Create a reel'));if(typeof paintNav==='function')paintNav();if($('#nv-games'))$('#nv-games').innerHTML=ico('chakra')+'<span>'+esc(LX('Games'))+'</span>';}
+paintNavLabels();
 $('#nv-feed').onclick=()=>{if(S.view==='feed'){reelsEl.scrollTo({top:0,behavior:'smooth'});return;}showView('feed');};
 $('#nv-create').onclick=()=>openCreate();
 $('#nv-top').onclick=()=>showView('top');
@@ -376,14 +380,20 @@ function gameName(id){const m=/^o([slb])([1-8])$/.exec(id);if(m&&typeof ARCADE!=
 function renderTop(){const c=counts(),all=allReels(),mine=all.filter(r=>r.own),learnt=all.filter(r=>r.mine),u=S.user;
  const plays=S.scores.reduce((a,x)=>a+(x.plays||0),0),best=S.scores.reduce((a,x)=>Math.max(a,x.best||0),0);
  const box=$('#v-top .top');
- box.innerHTML='<div class="mehead">'+(u?'<span class="ava big">'+esc(u.handle[0].toUpperCase())+'</span><div class="meid"><h1>'+esc(u.handle)+'</h1><p class="note">'+esc(u.email||'')+'</p></div>'+
-   '<div class="mebtns"><button class="tpill glass" id="me-edit">'+ico('edit')+'Name</button><button class="tpill glass" id="me-out">'+ico('out')+'Sign out</button></div>'
-  :'<span class="ava big ghost">'+ico('user')+'</span><div class="meid"><h1>Your space</h1><p class="note">Sign in with your email to keep your reels, learnings and game scores on every device.</p></div>')+'</div>'+
-  (u?'':'<button class="btn gold" id="me-in">'+ico('mail')+'Sign in with email</button>')+
-  '<div class="stats s4"><div class="stat"><b>'+fmt(learnt.length)+'</b><span>Learnt</span></div><div class="stat"><b>'+fmt(mine.length)+'</b><span>My reels</span></div><div class="stat"><b>'+fmt(plays)+'</b><span>Games played</span></div><div class="stat"><b>'+fmt(best)+'</b><span>Best score</span></div></div>'+
-  '<div class="metabs" role="tablist">'+[['mine','My reels'],['learnt','Learnt'],['scores','Game scores'],['top','Top reels']].map(t=>'<button role="tab" data-t="'+t[0]+'" aria-selected="'+(S.meTab===t[0])+'">'+t[1]+'</button>').join('')+'</div><div class="lb" id="lb"></div>';
+ const got=new Set(learnt.map(r=>TA(r).n)),LN=(LANGS.find(l=>l[0]===lang())||LANGS[0])[1];
+ const beads=Array.from({length:21},(_,i)=>'<circle cx="'+(10+i*15.5).toFixed(1)+'" cy="'+(22+9*Math.sin(i/20*Math.PI)).toFixed(1)+'" r="5.6" class="bead'+(i<Math.round(Math.min(108,learnt.length)/108*21)||(i===0&&learnt.length)?' on':'')+'"/>').join('');
+ box.innerHTML='<div class="mehead">'+(u?'<span class="ava big">'+esc(u.handle[0].toUpperCase())+'</span><div class="meid"><h1>'+esc(u.handle)+'</h1><p class="note">'+esc(LX('{n} of 8 tattvas learnt').replace('{n}',got.size))+'</p></div>'+
+   '<div class="mebtns"><button class="tpill glass" id="me-edit">'+ico('edit')+esc(LX('Name'))+'</button><button class="tpill glass" id="me-out">'+ico('out')+esc(LX('Sign out'))+'</button></div>'
+  :'<span class="ava big ghost">'+ico('user')+'</span><div class="meid"><h1>'+esc(LX('Your space'))+'</h1><p class="note">'+esc(LX('Sign in to keep your reels, learnings and game scores on every device.'))+'</p></div>')+'</div>'+
+  (u?'':'<button class="btn gold" id="me-in">'+ico('mail')+esc(LX('Sign in with email'))+'</button>')+
+  '<button class="langrow" id="me-lang">'+ico('globe')+'<span>'+esc(LX('Language'))+'</span><b>'+esc(LN)+'</b></button>'+
+  '<div class="mala"><svg viewBox="0 0 330 40" aria-hidden="true">'+beads+'</svg><p>'+esc(LX('Learning mala: {n} of 108 reels').replace('{n}',fmt(learnt.length)))+'</p></div>'+
+  '<p class="lab">'+esc(LX('Your tattvas'))+'</p><div class="tgrid">'+TATTVAS.map(T=>'<div class="tt'+(got.has(T.n)?' got':'')+'">'+tsym(T.n)+'<span>'+esc(TL(T.n).name)+'</span></div>').join('')+'</div>'+
+  '<div class="stats s4"><div class="stat"><b>'+fmt(learnt.length)+'</b><span>'+esc(LX('Learnt'))+'</span></div><div class="stat"><b>'+fmt(mine.length)+'</b><span>'+esc(LX('My reels'))+'</span></div><div class="stat"><b>'+fmt(plays)+'</b><span>'+esc(LX('Games played'))+'</span></div><div class="stat"><b>'+fmt(best)+'</b><span>'+esc(LX('Best score'))+'</span></div></div>'+
+  '<div class="metabs" role="tablist">'+[['mine','My reels'],['learnt','Learnt'],['scores','Game scores'],['top','Top reels']].map(x=>'<button role="tab" data-tab="'+x[0]+'" aria-selected="'+(S.meTab===x[0])+'">'+esc(LX(x[1]))+'</button>').join('')+'</div><div class="lb" id="lb"></div>';
+ $('#me-lang').onclick=()=>openLang();
  if(u){$('#me-out').onclick=signOut;$('#me-edit').onclick=()=>openName(false);}else $('#me-in').onclick=()=>openSignin(()=>renderTop(),'Sign in');
- box.querySelectorAll('.metabs button').forEach(b=>b.onclick=()=>{S.meTab=b.dataset.t;renderTop();});
+ box.querySelectorAll('.metabs button').forEach(b=>b.onclick=()=>{S.meTab=b.dataset.tab;renderTop();});
  const lb=$('#lb'),t=S.meTab;
  if(t==='scores'){if(!u){lb.innerHTML='<p class="note">Sign in and your best score in every game is kept here.</p>';return;}
   if(!S.scores.length){lb.innerHTML='<p class="note">No games yet. Play one from the Games tab.</p>';return;}
@@ -399,8 +409,18 @@ async function loadMe(){try{const j=await API('/api/me');S.user=j.user&&j.user.h
  if(typeof GS!=='undefined'){S.scores.forEach(x=>{if(x.best>(GS.best[x.game]||0))GS.best[x.game]=x.best;});}
  paintNav();if(S.view==='top')renderTop();
  if(S.pendingEmail)openName(true);}
+// language: a full screen the first time the app opens, then a sheet from Me
+function langButtons(cls){return LANGS.map(l=>'<button class="lopt'+(cls?' '+cls:'')+(lang()===l[0]&&LANG?' on':'')+'" data-l="'+l[0]+'" lang="'+l[0]+'"><b>'+esc(l[1])+'</b><span>'+esc(l[2])+'</span><i>'+ico('check')+'</i></button>').join('');}
+function openLang(){openSheet('lang','<div class="shead"><div><h2 class="sh-title">'+esc(LX('Language'))+'</h2><p class="note">'+esc(LX('The whole app, the meanings and the shloka letters switch. Singing stays in Sanskrit sounds.'))+'</p></div><button class="icon-btn glass" id="sh-x" aria-label="'+esc(LX('Close'))+'">'+ico('x')+'</button></div><div class="lops">'+langButtons('sm')+'</div>');
+ $('#sh-x').onclick=closeSheet;$('#sbody').querySelectorAll('.lopt').forEach(b=>b.onclick=()=>{closeSheet();setLang(b.dataset.l);});}
+function firstLang(){if(LANG)return;const el=document.createElement('div');el.className='langscreen';el.setAttribute('role','dialog');el.setAttribute('aria-label','Choose your language');let pick='en';
+ el.innerHTML='<div class="lsy">'+yantra()+'</div><div class="lsom">ॐ</div><div class="lst"><h1>Hey Tattva</h1><p class="dv">हे तत्त्व</p><p class="sub">The eight tattvas of the Dakṣiṇāmūrti Aṣṭakam, in reels, songs and games.</p></div>'+
+  '<h2 class="lsh">Choose your language</h2><div class="lops">'+langButtons()+'</div><button class="btn gold" id="ls-go">Continue</button><p class="lsn">You can change it any time in Me.</p>';
+ $('#app').appendChild(el);const paint=()=>el.querySelectorAll('.lopt').forEach(b=>b.classList.toggle('on',b.dataset.l===pick));paint();
+ el.querySelectorAll('.lopt').forEach(b=>b.onclick=()=>{pick=b.dataset.l;paint();});
+ $('#ls-go').onclick=()=>{if(pick!=='en'){setLang(pick);return;}setLang(pick,true);el.classList.add('out');setTimeout(()=>el.remove(),400);};}
 function signOut(){API('/api/auth',{method:'POST',body:JSON.stringify({logout:true})}).catch(()=>{});S.user=null;S.scores=[];LS.del('tr-me');paintNav();toast('Signed out');loadReels();if(S.view==='top')renderTop();}
-function paintNav(){const u=S.user;$('#nv-top').innerHTML=(u?'<span class="ava sm">'+esc(u.handle[0].toUpperCase())+'</span>':ico('user'))+'Me';$('#nv-top').setAttribute('aria-label',u?'Me · '+u.handle:'Me');}
+function paintNav(){const u=S.user;$('#nv-top').innerHTML=(u?'<span class="ava sm">'+esc(u.handle[0].toUpperCase())+'</span>':ico('user'))+'<span>'+esc(LX('Me'))+'</span>';$('#nv-top').setAttribute('aria-label',u?LX('Me')+': '+u.handle:LX('Me'));}
 // pick or change my name (the handle everyone sees)
 function openName(first,after){const cur=S.user?S.user.handle:'',sug=first?((S.pendingEmail||'').split('@')[0]||'').toLowerCase().replace(/[^a-z0-9_.]/g,'').slice(0,20):cur;
  openSheet('name','<div class="shead"><div><h2 class="sh-title">'+(first?'Pick your name':'Change your name')+'</h2><p class="note">Everyone sees it on your reels and in games. 3–20 letters, numbers, dots or underscores.</p></div>'+(first?'':'<button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button>')+'</div>'+
@@ -482,13 +502,13 @@ function finishSignin(user,after){const done=()=>{loadReels();loadMe();if(typeof
 // Simulated sign-in for now (Laksh, 2026-10-08): email, then a name the first time. No email is sent; the server
 // finds or creates the account. The email-link flow (linkSignin below) stays ready for when a mail service is added.
 function openSignin(after,title){
- openSheet('signin','<div class="shead"><div><h2 class="sh-title">'+esc(title||t('Sign in to share'))+'</h2><p class="note">'+esc(t('Just your email. No password, no code. We’ll remember you on this device.'))+'</p></div><button class="icon-btn glass" id="sh-x" aria-label="'+esc(t('Close'))+'">'+ico('x')+'</button></div>'+
-  '<div class="sistep"><label class="lab" for="si-email">'+esc(t('Email'))+'</label><input class="field" id="si-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com"><p class="err" id="si-err"></p><button class="btn gold" id="si-send">'+esc(t('Continue'))+'</button></div>');
+ openSheet('signin','<div class="shead"><div><h2 class="sh-title">'+esc(title||LX('Sign in to share'))+'</h2><p class="note">'+esc(LX('Just your email. No password, no code. We’ll remember you on this device.'))+'</p></div><button class="icon-btn glass" id="sh-x" aria-label="'+esc(LX('Close'))+'">'+ico('x')+'</button></div>'+
+  '<div class="sistep"><label class="lab" for="si-email">'+esc(LX('Email'))+'</label><input class="field" id="si-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com"><p class="err" id="si-err"></p><button class="btn gold" id="si-send">'+esc(LX('Continue'))+'</button></div>');
  $('#sh-x').onclick=closeSheet;const em=$('#si-email');setTimeout(()=>em.focus(),350);
- const go=async()=>{const v=em.value.trim().toLowerCase();if(!/^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/.test(v)){$('#si-err').textContent=t('Enter an email like you@example.com.');return;}
+ const go=async()=>{const v=em.value.trim().toLowerCase();if(!/^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/.test(v)){$('#si-err').textContent=LX('Enter an email like you@example.com.');return;}
   const b=$('#si-send');if(b.disabled)return;b.disabled=true;b.innerHTML='<span class="spin"></span>';$('#si-err').textContent='';
   try{const j=await API('/api/auth',{method:'POST',body:JSON.stringify({email:v,simulate:true})});finishSignin(j.user,after);}
-  catch(e){$('#si-err').textContent=e.status===501?t('Sign-in isn’t available right now.'):e.message;if($('#si-send')){b.disabled=false;b.textContent=t('Continue');}}};
+  catch(e){$('#si-err').textContent=e.status===501?LX('Sign-in isn’t available right now.'):e.message;if($('#si-send')){b.disabled=false;b.textContent=LX('Continue');}}};
  em.addEventListener('input',()=>$('#si-err').textContent='');em.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go();}});$('#si-send').onclick=go;}
 // the email link lands here: #access_token=…&type=magiclink (or #error=…)
 function linkSignin(){const h=location.hash;if(!/(^#|&)(access_token|error)=/.test(h))return false;const q=new URLSearchParams(h.slice(1));history.replaceState(null,'',location.pathname+location.search);
@@ -513,5 +533,7 @@ async function publish(d){
  clearDraft();const c=cleanReel(r);if(c)S.reels.unshift(c);showView('feed');renderFeed(true);reelsEl.scrollTop=0;requestAnimationFrame(()=>activate(0,true));toast('Shared to your reels');}
 
 /* ---------- boot ---------- */
-setSoundIcons();paintNav();renderFeed(true);loadReels();if(!linkSignin())loadMe();
+document.querySelectorAll('.crest').forEach(e=>e.innerHTML=yantra());applyI18n();startTranslator();
+window.addEventListener('langchange',()=>{paintNavLabels();setSoundIcons();renderFeed(true);requestAnimationFrame(()=>activate(currentIx(),true));if(S.view==='top')renderTop();if(sheetFor&&sheetFor.kind==='learn'){const r=sheetFor.r;openLearn(r);}if(typeof renderGames==='function')renderGames();});
+setSoundIcons();paintNav();renderFeed(true);loadReels();if(!linkSignin())loadMe();firstLang();
 })();

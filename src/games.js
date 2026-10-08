@@ -128,15 +128,16 @@ function goCount(R){narrStop();R.startAt=Date.now()+3000;R.phase='count';paintPl
 
 /* ---------- play screen ---------- */
 function ranked(R){return Object.values(R.players).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));}
-function introHTML(g){const V=TATTVAS[g.tattva-1],A=styleOf(g);
- return '<div class="intro" data-st="load"><p class="eyebrow">Tattva '+g.tattva+' · '+esc(V.name)+'</p><p class="lab istate">Loading the recitation…</p>'+
-  '<div class="iv">'+V.dev.map((d,i)=>'<span class="dev">'+esc(d)+'</span>').join('')+'</div>'+
-  '<div class="imean"><p class="lab">Meaning</p><p class="it">'+esc(V.teach)+'</p></div>'+
-  '<div class="ihow">'+ico('remix')+'<div><b>'+esc(A.name)+'</b><span>'+esc(A.how)+'</span></div></div></div>';}
+function introHTML(g){const V=TL(g.tattva),A=styleOf(g);
+ return '<div class="intro" data-st="load"><p class="eyebrow">'+esc(LX('Tattva'))+' '+g.tattva+' · '+esc(V.name)+'</p><p class="lab istate">'+esc(LX('Loading the recitation…'))+'</p>'+
+  '<div class="iv">'+V.verse.map(d=>'<span class="dev'+(V.roman?' roman':'')+'">'+esc(d)+'</span>').join('')+'</div>'+
+  '<div class="imean"><p class="lab">'+esc(LX('Meaning'))+'</p><p class="it">'+esc(V.teach)+'</p></div>'+
+  '<div class="ihow">'+tsym(g.tattva,'tsy psym')+'<div><b>'+esc(LX(A.name))+'</b><span>'+esc(LX(A.how))+'</span></div></div></div>';}
+const gTitle=g=>g.official?LX(styleOf(g).name)+' · '+TL(g.tattva).name:g.title;
 function paintLiveBoard(R){const el=$('#pl-live');if(!el)return;if(R.solo||R.phase!=='play'){el.hidden=true;return;}el.hidden=false;
  el.innerHTML=ranked(R).slice(0,4).map((p,i)=>'<div class="lb'+(p.pid===GS.me?' me':'')+'"><span>'+(i+1)+'</span><b>'+esc(p.name)+'</b><i>'+fmt(p.score)+'</i></div>').join('');}
 function paintPlay(){const R=GS.live,box=$('#pl-body');if(!R||!box)return;const g=R.g;
- $('#pl-title').textContent=g?g.title:'Joining…';$('#pl-code').hidden=R.solo||!R.code;$('#pl-code').innerHTML='<span>Code</span><b>'+esc(R.code||'')+'</b>';
+ $('#pl-title').textContent=g?gTitle(g):LX('Joining…');$('#pl-code').hidden=R.solo||!R.code;$('#pl-code').innerHTML='<span>Code</span><b>'+esc(R.code||'')+'</b>';
  $('#v-play').classList.toggle('gaming',R.phase==='play');const lv=$('#pl-live');if(lv)lv.hidden=true;
  if(R.err){box.innerHTML='<div class="pl-card"><p class="note">'+esc(R.err)+'</p><button class="btn gold" id="pl-x2">Back to games</button></div>';$('#pl-x2').onclick=()=>{closeRoom();showView('games');};return;}
  if(!g){box.innerHTML='<div class="pl-card pl-wait"><span class="spin"></span><p class="note">Waiting for the host…</p></div>';return;}
@@ -151,7 +152,7 @@ function paintPlay(){const R=GS.live,box=$('#pl-body');if(!R||!box)return;const 
   return;}
  if(R.phase==='count'){box.innerHTML='<div class="countbox"><p class="eyebrow">'+esc(styleOf(g).name)+' · Tattva '+g.tattva+'</p><div class="bigcount" id="pl-count">3</div><p class="note">'+esc(styleOf(g).how)+'</p></div>';return;}
  if(R.phase==='play'){if(!$('#ar-host'))box.innerHTML='<div class="arhost" id="ar-host"></div><div class="pl-live" id="pl-live" hidden></div>';return;}
- if(R.phase==='done'){ARC.stop();const rk=ranked(R),V=TATTVAS[g.tattva-1],best=GS.best[g.id]||0,next=official(g.settings.style,g.tattva%8+1);
+ if(R.phase==='done'){ARC.stop();const rk=ranked(R),V=TL(g.tattva),best=GS.best[g.id]||0,next=official(g.settings.style,g.tattva%8+1);
   const board=R.solo?'':'<p class="lab">Scores</p><div class="board">'+rk.map((p,i)=>'<div class="brow'+(p.pid===GS.me?' me':'')+'"><span class="rk">'+(i+1)+'</span><span class="bn">'+esc(p.name)+(p.fin?'':' <small>· playing</small>')+'</span><b>'+fmt(p.score)+'</b></div>').join('')+'</div>';
   box.innerHTML='<div class="pl-card result"><p class="eyebrow">'+esc(styleOf(g).name)+' · Tattva '+g.tattva+' · '+LEVELS[g.settings.level]+'</p><div class="bignum">'+fmt(R.myScore)+'</div><p class="count">'+(R.newBest?'New best!':'Best: <b>'+fmt(best)+'</b>')+'</p>'+board+
    '<div class="lesson"><p class="lab">Tattva '+g.tattva+' · '+esc(V.name)+'</p><p>'+esc(V.teach)+'</p></div>'+
@@ -173,22 +174,25 @@ function renderGames(){gamesEl.innerHTML='';setTimeout(paintLive,0);
  STYLES.forEach(st=>gamesEl.appendChild(gameCard(official(st,GS.pick[st]),st)));
  GS.games.forEach(g=>gamesEl.appendChild(gameCard(g)));}
 // one card per style (pick any of the eight tattvas on it), then one card per game someone made
+const COVER={stick:'/img/g_stick.jpg',letters:'/img/g_letters.jpg',build:'/img/g_build.jpg'};
 function gameCard(g,styleCard){const el=document.createElement('article');el.className='gcard'+(styleCard?' gstyle':'');el.id='g-'+(styleCard?'o'+SL[styleCard]:g.id);
- el.innerHTML='<canvas></canvas><div class="shade"></div>'+
-  '<div class="gcap"><span class="gtype">'+ico('remix')+(styleCard?'Game style':'Made by '+esc(g.name))+' · <span class="gsecs"></span>s</span><h2 class="gtitle"></h2>'+
-  '<p class="gsub"></p>'+(styleCard?'<div class="tchips">'+[1,2,3,4,5,6,7,8].map(n=>'<button class="tchip" data-n="'+n+'" aria-label="Tattva '+n+'">'+n+'</button>').join('')+'</div>':'')+'<p class="note gmeta"></p>'+
-  '<div class="glive" hidden></div><div class="row2"><button class="btn gold g-solo">'+ico('right')+'Play</button><button class="btn line g-host">'+ico('share')+'With friends</button></div></div>';
- const fill=()=>{const G=cardGame(el)||g,A=styleOf(G),V=TATTVAS[G.tattva-1];
-  el.querySelector('.gsecs').textContent=A.secs;el.querySelector('.gtitle').textContent=styleCard?A.name:G.title;
-  el.querySelector('.gsub').textContent='Tattva '+G.tattva+' · '+V.name+(styleCard?'':' · '+A.name);
-  el.querySelector('.gmeta').textContent=A.how+(G.official?'':' · '+LEVELS[G.settings.level])+(GS.best[G.id]?' · your best '+fmt(GS.best[G.id]):'')+(G.plays?' · played '+fmt(G.plays)+'×':'');
-  el.querySelectorAll('.tchip').forEach(b=>b.classList.toggle('on',+b.dataset.n===G.tattva));return G;};
+ const st=styleCard||g.settings.style;
+ el.innerHTML='<div class="gcover"><img alt="" loading="lazy" src="'+COVER[st]+'"><span class="gsecs"></span>'+(styleCard?'':'<span class="gby">'+esc(LX('Made by'))+' '+esc(g.name)+'</span>')+'</div>'+
+  '<div class="gbody"><h2 class="gtitle"></h2><p class="gdesc"></p>'+
+  (styleCard?'<div class="tchips" role="group" aria-label="'+esc(LX('Pick a tattva'))+'">'+[1,2,3,4,5,6,7,8].map(n=>'<button class="tchip" data-n="'+n+'" aria-label="'+esc(LX('Tattva'))+' '+n+': '+esc(TL(n).name)+'">'+tsym(n)+'</button>').join('')+'</div>':'')+
+  '<p class="gpick"></p><p class="note gmeta"></p>'+
+  '<div class="glive" hidden></div><div class="row2"><button class="btn gold g-solo">'+ico('right')+esc(LX('Play'))+'</button><button class="btn line g-host">'+ico('share')+esc(LX('With friends'))+'</button></div></div>';
+ const fill=()=>{const G=cardGame(el)||g,A=styleOf(G),V=TL(G.tattva);
+  el.querySelector('.gsecs').textContent=A.secs+'s';el.querySelector('.gtitle').textContent=styleCard?LX(A.name):G.title;
+  el.querySelector('.gdesc').textContent=LX(A.how);
+  el.querySelector('.gpick').innerHTML=tsym(G.tattva,'tsy psym')+'<span>'+esc(LX('Tattva'))+' '+G.tattva+': '+esc(V.name)+(styleCard?'':' · '+esc(LX(A.name)))+'</span>';
+  el.querySelector('.gmeta').textContent=[G.official?'':LX(LEVELS[G.settings.level]),GS.best[G.id]?LX('Your best')+' '+fmt(GS.best[G.id]):'',G.plays?LX('Played')+' '+fmt(G.plays)+'×':''].filter(Boolean).join(' · ');
+  el.querySelectorAll('.tchip').forEach(b=>{const on=+b.dataset.n===G.tattva;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);});return G;};
  fill();
- el.querySelectorAll('.tchip').forEach(b=>b.onclick=()=>{GS.pick[styleCard]=+b.dataset.n;LS.set('tr-gpick',GS.pick);const G=fill();queuePoster(el.querySelector('canvas'),norm({Tattva:G.tattva}),0);});
+ el.querySelectorAll('.tchip').forEach(b=>b.onclick=()=>{GS.pick[styleCard]=+b.dataset.n;LS.set('tr-gpick',GS.pick);fill();});
  el.querySelector('.g-solo').onclick=()=>startRoom({g:cardGame(el)||g,solo:true,name:myName()||'you'});
  el.querySelector('.g-host').onclick=()=>askName(name=>startRoom({g:cardGame(el)||g,host:true,code:newCode(),name}));
- if(gposter)gposter.observe(el);else queuePoster(el.querySelector('canvas'),norm({Tattva:g.tattva}),0);return el;}
-const gposter=('IntersectionObserver' in window)?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){gposter.unobserve(e.target);const g=cardGame(e.target);if(g)queuePoster(e.target.querySelector('canvas'),norm({Tattva:g.tattva}),0);}}),{root:gamesEl,rootMargin:'100% 0px'}):null;
+ return el;}
 function askName(cb){const cur=myName();if(cur){cb(cur);return;}
  openSheet('gname','<div class="shead"><div><h2 class="sh-title">Your player name</h2><p class="note">Shown to the others in the game.</p></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div><input class="field" id="gn-in" maxlength="20" placeholder="e.g. Laksh" autocomplete="nickname"><p class="err" id="gn-err"></p><button class="btn gold" id="gn-go">Continue</button>');
  const inp=$('#gn-in');setTimeout(()=>inp.focus(),300);$('#sh-x').onclick=closeSheet;
@@ -229,7 +233,7 @@ $('#pl-close').innerHTML=ico('x');$('#pl-close').onclick=()=>{closeRoom();showVi
 $('#gx-live').onclick=()=>{const r=LOBBY.rooms[0];const el=r&&(document.getElementById('g-'+r.gid)||document.getElementById('g-'+String(r.gid).slice(0,2)));if(el)el.scrollIntoView({behavior:'smooth'});};
 $('#gx-join').innerHTML=ico('right')+'Code';$('#gx-join').onclick=()=>openJoin();
 $('#gx-make').innerHTML=ico('plus')+'Make';$('#gx-make').onclick=()=>openMake();
-$('#nv-games').innerHTML=ico('drum')+'Games';$('#nv-games').onclick=()=>{if(S.view==='games'){gamesEl.scrollTo({top:0,behavior:'smooth'});return;}showView('games');if(!GS.loaded)loadGames();};
+$('#nv-games').innerHTML=ico('chakra')+'<span>'+esc(LX('Games'))+'</span>';$('#nv-games').onclick=()=>{if(S.view==='games'){gamesEl.scrollTo({top:0,behavior:'smooth'});return;}showView('games');if(!GS.loaded)loadGames();};
 renderGames();
 (function(){const m=location.hash.match(/^#join-([A-Z0-9]{6})$/i);if(m){showView('games');loadGames();setTimeout(()=>openJoin(m[1].toUpperCase()),300);}
  const g=location.hash.match(/^#g-((g[a-z0-9]{6,24})|o[slb][1-8])$/);if(g){showView('games');let id=g[1];if(/^o/.test(id)){const st=STYLES.find(x=>SL[x]===id[1]);GS.pick[st]=+id[2];id=id.slice(0,2);}loadGames().then(()=>{const el=document.getElementById('g-'+id);if(el)el.scrollIntoView();});}})();
