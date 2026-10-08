@@ -522,3 +522,11 @@ select.field{appearance:auto;font-size:14px;min-width:0;flex:1}
   .sheet .grab{display:none}
   .toast{position:fixed;top:24px;left:calc(var(--side) + (100vw - var(--side))/2)}
 }
+.siwait{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:6px 0}
+.siwait .icon-btn{width:56px;height:56px;color:var(--gold)}
+.siwait p{margin:0;font-size:15px}
+.siwait .spin{--th:var(--gold)}
+.sicode{border:1px solid var(--faint);border-radius:13px;padding:10px 12px}
+.sicode summary{cursor:pointer;font-size:14px;color:var(--muted);font-weight:600}
+.sicode[open]{display:flex;flex-direction:column;gap:10px}
+.sicode[open] summary{margin-bottom:2px}

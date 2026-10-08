@@ -472,28 +472,38 @@ function startReview(){if(S.view!=='review')return;const take=S.style.Recitation
 $('#rv-back').innerHTML=ico('back');$('#rv-back').onclick=()=>{showView('create');renderTools();renderFx(true);startPreview();};
 $('#cr-close').innerHTML=ico('x');
 $('#rv-share').onclick=async()=>{const b=$('#rv-share');if(b.disabled)return;b.disabled=true;try{const d=await makeDraft();if(S.user||S.local)await publish(d);else{saveDraft(d);openSignin();}}finally{b.disabled=false;}};
-// Real sign-in: email → a code arrives by email (Supabase Auth) → enter it → pick a name the first time.
+// Real sign-in: email → Supabase Auth emails a sign-in link (or a code, if a custom mailer's template shows one).
+// Tapping the link opens the site with #access_token=…; boot picks it up. A tab that is waiting checks /api/me, so a
+// link opened in the same browser signs this tab in too.
+function finishSignin(user,after){const done=()=>{loadReels();loadMe();if(typeof after==='function'){after();return;}const d=loadDraft();if(d)publish(d);};
+ if(user.handle){S.user=user;LS.set('tr-me',S.user);closeSheet();paintNav();toast('Signed in as '+user.handle);done();}
+ else{S.pendingEmail=user.email;openName(true,done);}}
 function openSignin(after,title){
- openSheet('signin','<div class="shead"><div><h2 class="sh-title">'+esc(title||'Sign in to share')+'</h2><p class="note" id="si-sub">No password. We email you a code.</p></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
-  '<div id="si-a" class="sistep"><label class="lab" for="si-email">Email</label><input class="field" id="si-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com"><p class="err" id="si-err"></p><button class="btn gold" id="si-send">'+ico('mail')+'Email me a code</button></div>'+
-  '<div id="si-b" class="sistep" hidden><label class="lab" for="si-code">Code</label><input class="field codein" id="si-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456"><p class="err" id="si-err2"></p><button class="btn gold" id="si-go">Sign in</button>'+
-  '<div class="sirow"><button class="linkbtn" id="si-again" disabled>Send a new code</button><button class="linkbtn" id="si-diff">Use a different email</button></div></div>');
- $('#sh-x').onclick=closeSheet;const em=$('#si-email'),cd=$('#si-code');setTimeout(()=>em.focus(),350);let email='',tm=0;
- const wait=n=>{const b=$('#si-again');if(!b)return;clearInterval(tm);b.disabled=true;let k=n;b.textContent='Send a new code ('+k+')';tm=setInterval(()=>{k--;if(!$('#si-again')){clearInterval(tm);return;}if(k<=0){clearInterval(tm);b.disabled=false;b.textContent='Send a new code';}else b.textContent='Send a new code ('+k+')';},1000);};
+ openSheet('signin','<div class="shead"><div><h2 class="sh-title">'+esc(title||'Sign in to share')+'</h2><p class="note" id="si-sub">No password. We email you a sign-in link.</p></div><button class="icon-btn glass" id="sh-x" aria-label="Close">'+ico('x')+'</button></div>'+
+  '<div id="si-a" class="sistep"><label class="lab" for="si-email">Email</label><input class="field" id="si-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="you@example.com"><p class="err" id="si-err"></p><button class="btn gold" id="si-send">'+ico('mail')+'Email me a sign-in link</button></div>'+
+  '<div id="si-b" class="sistep" hidden><div class="siwait"><span class="icon-btn glass">'+ico('mail')+'</span><p>Open the email from <b>Supabase Auth</b> and tap <b>Sign in</b>. This page signs in by itself when you come back.</p><span class="spin"></span></div>'+
+  '<details class="sicode"><summary>Got a code instead?</summary><input class="field codein" id="si-code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456"><button class="btn line" id="si-go">Sign in with code</button></details><p class="err" id="si-err2"></p>'+
+  '<div class="sirow"><button class="linkbtn" id="si-again" disabled>Send again</button><button class="linkbtn" id="si-diff">Use a different email</button></div></div>');
+ $('#sh-x').onclick=closeSheet;const em=$('#si-email'),cd=$('#si-code');setTimeout(()=>em.focus(),350);let email='',tm=0,poll=0,half=0;
+ const stop=()=>{clearInterval(tm);clearInterval(poll);};
+ const wait=n=>{const b=$('#si-again');if(!b)return;clearInterval(tm);b.disabled=true;let k=n;b.textContent='Send again ('+k+')';tm=setInterval(()=>{k--;if(!$('#si-again')){clearInterval(tm);return;}if(k<=0){clearInterval(tm);b.disabled=false;b.textContent='Send again';}else b.textContent='Send again ('+k+')';},1000);};
+ const watch=()=>{clearInterval(poll);poll=setInterval(async()=>{if(!$('#si-b')||sheetFor&&sheetFor.kind!=='signin'){clearInterval(poll);return;}if(document.hidden)return;
+   try{const j=await API('/api/me');if(j.user&&(j.user.handle||++half>=5)){stop();finishSignin(j.user,after);}}catch(e){}},2500);};
  const send=async()=>{const v=em.value.trim().toLowerCase();if(!/^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/.test(v)){$('#si-err').textContent='Enter an email like you@example.com.';return;}
   const b=$('#si-send');b.disabled=true;b.innerHTML='<span class="spin"></span>Sending…';$('#si-err').textContent='';
-  try{await API('/api/auth',{method:'POST',body:JSON.stringify({email:v})});email=v;$('#si-a').hidden=true;$('#si-b').hidden=false;$('#si-sub').innerHTML='We sent a code to <b>'+esc(v)+'</b>. It can take a minute; check spam too.';cd.value='';setTimeout(()=>cd.focus(),50);wait(60);}
-  catch(e){$('#si-err').textContent=e.status===501?'Sign-in isn’t available right now.':e.message;}finally{if($('#si-send')){b.disabled=false;b.innerHTML=ico('mail')+'Email me a code';}}};
+  try{await API('/api/auth',{method:'POST',body:JSON.stringify({email:v})});email=v;$('#si-a').hidden=true;$('#si-b').hidden=false;$('#si-sub').innerHTML='We sent a sign-in link to <b>'+esc(v)+'</b>. It can take a minute; check spam too.';wait(60);watch();}
+  catch(e){$('#si-err').textContent=e.status===501?'Sign-in isn’t available right now.':e.message;}finally{if($('#si-send')){b.disabled=false;b.innerHTML=ico('mail')+'Email me a sign-in link';}}};
  const verify=async()=>{const c=cd.value.replace(/\D/g,'');if(c.length<6){$('#si-err2').textContent='Enter the code from the email.';return;}
-  const b=$('#si-go');if(b.disabled)return;b.disabled=true;b.innerHTML='<span class="spin"></span>Checking…';$('#si-err2').textContent='';
-  try{const j=await API('/api/auth',{method:'POST',body:JSON.stringify({email,code:c})});clearInterval(tm);
-   const done=()=>{loadReels();loadMe();if(typeof after==='function'){after();return;}const d=loadDraft();if(d)publish(d);};
-   if(j.user.handle){S.user=j.user;LS.set('tr-me',S.user);closeSheet();paintNav();toast('Signed in as '+j.user.handle);done();}
-   else{S.pendingEmail=j.user.email;openName(true,done);}}
-  catch(e){$('#si-err2').textContent=e.message;if($('#si-go')){b.disabled=false;b.textContent='Sign in';}}};
+  const b=$('#si-go');if(b.disabled)return;b.disabled=true;$('#si-err2').textContent='';
+  try{const j=await API('/api/auth',{method:'POST',body:JSON.stringify({email,code:c})});stop();finishSignin(j.user,after);}
+  catch(e){$('#si-err2').textContent=e.message;if($('#si-go'))b.disabled=false;}};
  em.addEventListener('input',()=>$('#si-err').textContent='');em.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send();}});
- cd.addEventListener('input',()=>{cd.value=cd.value.replace(/\D/g,'');$('#si-err2').textContent='';if(cd.value.length>=6&&cd.value.length===(+cd.dataset.len||6))verify();});cd.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();verify();}});
- $('#si-send').onclick=send;$('#si-go').onclick=verify;$('#si-again').onclick=()=>{$('#si-a').hidden=false;$('#si-b').hidden=true;send();};$('#si-diff').onclick=()=>{clearInterval(tm);$('#si-b').hidden=true;$('#si-a').hidden=false;$('#si-sub').textContent='No password. We email you a code.';em.focus();};}
+ cd.addEventListener('input',()=>{cd.value=cd.value.replace(/\D/g,'');$('#si-err2').textContent='';});cd.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();verify();}});
+ $('#si-send').onclick=send;$('#si-go').onclick=verify;$('#si-again').onclick=()=>{$('#si-a').hidden=false;$('#si-b').hidden=true;send();};$('#si-diff').onclick=()=>{stop();$('#si-b').hidden=true;$('#si-a').hidden=false;$('#si-sub').textContent='No password. We email you a sign-in link.';em.focus();};}
+// the email link lands here: #access_token=…&type=magiclink (or #error=…)
+function linkSignin(){const h=location.hash;if(!/(^#|&)(access_token|error)=/.test(h))return false;const q=new URLSearchParams(h.slice(1));history.replaceState(null,'',location.pathname+location.search);
+ if(q.get('error')){toast(/expired/i.test(q.get('error_description')||q.get('error_code')||'')?'That sign-in link has expired. Ask for a new one.':'That sign-in link didn’t work. Ask for a new one.');return true;}
+ API('/api/auth',{method:'POST',body:JSON.stringify({access_token:q.get('access_token')})}).then(j=>finishSignin(j.user)).catch(e=>toast(e.message));return true;}
 function blobB64(b){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=no;r.readAsDataURL(b);});}
 async function makeDraft(){const d={caption:$('#caption').value.trim().slice(0,140),style:JSON.parse(JSON.stringify(S.style)),score:(S.source==='recorded'||S.source==='sung')?S.score:null,takeOffset:S.takeOffset||0,take:null};
  if(d.style.Recitation==='My recording'){if(S.takeBlob&&S.takeBlob.size<=880000){d.take={mime:(S.takeBlob.type||'audio/webm').replace(/\s/g,''),b64:await blobB64(S.takeBlob)};}else{if(S.takeBlob)toast('Your recording is too long to attach, so the reel shares without it');d.style.Recitation='None';}}
@@ -513,5 +523,5 @@ async function publish(d){
  clearDraft();const c=cleanReel(r);if(c)S.reels.unshift(c);showView('feed');renderFeed(true);reelsEl.scrollTop=0;requestAnimationFrame(()=>activate(0,true));toast('Shared to your reels');}
 
 /* ---------- boot ---------- */
-setSoundIcons();paintNav();renderFeed(true);loadReels();loadMe();
+setSoundIcons();paintNav();renderFeed(true);loadReels();if(!linkSignin())loadMe();
 })();

@@ -1,7 +1,8 @@
 import { sb, send, wrap, readBody, anon, rid, sha, setSession, clearSession, sessionToken, SESSION_DAYS, HttpError } from './_db.js';
 
-// Email-code sign-in. POST {email} sends a code (Supabase Auth emails it); POST {email, code} checks it and starts a
-// session; POST {logout:true} ends it. Supabase Auth's own tokens are not kept: the server issues a random session
+// Email sign-in. POST {email} asks Supabase Auth to email a sign-in link (and a code, if the template shows one).
+// The link comes back to the site with an access token in the URL fragment → POST {access_token}. Or POST {email, code}.
+// Either starts a session; POST {logout:true} ends it. Supabase Auth's own tokens are not kept: the server issues a random session
 // token in an HttpOnly cookie and stores only its hash.
 const EMAIL = /^[^@\s]{1,64}@[^@\s]+\.[^@\s]{2,}$/;
 const json = { 'Content-Type': 'application/json' };
@@ -18,18 +19,28 @@ export default wrap(async (req, res) => {
     return send(res, 200, { ok: true });
   }
 
+  if (b.access_token != null) {
+    const at = String(b.access_token);
+    if (!/^[\w-]+\.[\w-]+\.[\w-]+$/.test(at) || at.length > 4000) throw new HttpError(400, 'That sign-in link is broken. Ask for a new one.');
+    const r = await sb('/auth/v1/user', { headers: { Authorization: 'Bearer ' + at } }, [401, 403]);
+    if (!r.ok) throw new HttpError(400, 'That sign-in link has expired. Ask for a new one.');
+    return start(res, me, await r.json(), '');
+  }
+
   const email = String(b.email || '').trim().toLowerCase();
   if (!EMAIL.test(email) || email.length > 200) throw new HttpError(400, 'Enter an email like you@example.com.');
 
   if (b.code == null) {
-    const r = await sb('/auth/v1/otp', { method: 'POST', headers: json, body: JSON.stringify({ email, create_user: true }) }, [400, 422, 429, 500, 504]);
-    if (r.status === 429) throw new HttpError(429, 'Please wait a minute before asking for another code.');
+    const host = String(req.headers['x-forwarded-host'] || req.headers.host || '');
+    const site = /^tattvareels\.vercel\.app$/.test(host) ? 'https://' + host + '/' : /^localhost:\d+$/.test(host) ? 'http://' + host + '/' : '';
+    const r = await sb('/auth/v1/otp' + (site ? '?redirect_to=' + encodeURIComponent(site) : ''), { method: 'POST', headers: json, body: JSON.stringify({ email, create_user: true }) }, [400, 422, 429, 500, 504]);
+    if (r.status === 429) throw new HttpError(429, 'Please wait a minute before asking for another email.');
     if (!r.ok) {
       const j = await r.json().catch(() => ({}));
       const m = String(j.msg || j.message || j.error_description || '');
       console.error('otp', r.status, m);
       if (/not authorized/i.test(m)) throw new HttpError(403, 'Sign-in emails can only go to the team’s addresses for now.');
-      throw new HttpError(502, 'Couldn’t send the code. Try again in a minute.');
+      throw new HttpError(502, 'Couldn’t send the email. Try again in a minute.');
     }
     return send(res, 200, { sent: true });
   }
@@ -39,7 +50,10 @@ export default wrap(async (req, res) => {
   const v = await sb('/auth/v1/verify', { method: 'POST', headers: json, body: JSON.stringify({ type: 'email', email, token: code }) }, [400, 401, 403, 422, 429]);
   if (v.status === 429) throw new HttpError(429, 'Too many tries. Wait a minute and try again.');
   if (!v.ok) throw new HttpError(400, 'That code is wrong or has expired. Check the newest email, or send a new code.');
-  const u = (await v.json()).user || {};
+  return start(res, me, (await v.json()).user || {}, email);
+});
+
+async function start(res, me, u, email) {
   if (!u.id) throw new HttpError(502, 'Sign-in didn’t finish. Try again.');
 
   const token = rid(32);
@@ -61,4 +75,4 @@ export default wrap(async (req, res) => {
 
   const p = await sb(`/rest/v1/profiles?select=handle&id=eq.${u.id}`).then(r => r.json());
   send(res, 200, { user: { email: u.email || email, handle: (p[0] && p[0].handle) || null } });
-});
+}
