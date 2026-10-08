@@ -21,6 +21,7 @@ const DEF=()=>({Tattva:1,Tone:'Tabla',Visuals:'Tattva film',Sound:['sitar'],Reci
 const DEMOS=[];
 
 const IC={
+ guitar:'<path d="M14.5 9.5 20 4"/><path d="m18.5 2.5 3 3"/><path d="M11.6 8.6c-1.7-.6-3.6-.2-4.8 1.1-.7.7-.9 1.6-1 2.5-.1.6-.5 1.1-1.1 1.3-1.2.4-2.2 1.4-2.2 2.8 0 2.2 2.9 5 5.1 5.1 1.4 0 2.4-1 2.8-2.2.2-.6.7-1 1.3-1.1.9-.1 1.8-.3 2.5-1 1.3-1.2 1.7-3.1 1.1-4.8"/><circle cx="9.3" cy="14.7" r="1.6"/>',
  play:'<path d="M8 5.5v13l10.5-6.5Z"/>',pause:'<path d="M8.5 5v14M15.5 5v14"/>',
  lotus:'<path d="M12 20c-2.4-1.9-3.8-4.7-3.8-7.8 0-2.8 1.4-5.6 3.8-7.7 2.4 2.1 3.8 4.9 3.8 7.7 0 3.1-1.4 5.9-3.8 7.8Z"/><path d="M12 20c-4.6 0-8.4-2.6-9.6-6.6 2.6-.4 5 .3 6.8 1.9"/><path d="M12 20c4.6 0 8.4-2.6 9.6-6.6-2.6-.4-5 .3-6.8 1.9"/>',
  remix:'<path d="M4 8h12l-3-3"/><path d="M20 16H8l3 3"/><path d="M4 8v3M20 16v-3"/>',
@@ -209,7 +210,8 @@ function reelEl(r,ix){
   '<div class="rail"><button class="rbtn" data-a="learn" aria-label="'+esc(LX('I learnt this'))+'">'+ico('diya')+'<span class="ct">0</span></button>'+
   '<button class="rbtn" data-a="read" aria-label="'+esc(LX('Meaning'))+'">'+ico('book')+'<span>'+esc(LX('Meaning'))+'</span></button>'+
   '<button class="rbtn" data-a="remix" aria-label="'+esc(LX('Remix'))+'">'+ico('remix')+'<span>'+esc(LX('Remix'))+'</span></button>'+
-  '<button class="rbtn" data-a="share" aria-label="'+esc(LX('Share'))+'">'+ico('conch')+'<span>'+esc(LX('Share'))+'</span></button></div>'+
+  '<button class="rbtn" data-a="share" aria-label="'+esc(LX('Share'))+'">'+ico('conch')+'<span>'+esc(LX('Share'))+'</span></button>'+
+  '<button class="rbtn rock" data-a="rock" aria-label="'+esc(LX('Rock'))+'">'+ico('guitar')+'<span>'+esc(LX('Rock'))+'</span></button></div>'+
   '<div class="cap"><div class="crow"><span class="tmed">'+tsym(TA(r).n)+'</span><div class="ctt"><span class="tno">'+esc(LX('Tattva'))+' '+TA(r).n+'</span><span class="rtitle">'+esc(TL(TA(r).n).name)+'</span></div>'+
   '<div class="who" data-notr><span class="ava"></span><span class="nm"></span></div></div>'+
   (r.caption?'<div class="rcap" data-notr></div>':'')+
@@ -273,8 +275,9 @@ function paintSide(r){sideR=r;sideK=-1;if(!WIDE.matches)return;const box=$('#rsi
   '<div class="rs-sh"><p class="lab">'+esc(LX('The shloka'))+'</p>'+V.verse.map((d,k)=>'<div class="ln" data-k="'+k+'"><span class="dev'+(V.roman?' roman':'')+'">'+esc(d)+'</span><span class="en">'+esc(V.en[k])+'</span></div>').join('')+'</div>'+
   '<div><p class="lab">'+esc(LX('Keep these three'))+'</p><ul class="keep">'+V.keep.map(k=>'<li>'+tsym(n,'tsy ksym')+'<span>'+esc(k)+'</span></li>').join('')+'</ul></div>'+
   '<div class="row2"><button class="btn line" id="rs-sing">'+ico('mic')+esc(LX('Sing this verse'))+'</button><button class="btn line" id="rs-share">'+ico('conch')+esc(LX('Share'))+'</button></div>'+
+  '<button class="btn rockbtn" id="rs-rock">'+ico('guitar')+esc(LX('Rock'))+'</button>'+
   '<p class="note rs-by" data-notr>'+(r.caption?'“'+esc(r.caption)+'” · ':'')+esc(r.name)+'</p>';
- $('#rs-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);};$('#rs-sing').onclick=()=>{S.style=norm(Object.assign({},S.style,{Tattva:n}));openSing();};$('#rs-share').onclick=()=>openShare(r);
+ $('#rs-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);};$('#rs-sing').onclick=()=>{S.style=norm(Object.assign({},S.style,{Tattva:n}));openSing();};$('#rs-share').onclick=()=>openShare(r);$('#rs-rock').onclick=()=>openRock(n);
  paintSideCount();}
 function paintSideCount(){if(!sideR||!WIDE.matches)return;const b=$('#rs-btn');if(!b)return;const n=counts()[sideR.id]||0,m=isLearnt(sideR.id);$('#rs-n').textContent=fmt(n);b.className='btn '+(m?'done':'gold');b.innerHTML=ico(m?'check':'diya')+esc(LX(m?'You learnt this':'I learnt this'));}
 function sideLine(k){if(k===sideK||!WIDE.matches)return;sideK=k;$('#rside').querySelectorAll('.ln').forEach(el=>el.classList.toggle('on',+el.dataset.k===k));}
@@ -292,7 +295,8 @@ function railAction(a,el,btn){const r=el.__r;
  if(a==='learn'){const v=!isLearnt(r.id);setLearnt(r,v);if(v){popLearn(el);const rc=el.getBoundingClientRect(),bc=btn.getBoundingClientRect();burst(el,bc.left-rc.left+bc.width/2,bc.top-rc.top+14);}}
  else if(a==='read')openLearn(r);
  else if(a==='remix')openCreate(Object.assign({},r.style,{Sound:r.style.Sound.slice()}));
- else if(a==='share')openShare(r);}
+ else if(a==='share')openShare(r);
+ else if(a==='rock')openRock(TA(r).n);}
 function popLearn(el){const b=el.querySelector('[data-a="learn"]');b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');}
 function burst(el,x,y){const d=document.createElement('div');d.className='burst';d.style.left=x+'px';d.style.top=y+'px';
  d.innerHTML='<svg class="i" viewBox="0 0 24 24">'+IC.lotus+'</svg>'+[0,45,90,135,180,225,270,315].map(a=>'<i style="--a:'+a+'deg"></i>').join('');

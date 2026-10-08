@@ -8,7 +8,7 @@
 <meta property="og:title" content="Hey Tattva"><meta property="og:description" content="The world, like a city in a mirror. Watch, sing and share the eight tattvas.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2307050F'/%3E%3Cg fill='none' stroke='%23E9B44C' stroke-width='3' stroke-linejoin='round'%3E%3Cpath d='M32 52c-6-5-9-11-9-19 0-7 3-14 9-19 6 5 9 12 9 19 0 8-3 14-9 19Z'/%3E%3Cpath d='M32 52c-11 0-20-6-23-16 6-1 12 1 16 5'/%3E%3Cpath d='M32 52c11 0 20-6 23-16-6-1-12 1-16 5'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Eczar:wght@500;600;700&family=Tiro+Devanagari+Sanskrit:ital@0;1&family=Mukta:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;600&family=Noto+Serif+Telugu:wght@500;600&family=Noto+Sans+Kannada:wght@400;600&family=Noto+Serif+Kannada:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Eczar:wght@500;600;700&family=Tiro+Devanagari+Sanskrit:ital@0;1&family=Mukta:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;600&family=Noto+Serif+Telugu:wght@500;600&family=Noto+Sans+Kannada:wght@400;600&family=Noto+Serif+Kannada:wght@500;600&display=swap">
 <style>
 /* Layout: one phone-width column, full-height; Reels feed is a vertical snap scroller, sheets rise from the bottom. Single deliberate dark world: temple night, lamp gold, kumkum. */
 :root{
@@ -555,7 +555,7 @@ body{background:var(--night) radial-gradient(120% 70% at 50% -10%,#2A2268 0,tran
 .om{font-family:'Tiro Devanagari Sanskrit',serif;line-height:1;display:inline-grid;place-items:center}
 /* reel */
 .reel .shade{background:linear-gradient(to bottom,rgba(21,18,58,.55) 0,rgba(21,18,58,0) 15%,rgba(21,18,58,0) 100%)}
-.rail{bottom:auto;top:34%;gap:14px}
+.rail{bottom:auto;top:25%;gap:10px}
 .rbtn svg{width:32px;height:32px}
 .rbtn.on{color:var(--gold)}.rbtn.on svg{fill:none;filter:drop-shadow(0 0 8px rgba(255,170,60,.9))}.rbtn.on .flame{fill:#FFB648;stroke:#FFD27A}
 .cap{left:0;right:0;bottom:0;padding:14px 14px 12px;gap:6px;text-shadow:none;background:linear-gradient(180deg,rgba(21,18,58,.93),var(--night) 45%);border-top:1.5px solid rgba(244,183,58,.55)}
@@ -776,6 +776,36 @@ body.introon #app{visibility:hidden}
 .tskip{color:#5b538a;padding:0 6px!important}.tback{background:rgba(21,18,58,.08);color:var(--night)}.tnext{background:var(--kumkum);color:#FFE9C4}
 .tdots{flex:1;min-width:0;overflow:hidden;display:flex;gap:4px;justify-content:center}.tdots i{width:6px;height:6px;border-radius:50%;background:rgba(21,18,58,.2)}.tdots i.on{background:var(--kumkum);width:14px;border-radius:4px}
 .hland [hidden]{display:none!important}
+
+/* ---------- Rock (rock.js) ---------- */
+.rbtn.rock svg{color:#FF7A3C;filter:drop-shadow(0 0 6px rgba(255,74,28,.7))}
+.btn.rockbtn{margin-top:10px;width:100%;background:linear-gradient(180deg,#FF6A2C,#C3201A);color:#fff;font-family:'Bebas Neue',var(--f-ui);font-size:22px;letter-spacing:.08em;box-shadow:0 0 18px rgba(255,74,28,.35)}
+.rockstage{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;color:#F4EDE4;overflow:auto;transition:opacity .25s;
+ background:radial-gradient(60% 40% at 15% 0%,rgba(255,74,28,.38),transparent 70%),radial-gradient(60% 40% at 85% 0%,rgba(255,182,39,.24),transparent 70%),radial-gradient(90% 50% at 50% 115%,rgba(179,18,27,.4),transparent 70%),#0B0908}
+.rockstage.out{opacity:0}.rockstage[hidden]{display:none}
+.rockstage::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.06;background-image:repeating-radial-gradient(circle at 30% 30%,#fff 0 1px,transparent 1px 3px)}
+.rk-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 0;position:relative;z-index:1}
+.rk-top .icon-btn{background:rgba(255,255,255,.06);border:1px solid #3A2A20}.rk-nav{display:flex;gap:8px}
+.rk-tag{display:inline-flex;align-items:center;gap:8px;font:400 26px/1 'Bebas Neue',Impact,sans-serif;letter-spacing:.14em;color:#FFB627}
+.rk-eq{display:inline-flex;gap:2px;align-items:flex-end;height:16px}.rk-eq i{width:3px;background:#FF4A1C;animation:rkeq .9s ease-in-out infinite}.rk-eq i:nth-child(2){animation-delay:.2s}.rk-eq i:nth-child(3){animation-delay:.4s}@keyframes rkeq{0%,100%{height:3px}50%{height:16px}}
+.rk-body{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;padding:6px 18px 22px;max-width:560px;width:100%;margin:0 auto}
+.rk-yan{position:relative;width:180px;height:180px;color:#FFB627;transition:transform .08s,filter .08s;filter:drop-shadow(0 0 14px rgba(255,74,28,.85))}.rk-yan svg{width:100%;height:100%;animation:spin 24s linear infinite}
+.rk-sym{position:absolute;inset:0;display:grid;place-items:center}.rk-sym svg,.rk-sym .tsy{width:46px;height:46px;color:#FFE7A3;fill:none;stroke:currentColor;stroke-width:1.6}.rk-sym .om{font-family:var(--f-dev);font-size:42px;color:#FFE7A3}
+.rk-no{margin:8px 0 0;font:700 13px var(--f-ui);letter-spacing:.3em;text-transform:uppercase;color:#FF4A1C}
+.rk-name{margin:2px 0 12px;font:400 46px/1 'Bebas Neue',Impact,var(--f-disp);letter-spacing:.04em;text-align:center;background:linear-gradient(180deg,#FFE7A3,#FFB627 40%,#FF4A1C 80%,#B3121B);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rk-seg{display:flex;background:#070505;border:1px solid #3A2A20;border-radius:12px;padding:3px;margin-bottom:12px}.rk-seg button{padding:8px 18px;border-radius:9px;color:#A89A8E;font:700 15px var(--f-ui);letter-spacing:.08em;text-transform:uppercase}.rk-seg button.on{background:linear-gradient(180deg,#FF6A2C,#C3201A);color:#fff}
+.rk-lines{width:100%;min-height:150px;display:flex;flex-direction:column;justify-content:center;gap:6px;text-align:center}
+.rk-ln{margin:0;font-family:var(--f-dev);font-size:18px;line-height:1.45;color:#7E7168;transition:color .25s,transform .25s}.rk-ln.roman{font-family:var(--f-disp);font-size:16px}.rk-ln.en{font-family:var(--f-ui);font-size:16px}
+.rk-ln.on{color:#FFE7A3;transform:scale(1.04);text-shadow:0 0 18px rgba(255,120,40,.6)}
+.rk-ctl{display:flex;align-items:center;gap:14px;width:100%;margin:16px 0 12px}
+.rk-go{width:78px;height:78px;flex:none;border-radius:50%;display:grid;place-items:center;color:#140A04;background:radial-gradient(circle at 35% 30%,#FFCF6B,#FF4A1C 60%,#8E0F12);box-shadow:0 0 0 3px #000,0 0 28px rgba(255,74,28,.65)}.rk-go svg{width:32px;height:32px;fill:currentColor}
+.rk-info{flex:1}.rk-st{margin:0 0 8px;font:400 24px/1 'Bebas Neue',sans-serif;letter-spacing:.08em;color:#A89A8E}.rk-st.live{color:#FFB627}
+.rk-prog{height:6px;border-radius:3px;background:#1E1612;overflow:hidden}.rk-prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#FF4A1C,#FFB627)}
+.rk-meters{width:100%;display:grid;gap:10px}
+.rk-m{display:grid;grid-template-columns:56px 1fr 120px;align-items:center;gap:10px}.rk-m b{font:700 12px var(--f-ui);letter-spacing:.16em;text-transform:uppercase;color:#A89A8E}
+.rk-m>div{height:8px;border-radius:4px;background:#070505;overflow:hidden}.rk-m>div i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3CD070,#FFB627 70%,#FF4A1C)}
+.rk-m input{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:linear-gradient(90deg,#FF4A1C,#FFB627)}.rk-m input::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#eee,#777 70%,#333);box-shadow:0 0 0 2px #000}
+@media (min-width:900px){.rockstage{position:fixed}.rk-yan{width:220px;height:220px}.rk-name{font-size:60px}.rk-ln{font-size:21px}}
 
 </style>
 </head><body>
@@ -2479,6 +2509,7 @@ const DEF=()=>({Tattva:1,Tone:'Tabla',Visuals:'Tattva film',Sound:['sitar'],Reci
 const DEMOS=[];
 
 const IC={
+ guitar:'<path d="M14.5 9.5 20 4"/><path d="m18.5 2.5 3 3"/><path d="M11.6 8.6c-1.7-.6-3.6-.2-4.8 1.1-.7.7-.9 1.6-1 2.5-.1.6-.5 1.1-1.1 1.3-1.2.4-2.2 1.4-2.2 2.8 0 2.2 2.9 5 5.1 5.1 1.4 0 2.4-1 2.8-2.2.2-.6.7-1 1.3-1.1.9-.1 1.8-.3 2.5-1 1.3-1.2 1.7-3.1 1.1-4.8"/><circle cx="9.3" cy="14.7" r="1.6"/>',
  play:'<path d="M8 5.5v13l10.5-6.5Z"/>',pause:'<path d="M8.5 5v14M15.5 5v14"/>',
  lotus:'<path d="M12 20c-2.4-1.9-3.8-4.7-3.8-7.8 0-2.8 1.4-5.6 3.8-7.7 2.4 2.1 3.8 4.9 3.8 7.7 0 3.1-1.4 5.9-3.8 7.8Z"/><path d="M12 20c-4.6 0-8.4-2.6-9.6-6.6 2.6-.4 5 .3 6.8 1.9"/><path d="M12 20c4.6 0 8.4-2.6 9.6-6.6-2.6-.4-5 .3-6.8 1.9"/>',
  remix:'<path d="M4 8h12l-3-3"/><path d="M20 16H8l3 3"/><path d="M4 8v3M20 16v-3"/>',
@@ -2667,7 +2698,8 @@ function reelEl(r,ix){
   '<div class="rail"><button class="rbtn" data-a="learn" aria-label="'+esc(LX('I learnt this'))+'">'+ico('diya')+'<span class="ct">0</span></button>'+
   '<button class="rbtn" data-a="read" aria-label="'+esc(LX('Meaning'))+'">'+ico('book')+'<span>'+esc(LX('Meaning'))+'</span></button>'+
   '<button class="rbtn" data-a="remix" aria-label="'+esc(LX('Remix'))+'">'+ico('remix')+'<span>'+esc(LX('Remix'))+'</span></button>'+
-  '<button class="rbtn" data-a="share" aria-label="'+esc(LX('Share'))+'">'+ico('conch')+'<span>'+esc(LX('Share'))+'</span></button></div>'+
+  '<button class="rbtn" data-a="share" aria-label="'+esc(LX('Share'))+'">'+ico('conch')+'<span>'+esc(LX('Share'))+'</span></button>'+
+  '<button class="rbtn rock" data-a="rock" aria-label="'+esc(LX('Rock'))+'">'+ico('guitar')+'<span>'+esc(LX('Rock'))+'</span></button></div>'+
   '<div class="cap"><div class="crow"><span class="tmed">'+tsym(TA(r).n)+'</span><div class="ctt"><span class="tno">'+esc(LX('Tattva'))+' '+TA(r).n+'</span><span class="rtitle">'+esc(TL(TA(r).n).name)+'</span></div>'+
   '<div class="who" data-notr><span class="ava"></span><span class="nm"></span></div></div>'+
   (r.caption?'<div class="rcap" data-notr></div>':'')+
@@ -2731,8 +2763,9 @@ function paintSide(r){sideR=r;sideK=-1;if(!WIDE.matches)return;const box=$('#rsi
   '<div class="rs-sh"><p class="lab">'+esc(LX('The shloka'))+'</p>'+V.verse.map((d,k)=>'<div class="ln" data-k="'+k+'"><span class="dev'+(V.roman?' roman':'')+'">'+esc(d)+'</span><span class="en">'+esc(V.en[k])+'</span></div>').join('')+'</div>'+
   '<div><p class="lab">'+esc(LX('Keep these three'))+'</p><ul class="keep">'+V.keep.map(k=>'<li>'+tsym(n,'tsy ksym')+'<span>'+esc(k)+'</span></li>').join('')+'</ul></div>'+
   '<div class="row2"><button class="btn line" id="rs-sing">'+ico('mic')+esc(LX('Sing this verse'))+'</button><button class="btn line" id="rs-share">'+ico('conch')+esc(LX('Share'))+'</button></div>'+
+  '<button class="btn rockbtn" id="rs-rock">'+ico('guitar')+esc(LX('Rock'))+'</button>'+
   '<p class="note rs-by" data-notr>'+(r.caption?'“'+esc(r.caption)+'” · ':'')+esc(r.name)+'</p>';
- $('#rs-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);};$('#rs-sing').onclick=()=>{S.style=norm(Object.assign({},S.style,{Tattva:n}));openSing();};$('#rs-share').onclick=()=>openShare(r);
+ $('#rs-btn').onclick=()=>{const v=!isLearnt(r.id);setLearnt(r,v);};$('#rs-sing').onclick=()=>{S.style=norm(Object.assign({},S.style,{Tattva:n}));openSing();};$('#rs-share').onclick=()=>openShare(r);$('#rs-rock').onclick=()=>openRock(n);
  paintSideCount();}
 function paintSideCount(){if(!sideR||!WIDE.matches)return;const b=$('#rs-btn');if(!b)return;const n=counts()[sideR.id]||0,m=isLearnt(sideR.id);$('#rs-n').textContent=fmt(n);b.className='btn '+(m?'done':'gold');b.innerHTML=ico(m?'check':'diya')+esc(LX(m?'You learnt this':'I learnt this'));}
 function sideLine(k){if(k===sideK||!WIDE.matches)return;sideK=k;$('#rside').querySelectorAll('.ln').forEach(el=>el.classList.toggle('on',+el.dataset.k===k));}
@@ -2750,7 +2783,8 @@ function railAction(a,el,btn){const r=el.__r;
  if(a==='learn'){const v=!isLearnt(r.id);setLearnt(r,v);if(v){popLearn(el);const rc=el.getBoundingClientRect(),bc=btn.getBoundingClientRect();burst(el,bc.left-rc.left+bc.width/2,bc.top-rc.top+14);}}
  else if(a==='read')openLearn(r);
  else if(a==='remix')openCreate(Object.assign({},r.style,{Sound:r.style.Sound.slice()}));
- else if(a==='share')openShare(r);}
+ else if(a==='share')openShare(r);
+ else if(a==='rock')openRock(TA(r).n);}
 function popLearn(el){const b=el.querySelector('[data-a="learn"]');b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');}
 function burst(el,x,y){const d=document.createElement('div');d.className='burst';d.style.left=x+'px';d.style.top=y+'px';
  d.innerHTML='<svg class="i" viewBox="0 0 24 24">'+IC.lotus+'</svg>'+[0,45,90,135,180,225,270,315].map(a=>'<i style="--a:'+a+'deg"></i>').join('');
@@ -3668,6 +3702,7 @@ function runTour(tries){tries=tries||0;if(document.querySelector('.tour'))return
   {el:()=>curReel('[data-a="read"]'),d:'Open the meaning of the verse, word by word.'},
   {el:()=>curReel('[data-a="remix"]'),d:'Make your own reel of this verse: your music, your voice.'},
   {el:()=>curReel('[data-a="share"]'),d:'Send this reel to a friend.'},
+  {el:()=>curReel('[data-a="rock"]'),d:"Hear this tattva as rock: the singer's voice over a rock band."},
   {el:()=>vis('#nv-games'),d:'Play the tattvas: four games, alone or live with friends.'},
   {el:()=>vis('#nv-create'),d:'Create a reel: pick a tattva, instruments and sing the shloka.'},
   {el:()=>vis('#nv-top'),d:'Your page: tattvas learnt, your reels, scores, name and language.'},
@@ -3695,6 +3730,106 @@ function runTour(tries){tries=tries||0;if(document.querySelector('.tour'))return
  ov.querySelector('.tnext').onclick=()=>{if(i>=steps.length-1){close();return;}i++;show();};
  ov.querySelector('.tback').onclick=()=>{if(i>0){i--;show();}};ov.querySelector('.tskip').onclick=close;
  ov.addEventListener('keydown',e=>{if(e.key==='Escape')close();});addEventListener('resize',place);show();setTimeout(()=>ov.querySelector('.tnext').focus(),50);}
+
+/* ---------- Rock: each tattva in the singer's own voice (his ElevenLabs voice, rock delivery) over a hard-rock band
+   made by ElevenLabs Music (/api/music?v=N, stored once). The voice runs through a rock vocal chain (presence, grit,
+   compression, slapback, stage reverb); the band is carved and ducks whenever he sings. Opens as a full-screen stage. */
+Object.assign(UI18N.te,{"Rock":"రాక్","Rock stage":"రాక్ వేదిక","Verse":"శ్లోకం","Meaning":"అర్థం","Voice":"గొంతు","Band":"బ్యాండ్","Tuning up":"శ్రుతి చేస్తోంది","Plugging in the band":"బ్యాండ్ సిద్ధమవుతోంది","Live":"లైవ్","Needs internet":"ఇంటర్నెట్ కావాలి","Tap play":"ప్లే నొక్కండి",
+ "Hear this tattva as rock: the singer's voice over a rock band.":"ఈ తత్త్వాన్ని రాక్‌గా వినండి: గాయకుడి గొంతు, రాక్ బ్యాండ్‌తో."});
+Object.assign(UI18N.kn,{"Rock":"ರಾಕ್","Rock stage":"ರಾಕ್ ವೇದಿಕೆ","Verse":"ಶ್ಲೋಕ","Meaning":"ಅರ್ಥ","Voice":"ಧ್ವನಿ","Band":"ಬ್ಯಾಂಡ್","Tuning up":"ಶ್ರುತಿ ಮಾಡುತ್ತಿದೆ","Plugging in the band":"ಬ್ಯಾಂಡ್ ಸಿದ್ಧವಾಗುತ್ತಿದೆ","Live":"ಲೈವ್","Needs internet":"ಇಂಟರ್ನೆಟ್ ಬೇಕು","Tap play":"ಪ್ಲೇ ಒತ್ತಿ",
+ "Hear this tattva as rock: the singer's voice over a rock band.":"ಈ ತತ್ತ್ವವನ್ನು ರಾಕ್ ಆಗಿ ಕೇಳಿ: ಗಾಯಕನ ಧ್ವನಿ, ರಾಕ್ ಬ್ಯಾಂಡ್‌ನೊಂದಿಗೆ."});
+Object.assign(UI18N.hi,{"Rock":"रॉक","Rock stage":"रॉक मंच","Verse":"श्लोक","Meaning":"अर्थ","Voice":"आवाज़","Band":"बैंड","Tuning up":"सुर मिल रहे हैं","Plugging in the band":"बैंड तैयार हो रहा है","Live":"लाइव","Needs internet":"इंटरनेट चाहिए","Tap play":"प्ले दबाएँ",
+ "Hear this tattva as rock: the singer's voice over a rock band.":"इस तत्त्व को रॉक में सुनें: गायक की आवाज़, रॉक बैंड के साथ।"});
+
+const ROCK={ac:null,cache:{},cur:null,n:1,m:false,el:null,vol:{v:1,b:.8}};
+function rockCtx(){if(!ROCK.ac)ROCK.ac=new AC();return ROCK.ac;}
+async function rockBuf(url,ms){if(ROCK.cache[url])return ROCK.cache[url];const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);
+ try{const r=await fetch(url,{signal:c.signal});if(!r.ok)throw new Error(r.status);const ab=await r.arrayBuffer();return ROCK.cache[url]=await rockCtx().decodeAudioData(ab);}finally{clearTimeout(t);}}
+function rockImpulse(ac,sec,decay){const n=ac.sampleRate*sec,b=ac.createBuffer(2,n,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,decay);}return b;}
+function rockCurve(k){const n=1024,c=new Float32Array(n);for(let i=0;i<n;i++){const x=i/n*2-1;c[i]=Math.tanh(k*x)/Math.tanh(k);}return c;}
+// if the band can't load: the singer's own guitar loop with a rock beat
+async function rockFallback(ac,dur){let g=null;try{g=await rockBuf('/audio/singer_guitar.mp3',15000);}catch(e){}
+ const sr=ac.sampleRate,len=Math.ceil(dur*sr),b=ac.createBuffer(1,len,sr),d=b.getChannelData(0),spb=60/96,gd=g?g.getChannelData(0):null;
+ if(gd)for(let i=0;i<len;i++)d[i]=gd[i%gd.length]*.9;
+ for(let beat=0;beat*spb<dur;beat++){const t0=Math.floor(beat*spb*sr),bar=beat%4;
+  const hit=(f,l,amp,noise)=>{for(let i=0;i<l*sr&&t0+i<len;i++){const tt=i/sr,e=Math.exp(-tt*(noise?18:9));d[t0+i]+=amp*e*(noise?(Math.random()*2-1):Math.sin(2*Math.PI*f*tt*(1+2*Math.exp(-tt*40))));}};
+  if(bar===0||bar===2)hit(52,.35,.8,false);if(bar%2)hit(0,.22,.45,true);}
+ return b;}
+
+function rockStop(){const r=ROCK.cur;if(!r)return;ROCK.cur=null;cancelAnimationFrame(r.raf);
+ try{r.master.gain.setTargetAtTime(0,r.ac.currentTime,.2);setTimeout(()=>r.srcs.forEach(x=>{try{x.stop()}catch(e){}}),800);}catch(e){}
+ rockPaint();}
+async function rockPlay(){const n=ROCK.n,m=ROCK.m;rockStop();const me={n,m,state:'tune'};ROCK.cur=me;rockPaint();
+ const ac=rockCtx();if(ac.state==='suspended')await ac.resume();
+ let voice,band,real=true;
+ try{voice=await rockBuf('/api/tts?v='+n+'&voice=singer&sv=2&rock=1'+(m?'&m=1':''),60000);}catch(e){if(ROCK.cur===me){me.state='err';rockPaint();ROCK.cur=null;}return;}
+ if(ROCK.cur!==me)return;me.state='band';rockPaint();
+ try{band=await rockBuf('/api/music?v='+n,150000);}catch(e){band=null;}
+ if(ROCK.cur!==me)return;
+ if(!band){real=false;band=await rockFallback(ac,voice.duration+8);}
+ const t=ac.currentTime+.1,intro=real?3.2:2.4,end=intro+voice.duration+3.5;
+ const master=ac.createGain();master.gain.value=0;master.gain.setTargetAtTime(1,t,.08);
+ const lim=ac.createDynamicsCompressor();lim.threshold.value=-6;lim.knee.value=2;lim.ratio.value=12;lim.attack.value=.002;lim.release.value=.12;master.connect(lim);lim.connect(ac.destination);
+ // the rock vocal chain
+ const vs=ac.createBufferSource();vs.buffer=voice;
+ const hp=ac.createBiquadFilter();hp.type='highpass';hp.frequency.value=110;
+ const mud=ac.createBiquadFilter();mud.type='peaking';mud.frequency.value=320;mud.gain.value=-3;
+ const pres=ac.createBiquadFilter();pres.type='peaking';pres.frequency.value=2900;pres.gain.value=6;pres.Q.value=.9;
+ const air=ac.createBiquadFilter();air.type='highshelf';air.frequency.value=8000;air.gain.value=3;
+ const grit=ac.createWaveShaper();grit.curve=rockCurve(3.2);grit.oversample='4x';const gmix=ac.createGain();gmix.gain.value=.35;const dry=ac.createGain();dry.gain.value=.8;
+ const comp=ac.createDynamicsCompressor();comp.threshold.value=-24;comp.ratio.value=5;comp.attack.value=.004;comp.release.value=.14;comp.knee.value=6;
+ const vg=ac.createGain();vg.gain.value=ROCK.vol.v*1.9;
+ vs.connect(hp);hp.connect(mud);mud.connect(pres);pres.connect(air);air.connect(dry);air.connect(grit);grit.connect(gmix);dry.connect(comp);gmix.connect(comp);comp.connect(vg);vg.connect(master);
+ const dl=ac.createDelay(1);dl.delayTime.value=.118;const fb=ac.createGain();fb.gain.value=.22;const dlf=ac.createBiquadFilter();dlf.type='lowpass';dlf.frequency.value=3200;const dw=ac.createGain();dw.gain.value=.2;
+ vg.connect(dl);dl.connect(dlf);dlf.connect(fb);fb.connect(dl);dlf.connect(dw);dw.connect(master);
+ const rv=ac.createConvolver();rv.buffer=rockImpulse(ac,2.2,3);const rw=ac.createGain();rw.gain.value=.18;vg.connect(rv);rv.connect(rw);rw.connect(master);
+ const van=ac.createAnalyser();van.fftSize=1024;comp.connect(van);
+ // the band: room for the voice, and it ducks when he sings
+ const bs=ac.createBufferSource();bs.buffer=band;bs.loop=true;
+ const carve=ac.createBiquadFilter();carve.type='peaking';carve.frequency.value=2600;carve.gain.value=-6;carve.Q.value=.8;
+ const duck=ac.createGain();const bg=ac.createGain();bg.gain.value=ROCK.vol.b*.55;
+ bs.connect(carve);carve.connect(duck);duck.connect(bg);bg.connect(master);const ban=ac.createAnalyser();ban.fftSize=1024;bg.connect(ban);
+ bs.start(t);vs.start(t+intro);bs.stop(t+end+.1);
+ Object.assign(me,{ac,master,srcs:[bs,vs],vg,bg,t,intro,vdur:voice.duration,end,real,state:'live'});rockPaint();
+ const buf=new Float32Array(1024),lvl=a=>{a.getFloatTimeDomainData(buf);let s=0;for(let i=0;i<buf.length;i++)s+=buf[i]*buf[i];return Math.sqrt(s/buf.length);};
+ const tick=()=>{if(ROCK.cur!==me)return;const v=lvl(van),b=lvl(ban),now=ac.currentTime-t;
+  duck.gain.setTargetAtTime(Math.max(.45,1-v*3.2),ac.currentTime,v>.02?.03:.25);
+  vg.gain.value=ROCK.vol.v*1.9;const tb=ROCK.vol.b*.55*(now>end-2.2?Math.max(0,(end-now)/2.2):1);bg.gain.value=tb;
+  const el=ROCK.el;if(el){el.querySelector('.rk-mv').style.width=Math.min(100,v*260)+'%';el.querySelector('.rk-mb').style.width=Math.min(100,b*260)+'%';
+   const k=Math.min(1,v*6);el.querySelector('.rk-yan').style.transform='scale('+(1+k*.06)+')';el.querySelector('.rk-yan').style.filter='drop-shadow(0 0 '+(14+k*30)+'px rgba(255,74,28,.85))';
+   const p=(now-me.intro)/me.vdur,li=p<0?-1:Math.min(3,Math.floor(p*4));el.querySelectorAll('.rk-ln').forEach((x,i)=>x.classList.toggle('on',i===li));el.querySelector('.rk-prog i').style.width=Math.max(0,Math.min(100,now/end*100))+'%';}
+  if(now>end+.3){rockStop();return;}me.raf=requestAnimationFrame(tick);};
+ me.raf=requestAnimationFrame(tick);}
+function rockPaint(){const el=ROCK.el;if(!el)return;const r=ROCK.cur,V=TL(ROCK.n);
+ const st=!r?'idle':r.state;
+ el.querySelector('.rk-go').innerHTML=ico(st==='idle'||st==='err'?'play':'pause');
+ el.querySelector('.rk-go').setAttribute('aria-label',LX(st==='idle'?'Play':'Stop'));
+ el.querySelector('.rk-st').textContent=LX(st==='tune'?'Tuning up':st==='band'?'Plugging in the band':st==='live'?'Live':st==='err'?'Needs internet':'Tap play');
+ el.querySelector('.rk-st').classList.toggle('live',st==='live');
+ el.querySelectorAll('.rk-seg button').forEach(b=>b.classList.toggle('on',(b.dataset.m==='1')===ROCK.m));
+ if(st!=='live'){el.querySelector('.rk-mv').style.width='0';el.querySelector('.rk-mb').style.width='0';el.querySelectorAll('.rk-ln').forEach(x=>x.classList.remove('on'));if(st==='idle')el.querySelector('.rk-prog i').style.width='0';}}
+function rockFill(){const el=ROCK.el,n=ROCK.n,V=TL(n);
+ el.querySelector('.rk-no').textContent=LX('Tattva')+' '+n;el.querySelector('.rk-name').textContent=V.name;el.querySelector('.rk-sym').innerHTML=tsym(n);
+ el.querySelector('.rk-lines').innerHTML=(ROCK.m?V.en:V.verse).map((l,i)=>'<p class="rk-ln'+(ROCK.m?' en':V.roman?' roman':'')+'">'+esc(l)+'</p>').join('');rockPaint();}
+function openRock(n){stopCur();if(typeof closeSheet==='function')closeSheet();ROCK.n=n||1;ROCK.m=false;
+ if(!ROCK.el){const el=document.createElement('div');el.className='rockstage';el.setAttribute('role','dialog');el.setAttribute('aria-label',LX('Rock stage'));
+  el.innerHTML='<div class="rk-top"><button class="icon-btn rk-x" aria-label="'+esc(LX('Close'))+'">'+ico('x')+'</button><span class="rk-tag"><span class="rk-eq"><i></i><i></i><i></i></span>'+esc(LX('Rock'))+'</span>'+
+   '<span class="rk-nav"><button class="icon-btn rk-prev" aria-label="'+esc(LX('Previous'))+'">'+ico('back')+'</button><button class="icon-btn rk-next" aria-label="'+esc(LX('Next'))+'">'+ico('right')+'</button></span></div>'+
+   '<div class="rk-body"><div class="rk-yan">'+yantra()+'<span class="rk-sym"></span></div><p class="rk-no"></p><h2 class="rk-name"></h2>'+
+   '<div class="rk-seg"><button data-m="0">'+esc(LX('Verse'))+'</button><button data-m="1">'+esc(LX('Meaning'))+'</button></div>'+
+   '<div class="rk-lines"></div>'+
+   '<div class="rk-ctl"><button class="rk-go"></button><div class="rk-info"><p class="rk-st"></p><div class="rk-prog"><i></i></div></div></div>'+
+   '<div class="rk-meters"><div class="rk-m"><b>'+esc(LX('Voice'))+'</b><div><i class="rk-mv"></i></div><input type="range" class="rk-fv" min="0" max="1.5" step=".01" value="1" aria-label="'+esc(LX('Voice'))+'"></div>'+
+   '<div class="rk-m"><b>'+esc(LX('Band'))+'</b><div><i class="rk-mb"></i></div><input type="range" class="rk-fb" min="0" max="1.5" step=".01" value=".8" aria-label="'+esc(LX('Band'))+'"></div></div></div>';
+  $('#app').appendChild(el);ROCK.el=el;
+  el.querySelector('.rk-x').onclick=closeRock;
+  el.querySelector('.rk-go').onclick=()=>{if(ROCK.cur)rockStop();else rockPlay();};
+  el.querySelector('.rk-prev').onclick=()=>{rockStop();ROCK.n=ROCK.n>1?ROCK.n-1:8;rockFill();};
+  el.querySelector('.rk-next').onclick=()=>{rockStop();ROCK.n=ROCK.n<8?ROCK.n+1:1;rockFill();};
+  el.querySelectorAll('.rk-seg button').forEach(b=>b.onclick=()=>{rockStop();ROCK.m=b.dataset.m==='1';rockFill();});
+  el.querySelector('.rk-fv').oninput=e=>{ROCK.vol.v=+e.target.value;};el.querySelector('.rk-fb').oninput=e=>{ROCK.vol.b=+e.target.value;};}
+ ROCK.el.hidden=false;ROCK.el.classList.remove('out');rockFill();rockPlay();}
+function closeRock(){rockStop();if(!ROCK.el)return;ROCK.el.classList.add('out');setTimeout(()=>{if(ROCK.el)ROCK.el.hidden=true;},250);if(S.view==='feed')requestAnimationFrame(()=>activate(currentIx(),true));}
 
 /* ---------- boot ---------- */
 document.querySelectorAll('.crest').forEach(e=>e.innerHTML=yantra());applyI18n();startTranslator();

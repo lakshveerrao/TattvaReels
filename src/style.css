@@ -543,7 +543,7 @@ body{background:var(--night) radial-gradient(120% 70% at 50% -10%,#2A2268 0,tran
 .om{font-family:'Tiro Devanagari Sanskrit',serif;line-height:1;display:inline-grid;place-items:center}
 /* reel */
 .reel .shade{background:linear-gradient(to bottom,rgba(21,18,58,.55) 0,rgba(21,18,58,0) 15%,rgba(21,18,58,0) 100%)}
-.rail{bottom:auto;top:34%;gap:14px}
+.rail{bottom:auto;top:25%;gap:10px}
 .rbtn svg{width:32px;height:32px}
 .rbtn.on{color:var(--gold)}.rbtn.on svg{fill:none;filter:drop-shadow(0 0 8px rgba(255,170,60,.9))}.rbtn.on .flame{fill:#FFB648;stroke:#FFD27A}
 .cap{left:0;right:0;bottom:0;padding:14px 14px 12px;gap:6px;text-shadow:none;background:linear-gradient(180deg,rgba(21,18,58,.93),var(--night) 45%);border-top:1.5px solid rgba(244,183,58,.55)}
@@ -764,3 +764,33 @@ body.introon #app{visibility:hidden}
 .tskip{color:#5b538a;padding:0 6px!important}.tback{background:rgba(21,18,58,.08);color:var(--night)}.tnext{background:var(--kumkum);color:#FFE9C4}
 .tdots{flex:1;min-width:0;overflow:hidden;display:flex;gap:4px;justify-content:center}.tdots i{width:6px;height:6px;border-radius:50%;background:rgba(21,18,58,.2)}.tdots i.on{background:var(--kumkum);width:14px;border-radius:4px}
 .hland [hidden]{display:none!important}
+
+/* ---------- Rock (rock.js) ---------- */
+.rbtn.rock svg{color:#FF7A3C;filter:drop-shadow(0 0 6px rgba(255,74,28,.7))}
+.btn.rockbtn{margin-top:10px;width:100%;background:linear-gradient(180deg,#FF6A2C,#C3201A);color:#fff;font-family:'Bebas Neue',var(--f-ui);font-size:22px;letter-spacing:.08em;box-shadow:0 0 18px rgba(255,74,28,.35)}
+.rockstage{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;color:#F4EDE4;overflow:auto;transition:opacity .25s;
+ background:radial-gradient(60% 40% at 15% 0%,rgba(255,74,28,.38),transparent 70%),radial-gradient(60% 40% at 85% 0%,rgba(255,182,39,.24),transparent 70%),radial-gradient(90% 50% at 50% 115%,rgba(179,18,27,.4),transparent 70%),#0B0908}
+.rockstage.out{opacity:0}.rockstage[hidden]{display:none}
+.rockstage::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.06;background-image:repeating-radial-gradient(circle at 30% 30%,#fff 0 1px,transparent 1px 3px)}
+.rk-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 0;position:relative;z-index:1}
+.rk-top .icon-btn{background:rgba(255,255,255,.06);border:1px solid #3A2A20}.rk-nav{display:flex;gap:8px}
+.rk-tag{display:inline-flex;align-items:center;gap:8px;font:400 26px/1 'Bebas Neue',Impact,sans-serif;letter-spacing:.14em;color:#FFB627}
+.rk-eq{display:inline-flex;gap:2px;align-items:flex-end;height:16px}.rk-eq i{width:3px;background:#FF4A1C;animation:rkeq .9s ease-in-out infinite}.rk-eq i:nth-child(2){animation-delay:.2s}.rk-eq i:nth-child(3){animation-delay:.4s}@keyframes rkeq{0%,100%{height:3px}50%{height:16px}}
+.rk-body{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;padding:6px 18px 22px;max-width:560px;width:100%;margin:0 auto}
+.rk-yan{position:relative;width:180px;height:180px;color:#FFB627;transition:transform .08s,filter .08s;filter:drop-shadow(0 0 14px rgba(255,74,28,.85))}.rk-yan svg{width:100%;height:100%;animation:spin 24s linear infinite}
+.rk-sym{position:absolute;inset:0;display:grid;place-items:center}.rk-sym svg,.rk-sym .tsy{width:46px;height:46px;color:#FFE7A3;fill:none;stroke:currentColor;stroke-width:1.6}.rk-sym .om{font-family:var(--f-dev);font-size:42px;color:#FFE7A3}
+.rk-no{margin:8px 0 0;font:700 13px var(--f-ui);letter-spacing:.3em;text-transform:uppercase;color:#FF4A1C}
+.rk-name{margin:2px 0 12px;font:400 46px/1 'Bebas Neue',Impact,var(--f-disp);letter-spacing:.04em;text-align:center;background:linear-gradient(180deg,#FFE7A3,#FFB627 40%,#FF4A1C 80%,#B3121B);-webkit-background-clip:text;background-clip:text;color:transparent}
+.rk-seg{display:flex;background:#070505;border:1px solid #3A2A20;border-radius:12px;padding:3px;margin-bottom:12px}.rk-seg button{padding:8px 18px;border-radius:9px;color:#A89A8E;font:700 15px var(--f-ui);letter-spacing:.08em;text-transform:uppercase}.rk-seg button.on{background:linear-gradient(180deg,#FF6A2C,#C3201A);color:#fff}
+.rk-lines{width:100%;min-height:150px;display:flex;flex-direction:column;justify-content:center;gap:6px;text-align:center}
+.rk-ln{margin:0;font-family:var(--f-dev);font-size:18px;line-height:1.45;color:#7E7168;transition:color .25s,transform .25s}.rk-ln.roman{font-family:var(--f-disp);font-size:16px}.rk-ln.en{font-family:var(--f-ui);font-size:16px}
+.rk-ln.on{color:#FFE7A3;transform:scale(1.04);text-shadow:0 0 18px rgba(255,120,40,.6)}
+.rk-ctl{display:flex;align-items:center;gap:14px;width:100%;margin:16px 0 12px}
+.rk-go{width:78px;height:78px;flex:none;border-radius:50%;display:grid;place-items:center;color:#140A04;background:radial-gradient(circle at 35% 30%,#FFCF6B,#FF4A1C 60%,#8E0F12);box-shadow:0 0 0 3px #000,0 0 28px rgba(255,74,28,.65)}.rk-go svg{width:32px;height:32px;fill:currentColor}
+.rk-info{flex:1}.rk-st{margin:0 0 8px;font:400 24px/1 'Bebas Neue',sans-serif;letter-spacing:.08em;color:#A89A8E}.rk-st.live{color:#FFB627}
+.rk-prog{height:6px;border-radius:3px;background:#1E1612;overflow:hidden}.rk-prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#FF4A1C,#FFB627)}
+.rk-meters{width:100%;display:grid;gap:10px}
+.rk-m{display:grid;grid-template-columns:56px 1fr 120px;align-items:center;gap:10px}.rk-m b{font:700 12px var(--f-ui);letter-spacing:.16em;text-transform:uppercase;color:#A89A8E}
+.rk-m>div{height:8px;border-radius:4px;background:#070505;overflow:hidden}.rk-m>div i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3CD070,#FFB627 70%,#FF4A1C)}
+.rk-m input{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:linear-gradient(90deg,#FF4A1C,#FFB627)}.rk-m input::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#eee,#777 70%,#333);box-shadow:0 0 0 2px #000}
+@media (min-width:900px){.rockstage{position:fixed}.rk-yan{width:220px;height:220px}.rk-name{font-size:60px}.rk-ln{font-size:21px}}
