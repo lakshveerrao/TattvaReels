@@ -4,7 +4,7 @@ name: voice-check
 on:
   push:
     branches: [main]
-    paths: ['api/tts.js', 'api/_voice/**', '.github/workflows/voice-check.yml']
+    paths: ['api/tts.js', 'api/music.js', 'api/_voice/**', '.github/workflows/voice-check.yml']
   workflow_dispatch:
 permissions:
   statuses: write
@@ -29,15 +29,16 @@ jobs:
           code=$(curl -s -m 60 -o v.mp3 -w "%{http_code}" "$SITE/api/tts?v=3&voice=singer&sv=2")
           size=$(stat -c%s v.mp3); head -c 300 v.mp3 | grep -a -o '"error":"[^"]*"' > err.txt
           curl -s -m 60 -o old.mp3 "$SITE/api/tts?v=3&voice=singer"; curl -s -m 60 -o ai.mp3 "$SITE/api/tts?v=3"
+          mcode=$(curl -s -m 280 -o m.mp3 -w "%{http_code}" "$SITE/api/music?v=1"); msize=$(stat -c%s m.mp3); MUS="music $mcode ${msize}B $(head -c 120 m.mp3 | tr -dc '[:print:]' | grep -o 'error.*' | cut -c1-60)"
           NEW=$(sha1sum v.mp3 | cut -c1-6); OLD=$(sha1sum old.mp3 | cut -c1-6); AI=$(sha1sum ai.mp3 | cut -c1-6)
           if [ "$code" = "200" ] && [ "$size" -gt 20000 ]; then state=success; else state=failure; fi
-          desc=$(NEW=$NEW OLD=$OLD AI=$AI python3 - "$S" "$code" "$size" <<'P'
+          desc=$(MUS="$MUS" NEW=$NEW OLD=$OLD AI=$AI python3 - "$S" "$code" "$size" <<'P'
           import sys,json
           s,code,size=sys.argv[1:4]
           try: j=json.loads(s)
           except Exception: j={'raw':s[:60]}
           d=('voice %s created=%s' % (j.get('voice','-'), j.get('created','-'))) if j.get('ok') else ('error: '+str(j.get('error',j))[:90])
-          print((d+' | v3 %s %sB new=%s old=%s ai=%s' % (code,size,__import__('os').environ['NEW'],__import__('os').environ['OLD'],__import__('os').environ['AI']))[:139])
+          print((__import__('os').environ['MUS']+' | '+d+' | v3 %s %sB' % (code,size))[:139])
           P
           )
           echo "$desc"

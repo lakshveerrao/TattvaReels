@@ -2621,10 +2621,10 @@ function play(canvas,i,style,o){
   ac=new AC();if(ac.resume)ac.resume();master=ac.createGain();master.gain.value=.85;const comp=ac.createDynamicsCompressor();master.connect(comp);comp.connect(ac.destination);t0=ac.currentTime+.12;
   const layer=(id,gain,off)=>{const b=AUD.buf[id];if(!b)return;const s=ac.createBufferSource(),gg=ac.createGain();gg.gain.value=gain;s.buffer=b;s.connect(gg);gg.connect(master);s.start(t0+(off||0));};
   layer('drone_tanpura',.4);
-  const ins=style.Sound,gi=((take||elOn)?.42:.72)/Math.sqrt(Math.max(1,ins.length));ins.forEach(id=>layer(vn+'/'+id,gi));
+  const ins=style.Sound,gi=((take||elOn)?(elOn&&VQ()?.3:.42):.72)/Math.sqrt(Math.max(1,ins.length));ins.forEach(id=>layer(vn+'/'+id,gi));
   if(style.Tone==='Tabla')layer('rhythm_tabla',.45);else if(style.Tone==='Mridangam')layer('rhythm_mridangam',.45);else rhythm(ac,master,164.81,t0,B,style.Tone,noiseBuf(ac));
   if(take){const src=ac.createBufferSource(),tg=ac.createGain();tg.gain.value=1.15;src.buffer=take;src.connect(tg);tg.connect(master);src.start(t0,Math.max(0,o.takeOffset||0));}
-  if(elOn){const es=ac.createBufferSource(),eg=ac.createGain();eg.gain.value=1.1;es.buffer=elB;es.connect(eg);eg.connect(master);es.start(t0+.6);}
+  if(elOn){const es=ac.createBufferSource(),eg=ac.createGain();eg.gain.value=VQ()?1.35:1.1;es.buffer=elB;es.connect(eg);eg.connect(master);es.start(t0+.6);}
   if(style.Recitation==='AI voice'&&!elOn&&window.speechSynthesis){try{const u=new SpeechSynthesisUtterance(TA(style).dev.join(' '));u.lang='hi-IN';u.rate=.6;speechSynthesis.cancel();speechSynthesis.speak(u);speaking=true;}catch(e){}}
  }catch(e){ac=null;}}
  const g=ctx2(canvas),HH=canvas.__h;

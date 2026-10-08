@@ -41,6 +41,9 @@
     "api/tts.js": {
       "includeFiles": "api/_voice/**",
       "maxDuration": 60
+    },
+    "api/music.js": {
+      "maxDuration": 300
     }
   }
 }
