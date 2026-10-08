@@ -3,7 +3,7 @@ import { sb, send, wrap, readBody, who, needUser, HANDLE, HttpError } from './_d
 // The signed-in account. GET → who I am and my best game scores. POST {handle} picks or changes my name;
 // POST {score:{game, s}} records a finished game (keeps the best).
 const json = { 'Content-Type': 'application/json' };
-const GAME = /^(g[a-z0-9]{6,24}|o[slb][1-8])$/;
+const GAME = /^(g[a-z0-9]{6,24}|o[slbc][1-8])$/;
 const RESERVED = new Set(['admin', 'tattva', 'tattvareels', 'support', 'guru', 'official', 'you', 'seeker', 'host']);
 
 export default wrap(async (req, res) => {

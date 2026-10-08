@@ -16,6 +16,7 @@ ARCADE.letters=(function(){
   // a stone floor for the wall of the verse
   var fl=[];for(var x=0;x<20;x++)fl.push([x-9.5,0,0,1,1,2,x%2?'#6b5a48':'#7a6854']);var floor=c.model('lbfl',fl,.5);floor.rotation.set(.3,0,0);floor.position.set(0,-c.HH+.6,-2);c.add(floor);
   c.hud.classList.add('captop');
+  c.chakraBg('#F4B73A',9.5,0,-.5,-14,.05,.15);
   var halo=c.glow('rgba(233,180,76,.25)',11);halo.position.set(0,-.5,-12);halo.material.opacity=.35;c.add(halo);s.motes=[];
   for(var q=0;q<14;q++){var mo=c.glow(q%3?'rgba(255,200,120,.7)':'rgba(180,200,255,.6)',.25+(q%4)*.08);mo.position.set(-4.6+(q*0.71%9.2),-c.HH+(q*1.37%(c.HH*2)),-4);mo.userData.v=.25+(q%5)*.08;c.add(mo);s.motes.push(mo);}
   c.help('Tap the letters in order');showWord(s);

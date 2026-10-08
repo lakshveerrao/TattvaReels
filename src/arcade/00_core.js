@@ -23,6 +23,29 @@ var ARC=(function(){
  function glow(color,size){var c=document.createElement('canvas');c.width=c.height=64;var x=c.getContext('2d'),gr=x.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.3,color);gr.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=gr;x.fillRect(0,0,64,64);
   var s=new T.Sprite(new T.SpriteMaterial({map:new T.CanvasTexture(c),blending:T.AdditiveBlending,depthWrite:false,transparent:true}));s.scale.setScalar(size||1);return s;}
  /* ---- common blocky figures ---- */
+ /* Sudarshana chakra drawn on a canvas (rings, spokes, a rim of flames); used as a spinning backdrop and as the thrown chakra */
+ var chakraCache={};
+ function chakraTex(color,flames){var k=color+(flames?'f':'');if(chakraCache[k])return chakraCache[k];var S=512,c=document.createElement('canvas');c.width=c.height=S;var x=c.getContext('2d'),m=S/2;
+  x.strokeStyle=color;x.fillStyle=color;x.lineCap='round';x.lineJoin='round';
+  if(flames){for(var i=0;i<24;i++){var a=i/24*Math.PI*2;x.save();x.translate(m,m);x.rotate(a);x.beginPath();x.moveTo(-18,-200);x.quadraticCurveTo(-6,-236,0,-252);x.quadraticCurveTo(6,-236,18,-200);x.closePath();x.globalAlpha=.85;x.fill();x.restore();}x.globalAlpha=1;}
+  [[200,10],[178,4],[120,6],[64,8],[26,0]].forEach(function(r){x.beginPath();x.arc(m,m,r[0],0,Math.PI*2);if(r[1]){x.lineWidth=r[1];x.stroke();}else x.fill();});
+  x.lineWidth=5;for(i=0;i<16;i++){a=i/16*Math.PI*2;x.beginPath();x.moveTo(m+Math.cos(a)*64,m+Math.sin(a)*64);x.lineTo(m+Math.cos(a)*178,m+Math.sin(a)*178);x.stroke();}
+  x.lineWidth=3;for(i=0;i<16;i++){a=(i+.5)/16*Math.PI*2;x.beginPath();x.ellipse(m+Math.cos(a)*150,m+Math.sin(a)*150,16,9,a,0,Math.PI*2);x.stroke();}
+  var t=new T.CanvasTexture(c);chakraCache[k]=t;return t;}
+ // the hero: a young brahmachari with a shikha, vibhuti tripundra and a red dot, sacred thread, angavastram and dhoti
+ function hero(){var F=new T.Group(),m=function(c){return new T.MeshLambertMaterial({color:c});},skin=m('#c98b5e'),dhoti=m('#fff3dc'),saf=m('#f08a24'),dk=m('#1a1206'),wh=m('#ffffff'),red=m('#d6202c');
+  function box(w,h,d,mat,x,y,z,par,rz){var b=new T.Mesh(new T.BoxGeometry(w,h,d),mat);b.position.set(x,y,z);if(rz)b.rotation.z=rz;(par||F).add(b);return b;}
+  function limb(x,y,len,mat,w){var p=new T.Group();p.position.set(x,y,0);F.add(p);box(w||.13,len,.13,mat,0,-len/2,0,p);return p;}
+  box(.46,.48,.46,skin,0,1.46,0);                                  // shaved head
+  box(.1,.16,.1,dk,0,1.76,-.14);box(.06,.12,.06,dk,0,1.86,-.2);      // shikha
+  box(.07,.09,.02,dk,.11,1.45,.235);box(.07,.09,.02,dk,-.07,1.45,.235); // eyes
+  [1.56,1.6,1.64].forEach(function(y){box(.32,.022,.02,wh,0,y,.236);});box(.05,.05,.02,red,0,1.6,.248); // tripundra + kumkum
+  box(.3,.6,.18,skin,0,.9,0);                                      // bare chest
+  box(.035,.74,.02,wh,.02,.92,.095,null,-.5);                      // sacred thread
+  box(.09,.7,.2,saf,-.06,.95,0,null,.55);                          // angavastram over the shoulder
+  box(.4,.36,.24,dhoti,0,.5,0);box(.42,.05,.25,saf,0,.34,0);        // dhoti with a saffron border
+  var r={F:F,aL:limb(-.2,1.15,.55,skin),aR:limb(.2,1.15,.55,skin),lL:limb(-.08,.5,.5,dhoti,.15),lR:limb(.08,.5,.5,dhoti,.15)};
+  return r;}
  var LIB={
   person:function(skin,shirt,legs,s){s=s||1;return[[0,6*s,0,4*s,4*s,4*s,skin],[0,2.5*s,0,4*s,3*s,2*s,shirt],[-2.5*s,2.5*s,0,1*s,3*s,1.6*s,shirt],[2.5*s,2.5*s,0,1*s,3*s,1.6*s,shirt],[-1*s,-.5*s,0,1.8*s,3*s,1.8*s,legs],[1*s,-.5*s,0,1.8*s,3*s,1.8*s,legs],[-.9*s,6.3*s,2.05*s,.7*s,.7*s,.1,'#1a1206'],[.9*s,6.3*s,2.05*s,.7*s,.7*s,.1,'#1a1206']];},
   tree:function(trunk,leaf){return[[0,1,0,1.6,4,1.6,trunk],[0,4.5,0,6,3,6,leaf],[0,7,0,4,2,4,leaf],[0,8.6,0,2,1.2,2,leaf],[-2.2,4,1.5,1.4,1.4,1.4,'#7cc46a']];},
@@ -56,10 +79,13 @@ var ARC=(function(){
    pop:function(t,x,y,cls){pop(t,x,y,cls);},help:function(t){var el=hud.querySelector('.arhelp');el.textContent=t||'';el.classList.toggle('on',!!t);},
    shake:function(){host.classList.remove('arshake');void host.offsetWidth;host.classList.add('arshake');},
    burst:function(x,y,color,n){for(var i=0;i<(n||10);i++){var m=model('shard'+color,[[0,0,0,1,1,1,color]],.12);m.position.set(x,y,1);m.userData.v=new T.Vector3((rnd()-.5)*8,rnd()*7+2,0);m.userData.life=.7;scene.add(m);shards.push(m);}},
+   hero:hero,chakraTex:chakraTex,
+   // a big chakra slowly turning behind the scene
+   chakraBg:function(color,size,x,y,z,speed,op){var sp=new T.Sprite(new T.SpriteMaterial({map:chakraTex(color,true),transparent:true,opacity:op==null?.22:op,depthWrite:false}));sp.scale.setScalar(size);sp.position.set(x||0,y||0,z==null?-25:z);sp.userData.spin=speed==null?.08:speed;scene.add(sp);spins.push(sp);return sp;},
    recite:function(i){i=((i%4)+4)%4;var V=typeof TATTVAS!=='undefined'?TATTVAS[(o.tattva||1)-1]:null;if(ctx.voice.line)ctx.voice.line(i);if(!V)return;var el=hud.querySelector('.arline');
     el.innerHTML='<b>'+(i<3?V.dev[i]:L4.dev)+'</b><span>'+(i<3?V.en[i]:L4.en)+'</span>';el.hidden=false;el.classList.remove('in');void el.offsetWidth;el.classList.add('in');clearTimeout(lineT);lineT=setTimeout(function(){el.hidden=true;},7500);},
    end:function(){finish();},get t(){return st.t;},get left(){return Math.max(0,dur-st.t);},get dur(){return dur;}};
-  var shards=[],lineT=0;
+  var shards=[],lineT=0,spins=[];
   function pop(t,x,y,cls){var el=document.createElement('span'),p=toScreen(x,y);el.className='arpop '+(cls||'');el.textContent=t;el.style.left=p.x+'%';el.style.top=p.y+'%';hud.querySelector('.arpops').appendChild(el);setTimeout(function(){el.remove();},900);}
   var bg=new T.Mesh(new T.PlaneGeometry(40,60),new T.ShaderMaterial({depthWrite:false,uniforms:{a:{value:new T.Color(game.sky?game.sky[0]:'#1b1030')},b:{value:new T.Color(game.sky?game.sky[1]:'#07050f')}},vertexShader:'varying float vY;void main(){vY=position.y/60.+.5;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform vec3 a,b;varying float vY;void main(){gl_FragColor=vec4(mix(b,a,smoothstep(.3,.75,vY)),1.);}'}));bg.position.z=-30;scene.add(bg);
   game.setup(ctx);
@@ -77,6 +103,7 @@ var ARC=(function(){
     if(!st.over){st.t+=dt;game.update(dt,st.t,ctx);if(st.t>=dur){finish();}}else if(game.after)game.after(dt,ctx);}
    if(!st.over){var left=Math.max(0,dur-st.t),tl=hud.querySelector('.artimer');tl.querySelector('b').textContent=Math.ceil(left);tl.style.setProperty('--p',(left/dur).toFixed(3));
     if(Math.ceil(left)!==lastSec){lastSec=Math.ceil(left);if(lastSec<=5&&lastSec>0)SFX.tick();}}
+   spins.forEach(function(sp){sp.material.rotation+=sp.userData.spin*dt*(o.timeScale||1);});
    for(var i=shards.length-1;i>=0;i--){var m=shards[i];m.userData.v.y-=18*dt;m.position.addScaledVector(m.userData.v,dt);m.rotation.x+=dt*8;m.userData.life-=dt;m.scale.setScalar(Math.max(.01,m.userData.life/.7));if(m.userData.life<=0){scene.remove(m);shards.splice(i,1);}}
    R.render(scene,cam);raf=requestAnimationFrame(frame);}
   function finish(){if(st.over)return;st.over=true;stopMusic();SFX.big();var d=game.finish?game.finish(ctx):0;if(o.onEnd)setTimeout(function(){o.onEnd(st.score);},d||700);}

@@ -15,13 +15,7 @@ ARCADE.stick=(function(){
  var G={name:'Stickman Quest',secs:75,short:'Run, jump, collect the letters',how:'Tap to jump, tap again in the air to double jump. Collect the letters of each word in order.',s:null};
  function h32(n){var a=n*2654435761>>>0;return function(){a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
  function escH(x){return String(x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
- function figure(T){var F=new T.Group(),m=function(c){return new T.MeshLambertMaterial({color:c});},body=m('#fff3dc'),skin=m('#ffd9a8'),saf=m('#ff9a3c'),dk=m('#1a1206');
-  function box(w,h,d,mat,x,y,z,par){var b=new T.Mesh(new T.BoxGeometry(w,h,d),mat);b.position.set(x,y,z);(par||F).add(b);return b;}
-  function limb(x,y,len,mat){var p=new T.Group();p.position.set(x,y,0);F.add(p);box(.14,len,.14,mat,0,-len/2,0,p);return p;}
-  box(.5,.5,.5,skin,0,1.45,0);box(.08,.1,.02,dk,.12,1.48,.26);box(.08,.1,.02,dk,-.08,1.48,.26);box(.52,.12,.52,saf,0,1.68,0);
-  box(.18,.64,.18,body,0,.88,0);box(.32,.12,.32,saf,0,1.14,0);
-  var r={F:F,aL:limb(-.13,1.12,.55,body),aR:limb(.13,1.12,.55,body),lL:limb(-.06,.57,.57,body),lR:limb(.06,.57,.57,body)};
-  F.rotation.y=.55;F.scale.setScalar(1.3);return r;}
+ function figure(T,c){var r=c.hero();r.F.rotation.y=.55;r.F.scale.setScalar(1.3);return r;}
  G.setup=function(c){var T=c.T,n=c.tattva,th=TH[n]||TH[1];c.sky(th.sky[0],th.sky[1]);
   var r2=ARC.rngOf(Math.floor(c.rnd()*1e9)),gy=-c.HH*.32,px=-2.6,lv=c.level;
   var words=WORDS.forTattva(n),key=words.filter(function(w){return WORDS.isKey(n,w);}),rest=words.filter(function(w){return !WORDS.isKey(n,w);});
@@ -29,9 +23,10 @@ ARCADE.stick=(function(){
   var order=rest.slice(0,1).concat(key.slice(0,1),rest.slice(1));if(!order.length)order=[{dev:'ॐ',ak:['ॐ'],iast:'om',mean:'Om'}];
   var pool=[];words.forEach(function(w){w.ak.forEach(function(a){if(pool.indexOf(a)<0)pool.push(a);});});
   var s=G.s={c:c,th:th,gy:gy,px:px,y:gy,vy:0,ground:true,jumps:0,v:4.2+lv*.6,segs:[],tiles:[],props:[],genX:-c.HW-2,segN:0,dist:0,nextTile:3,nextProp:0,
-   order:order,wi:0,got:0,pool:pool,since:0,combo:0,words:0,line:0,lastLine:-99,inv:0,pause:0,ph:0,fig:figure(T)};
+   order:order,wi:0,got:0,pool:pool,since:0,combo:0,words:0,line:0,lastLine:-99,inv:0,pause:0,ph:0,fig:figure(T,c)};
   c.add(s.fig.F);s.fig.F.position.set(px,gy,1);
   var halo=c.glow('rgba(255,210,120,.6)',1.6);s.fig.F.add(halo);halo.position.set(0,1.45,-.3);
+  c.chakraBg(th.orb,c.HH*1.5,0,c.HH*.18,-28,.06,.16);
   var orb=c.glow(th.orb,n===6?5:3.6);orb.position.set(2.7,c.HH-7,-20);c.add(orb);
   if(n===6){var d=new T.Mesh(new T.CircleGeometry(.95,32),new T.MeshBasicMaterial({color:0x120604}));d.position.set(2.95,c.HH-6.75,-19);c.add(d);s.rahu=d;}
   // ground runs off the left edge at the start

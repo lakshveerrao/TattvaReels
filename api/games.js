@@ -10,8 +10,8 @@ function clean(b) {
   const title = String(b.title || '').replace(/\s+/g, ' ').trim().slice(0, 60);
   return { type: 'arcade', tattva, settings, title };
 }
-const STYLES = ['stick', 'letters', 'build'];
-const STYLE_NAMES = { stick: 'Stickman Quest', letters: 'Letter Builder', build: 'Block Builder' };
+const STYLES = ['stick', 'letters', 'build', 'chakra'];
+const STYLE_NAMES = { stick: 'Stickman Quest', letters: 'Letter Builder', build: 'Block Builder', chakra: 'Chakra Launch' };
 const TATTVA_NAMES = ['The mirror city', 'The seed', 'That you are', 'The lamp in the pot', 'Not the body', 'The eclipse', 'The unchanging I', 'The dream of roles'];
 const out = (r, w) => ({ own: !!(w && w.user && r.user_id === w.user.id), id: r.id, name: r.name, title: r.title, type: r.type, tattva: r.tattva, settings: r.settings, plays: r.plays || 0, createdAt: Date.parse(r.created_at) || 0 });
 const COLS = 'id,name,title,type,tattva,settings,plays,created_at,user_id';

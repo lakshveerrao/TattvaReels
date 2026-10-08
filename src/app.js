@@ -375,7 +375,7 @@ function reelRow(r,k,n){const b=document.createElement('button');b.className='lr
  const sm=b.querySelector('small');sm.textContent=r.name+' · '+r.style.Visuals;if(r.score!=null){const s=document.createElement('span');s.className='score';s.textContent='Tune '+r.score+'%';sm.appendChild(s);}
  b.onclick=()=>{const ix=reelList.findIndex(x=>x.id===r.id);showView('feed');if(ix>=0){reelsEl.scrollTop=ix*reelsEl.clientHeight;activate(ix,true);}};
  queuePoster(b.querySelector('canvas'),r.style,0);return b;}
-function gameName(id){const m=/^o([slb])([1-8])$/.exec(id);if(m&&typeof ARCADE!=='undefined'){const st={s:'stick',l:'letters',b:'build'}[m[1]];return ARCADE[st].name+' · Tattva '+m[2];}
+function gameName(id){const m=/^o([slbc])([1-8])$/.exec(id);if(m&&typeof ARCADE!=='undefined'){const st={s:'stick',l:'letters',b:'build',c:'chakra'}[m[1]];return ARCADE[st].name+' · Tattva '+m[2];}
  const g=typeof GS!=='undefined'&&GS.games.find(x=>x.id===id);return g?g.title:'A community game';}
 function renderTop(){const c=counts(),all=allReels(),mine=all.filter(r=>r.own),learnt=all.filter(r=>r.mine),u=S.user;
  const plays=S.scores.reduce((a,x)=>a+(x.plays||0),0),best=S.scores.reduce((a,x)=>Math.max(a,x.best||0),0);

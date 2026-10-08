@@ -33,7 +33,8 @@ ARCADE.build=(function(){
   var parts=[];for(var x=-5;x<=5;x++)for(var z=-5;z<=5;z++)parts.push([x,-.5,z,1,1,1,(x+z)&1?'#7cc46a':'#8fd17e']);
   parts.push([0,-1.5,0,11,1,11,'#7a4e2c'],[0,-2.4,0,9,.8,9,'#6b4423']);
   var ground=c.model('bgnd',parts,1);ground.rotation.set(0,0,0);c.add(ground);
-  var gl=goal(n),s=G.s={c:c,n:n,cells:{},goal:{},ghosts:{},solids:[],ghostList:[],ground:ground,mode:'build',col:PAL[0],yaw:.65,pitch:.55,filled:0,total:gl.length,shown:0,done:false,line:0,lastLine:-99,orbit:0,ray:new T.Raycaster()};s.gop=c.level>=3?.1:c.level===2?.16:.22;
+  var mand=new T.Mesh(new T.PlaneGeometry(30,30),new T.MeshBasicMaterial({map:c.chakraTex('#F4B73A',true),transparent:true,opacity:.35,depthWrite:false}));mand.rotation.x=-Math.PI/2;mand.position.y=-2.9;c.add(mand);
+  var gl=goal(n),s=G.s={c:c,n:n,cells:{},goal:{},ghosts:{},solids:[],ghostList:[],ground:ground,mode:'build',col:PAL[0],yaw:.65,pitch:.55,filled:0,total:gl.length,shown:0,done:false,line:0,lastLine:-99,orbit:0,ray:new T.Raycaster()};s.mand=mand;s.gop=c.level>=3?.1:c.level===2?.16:.22;
   var gop=c.level>=3?.1:c.level===2?.16:.22;
   gl.forEach(function(g){var k=g[0]+','+g[1]+','+g[2];s.goal[k]=g[3];
    var m=new T.Mesh(ghostGeo,new T.MeshBasicMaterial({color:g[3],transparent:true,opacity:gop,depthWrite:false}));m.position.set(g[0],g[1]+.5,g[2]);
@@ -66,7 +67,7 @@ ARCADE.build=(function(){
  function placeCam(s){var c=s.c,cam=c.cam,a=cam.aspect||.56,vf=cam.fov*Math.PI/360,hf=Math.atan(Math.tan(vf)*a),r=Math.max(14,6.9/Math.tan(Math.min(vf,hf)));
   var ty=3.2;cam.position.set(Math.sin(s.yaw)*Math.cos(s.pitch)*r,ty+Math.sin(s.pitch)*r,Math.cos(s.yaw)*Math.cos(s.pitch)*r);cam.lookAt(0,ty-.6,0);}
  function place(s){placeCam(s);}
- G.update=function(dt,t,c){var s=G.s;if(t>4&&t<4.2&&!s.done)c.help('');
+ G.update=function(dt,t,c){var s=G.s;if(s.mand)s.mand.rotation.z+=dt*.05;if(t>4&&t<4.2&&!s.done)c.help('');
   if(t>1&&s.lastLine<0){c.recite(0);s.line=1;s.lastLine=t;}
   if(t>s.lastLine+22&&!s.done){c.recite(s.line++);s.lastLine=t;}
   s.solids.forEach(function(m){if(m.userData.grow<1){m.userData.grow=Math.min(1,m.userData.grow+dt*7);var e=m.userData.grow;m.scale.setScalar(.2+.8*(1-Math.pow(1-e,3))+Math.sin(e*Math.PI)*.12);}});

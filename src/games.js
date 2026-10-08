@@ -2,18 +2,18 @@
    meaning first, the recitation continues line by line during play; solo or live ---------- */
 const SB_URL='https://uodkcmhoszjlgxowkucw.supabase.co',SB_KEY='sb_publishable_ZZxIRgg3b8amPGJzQz1r0g_v_1zdIsc';
 const LEVELS={1:'Easy',2:'Normal',3:'Hard'};
-const STYLES=['stick','letters','build'],SL={stick:'s',letters:'l',build:'b'},CODE_AB='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+const STYLES=['stick','letters','build','chakra'],SL={stick:'s',letters:'l',build:'b',chakra:'c'},CODE_AB='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const GS={games:[],loaded:false,local:false,live:null,me:LS.get('tr-pid',null),best:LS.get('tr-best',{})};
 if(!GS.me||!/^p[a-z0-9]{8}$/.test(GS.me)){GS.me='p'+Math.random().toString(36).slice(2,10).padEnd(8,'0');LS.set('tr-pid',GS.me);}
 const myName=()=>S.user&&S.user.handle?S.user.handle:(LS.get('tr-gname','')||'');
 const styleOf=g=>ARCADE[g&&g.settings&&g.settings.style]||ARCADE.stick,secsOf=g=>styleOf(g).secs||60;
 const official=(st,n)=>({id:'o'+SL[st]+n,name:'Hey Tattva',title:ARCADE[st].name+' · '+TATTVAS[n-1].name,type:'arcade',tattva:n,settings:{style:st,level:2,seed:1},plays:0,official:true});
-GS.pick=Object.assign({stick:1,letters:1,build:1},LS.get('tr-gpick',{}));
-function cleanGame(g){if(!g||typeof g!=='object'||!/^(g[a-z0-9]{6,24}|o[slb][1-8])$/.test(g.id||''))return null;const s=g.settings||{},st=STYLES.includes(s.style)?s.style:'stick',n=Math.min(8,Math.max(1,+g.tattva||1));
+GS.pick=Object.assign({stick:1,letters:1,build:1,chakra:1},LS.get('tr-gpick',{}));
+function cleanGame(g){if(!g||typeof g!=='object'||!/^(g[a-z0-9]{6,24}|o[slbc][1-8])$/.test(g.id||''))return null;const s=g.settings||{},st=STYLES.includes(s.style)?s.style:'stick',n=Math.min(8,Math.max(1,+g.tattva||1));
  return{id:g.id,name:String(g.name||'seeker').slice(0,24),title:String(g.title||'').slice(0,60)||(ARCADE[st].name+' · '+TATTVAS[n-1].name),type:'arcade',tattva:n,
   settings:{style:st,level:[1,2,3].includes(+s.level)?+s.level:2,seed:+s.seed||1},plays:+g.plays||0,official:!!g.official||/^o/.test(g.id)};}
 // signed in: the server keeps my best per game (shown on the Me page)
-function saveScore(id,sc){if(!S.user||!/^(g[a-z0-9]{6,24}|o[slb][1-8])$/.test(id)||id==='gdraft000')return;
+function saveScore(id,sc){if(!S.user||!/^(g[a-z0-9]{6,24}|o[slbc][1-8])$/.test(id)||id==='gdraft000')return;
  API('/api/me',{method:'POST',body:JSON.stringify({score:{game:id,s:sc}})}).then(j=>{const x=S.scores.find(y=>y.game===id);if(x){x.best=Math.max(x.best,j.best);x.plays++;}else S.scores.unshift({game:id,best:j.best,plays:1});}).catch(()=>{});}
 function setBest(id,sc){if(sc>(GS.best[id]||0)){GS.best[id]=sc;LS.set('tr-best',GS.best);return true;}return false;}
 
@@ -169,12 +169,12 @@ async function loadGames(){
  try{const j=await API('/api/games');GS.local=false;GS.games=(j.games||[]).filter(g=>g&&g.settings&&g.settings.style).map(cleanGame).filter(Boolean);}
  catch(e){GS.local=true;GS.games=LS.get('tr-games',[]).filter(g=>g&&g.settings&&g.settings.style).map(cleanGame).filter(Boolean);}
  GS.loaded=true;renderGames();}
-const cardGame=el=>{const id=el.id.slice(2);if(/^o[slb]$/.test(id)){const st=STYLES.find(x=>SL[x]===id[1]);return official(st,GS.pick[st]);}return GS.games.find(g=>g.id===id);};
+const cardGame=el=>{const id=el.id.slice(2);if(/^o[slbc]$/.test(id)){const st=STYLES.find(x=>SL[x]===id[1]);return official(st,GS.pick[st]);}return GS.games.find(g=>g.id===id);};
 function renderGames(){gamesEl.innerHTML='';setTimeout(paintLive,0);
  STYLES.forEach(st=>gamesEl.appendChild(gameCard(official(st,GS.pick[st]),st)));
  GS.games.forEach(g=>gamesEl.appendChild(gameCard(g)));}
 // one card per style (pick any of the eight tattvas on it), then one card per game someone made
-const COVER={stick:'/img/g_stick.jpg',letters:'/img/g_letters.jpg',build:'/img/g_build.jpg'};
+const COVER={stick:'/img/g_stick.jpg',letters:'/img/g_letters.jpg',build:'/img/g_build.jpg',chakra:'/img/g_chakra.jpg'};
 function gameCard(g,styleCard){const el=document.createElement('article');el.className='gcard'+(styleCard?' gstyle':'');el.id='g-'+(styleCard?'o'+SL[styleCard]:g.id);
  const st=styleCard||g.settings.style;
  el.innerHTML='<div class="gcover"><img alt="" loading="lazy" src="'+COVER[st]+'"><span class="gsecs"></span>'+(styleCard?'':'<span class="gby">'+esc(LX('Made by'))+' '+esc(g.name)+'</span>')+'</div>'+
@@ -236,4 +236,4 @@ $('#gx-make').innerHTML=ico('plus')+'Make';$('#gx-make').onclick=()=>openMake();
 $('#nv-games').innerHTML=ico('chakra')+'<span>'+esc(LX('Games'))+'</span>';$('#nv-games').onclick=()=>{if(S.view==='games'){gamesEl.scrollTo({top:0,behavior:'smooth'});return;}showView('games');if(!GS.loaded)loadGames();};
 renderGames();
 (function(){const m=location.hash.match(/^#join-([A-Z0-9]{6})$/i);if(m){showView('games');loadGames();setTimeout(()=>openJoin(m[1].toUpperCase()),300);}
- const g=location.hash.match(/^#g-((g[a-z0-9]{6,24})|o[slb][1-8])$/);if(g){showView('games');let id=g[1];if(/^o/.test(id)){const st=STYLES.find(x=>SL[x]===id[1]);GS.pick[st]=+id[2];id=id.slice(0,2);}loadGames().then(()=>{const el=document.getElementById('g-'+id);if(el)el.scrollIntoView();});}})();
+ const g=location.hash.match(/^#g-((g[a-z0-9]{6,24})|o[slbc][1-8])$/);if(g){showView('games');let id=g[1];if(/^o/.test(id)){const st=STYLES.find(x=>SL[x]===id[1]);GS.pick[st]=+id[2];id=id.slice(0,2);}loadGames().then(()=>{const el=document.getElementById('g-'+id);if(el)el.scrollIntoView();});}})();
