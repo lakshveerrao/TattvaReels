@@ -97,3 +97,5 @@ function openRock(n){stopCur();if(typeof closeSheet==='function')closeSheet();RO
   el.querySelector('.rk-fv').oninput=e=>{ROCK.vol.v=+e.target.value;};el.querySelector('.rk-fb').oninput=e=>{ROCK.vol.b=+e.target.value;};}
  ROCK.el.hidden=false;ROCK.el.classList.remove('out');rockFill();rockPlay();}
 function closeRock(){rockStop();if(!ROCK.el)return;ROCK.el.classList.add('out');setTimeout(()=>{if(ROCK.el)ROCK.el.hidden=true;},250);if(S.view==='feed')requestAnimationFrame(()=>activate(currentIx(),true));}
+// direct link: #rock opens the rock stage on tattva 1, #rock-3 on tattva 3
+(function(){const go=d=>{const m=location.hash.match(/^#rock(?:-([1-8]))?$/);if(m)setTimeout(()=>openRock(+(m[1]||1)),d);};go(600);addEventListener('hashchange',()=>go(50));})();

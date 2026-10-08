@@ -3630,7 +3630,7 @@ Object.assign(UI18N.hi,{"Singer voice":"गायक की आवाज़","AI
 
 const FLOW={keep:()=>!!LS.get('tr-lang-keep',false)&&!!LANG,setKeep:v=>LS.set('tr-lang-keep',!!v),on:false};
 function startFlow(){let resume=null;try{resume=sessionStorage.getItem('tr-resume');sessionStorage.removeItem('tr-resume');}catch(e){}
- const deep=/^#(r-|join-|g-)|(^#|&)(access_token|error)=/.test(location.hash)||/[?&](app|live)(=|&|$)/.test(location.search);
+ const deep=/^#(r-|join-|g-|rock)|(^#|&)(access_token|error)=/.test(location.hash)||/[?&](app|live)(=|&|$)/.test(location.search);
  if(resume==='tour'){setTimeout(runTour,500);return;}
  if(resume==='app')return;
  if(deep){if(!LANG)askLang(null);return;}
@@ -3830,6 +3830,8 @@ function openRock(n){stopCur();if(typeof closeSheet==='function')closeSheet();RO
   el.querySelector('.rk-fv').oninput=e=>{ROCK.vol.v=+e.target.value;};el.querySelector('.rk-fb').oninput=e=>{ROCK.vol.b=+e.target.value;};}
  ROCK.el.hidden=false;ROCK.el.classList.remove('out');rockFill();rockPlay();}
 function closeRock(){rockStop();if(!ROCK.el)return;ROCK.el.classList.add('out');setTimeout(()=>{if(ROCK.el)ROCK.el.hidden=true;},250);if(S.view==='feed')requestAnimationFrame(()=>activate(currentIx(),true));}
+// direct link: #rock opens the rock stage on tattva 1, #rock-3 on tattva 3
+(function(){const go=d=>{const m=location.hash.match(/^#rock(?:-([1-8]))?$/);if(m)setTimeout(()=>openRock(+(m[1]||1)),d);};go(600);addEventListener('hashchange',()=>go(50));})();
 
 /* ---------- boot ---------- */
 document.querySelectorAll('.crest').forEach(e=>e.innerHTML=yantra());applyI18n();startTranslator();

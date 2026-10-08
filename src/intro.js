@@ -56,7 +56,7 @@ Object.assign(UI18N.hi,{"Singer voice":"गायक की आवाज़","AI
 
 const FLOW={keep:()=>!!LS.get('tr-lang-keep',false)&&!!LANG,setKeep:v=>LS.set('tr-lang-keep',!!v),on:false};
 function startFlow(){let resume=null;try{resume=sessionStorage.getItem('tr-resume');sessionStorage.removeItem('tr-resume');}catch(e){}
- const deep=/^#(r-|join-|g-)|(^#|&)(access_token|error)=/.test(location.hash)||/[?&](app|live)(=|&|$)/.test(location.search);
+ const deep=/^#(r-|join-|g-|rock)|(^#|&)(access_token|error)=/.test(location.hash)||/[?&](app|live)(=|&|$)/.test(location.search);
  if(resume==='tour'){setTimeout(runTour,500);return;}
  if(resume==='app')return;
  if(deep){if(!LANG)askLang(null);return;}
