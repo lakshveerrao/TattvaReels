@@ -27,7 +27,8 @@ src/
   engines.js      2D particle visual engines (Mirror city, Splat bloom, Sound sand, Flow rivers, Embers, ...)
   analysis.js     YIN pitch tracking and scoring helpers
   tunes.js        const TUNES = tune B notes for verses 1–8 (generated from tunes/verse-N.B.json)
-  games.js        Games tab: make a game (quiz / shloka puzzle race), play solo or host live with a 6-letter join code
+  games.js        Games tab: 8 official tattva games + community versions; narration (shloka, then meaning) → 3-2-1 → 60 s game → result; solo or live
+  arcade/         00_core.js blocky voxel arcade engine (ortho camera, HUD, sfx, seeded rng); 01_mirror … 08_wake.js one 60 s game per tattva (ARCADE[n])
   tattvas.js      const TATTVAS = per-verse text (dev/iast/en), teaching, keep points, word glossary
   films/          00_kit.js shared film toolkit (one WebGL renderer, morphing particles, line art, labels);
                   02_seed.js … 08_dream.js one 3D film per tattva (film 1 is film.js). FILMS[n] registry.
@@ -37,9 +38,9 @@ api/              Vercel Node serverless functions (ESM)
   learn.js        POST "I learnt this" toggle, one per browser (tr_a cookie)
   take.js         GET a reel's recorded voice from the private Storage bucket "takes"
   games.js        GET list / ?id= one, POST create (10 per hour per browser), POST {played:id} counts a play
-  tts.js          ElevenLabs recitation, /api/tts?v=1..8, cached at the edge
+  tts.js          ElevenLabs: /api/tts?v=1..8 recites the verse, &m=1 speaks its meaning; cached at the edge
 supabase/setup.sql  tables reels, learnt; view reel_feed; RLS on; bucket takes (ALREADY RUN on 2026-10-07)
-supabase/games.sql  table games + game_played() (ALREADY RUN on 2026-10-08)
+supabase/games.sql  table games + game_played() (ALREADY RUN on 2026-10-08); games_arcade.sql allows type 'arcade' (ALREADY RUN)
 audio/            verse 1: 12 instruments + shared drone_tanpura, rhythm_tabla, rhythm_mridangam; audio/vN/ = 12 instruments for verse N (loaded on demand)
 vendor/three.min.js  Three.js r128; vendor/supabase.min.js supabase-js 2.117 (loaded only when a live game starts)
 tunes/            tune library for all 8 verses (JSON + MIDI), specs and scripts (audio renders not in git)
@@ -53,7 +54,7 @@ tunes/            tune library for all 8 verses (JSON + MIDI), specs and scripts
 - **Sing mode:** Yousician-style live scoring. YIN pitch, beat-locked note judging (±50 cents, a note is hit at ≥50% of frames, octave folding, latency search −0.05 to +0.45 s), "Any key" mode finds the key by vote, pass mark 80. Full spec in `tunes/MATCHING_SPEC.md`; Python reference in `tunes/tune_check.py`.
 - A reel's tattva lives in `style.Tattva` (1–8), stored in the reels.style jsonb; no extra DB column.
 - Films: each is a pure function of story progress pf (0..1) and time; labels show a Sanskrit word + English. Check them frame by frame (render a grid of pf values headless) before shipping.
-- **Games:** content is generated from the verse with the game's seed, so every phone builds the same questions/tiles. Live play uses Supabase Realtime broadcast + presence on channel `tr-room-<CODE>` with the publishable key (public by design, hardcoded in games.js). The host's phone is the referee (scores, timer, phases) and broadcasts `state`; players send `hello`, `ans`, `prog`. No game state is stored server-side. Hosts also announce their room on the public presence channel `tr-room-LOBBY`, so the Games feed shows "Join <host>'s game" on the card and anyone can join without typing the code. For local multi-phone tests add `?live=ws://localhost:PORT` to use a WebSocket relay instead.
+- **Games (agreed 2026-10-08):** fun blocky Minecraft-style arcade games, max 60 seconds, one per tattva: 1 Mirror Catch, 2 Grow the Banyan, 3 Find That, 4 Light the World, 5 Neti Neti, 6 Escape Rāhu, 7 Thread Runner, 8 Wake Up. Each opens with the AI voice reciting the shloka, then speaking its meaning (skippable). In live games everyone plays the same seed at the same moment; scores stream to the host, top score wins. Live play uses Supabase Realtime broadcast + presence on channel `tr-room-<CODE>` with the publishable key (public by design, hardcoded in games.js). The host's phone is the referee (scores, timer, phases) and broadcasts `state`; players send `hello`, `ans`, `prog`. No game state is stored server-side. Hosts also announce their room on the public presence channel `tr-room-LOBBY`, so the Games feed shows "Join <host>'s game" on the card and anyone can join without typing the code. For local multi-phone tests add `?live=ws://localhost:PORT` to use a WebSocket relay instead.
 - All tests and demo content were deleted on purpose. Don't add demo reels or sample data.
 
 ## Secrets: never commit

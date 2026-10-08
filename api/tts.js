@@ -12,8 +12,22 @@ const VERSES = [
 
 // Reads verse 1 with ElevenLabs. The key comes from Vercel's environment settings, never from the code.
 // Vercel's edge cache keeps the result, so ElevenLabs is called rarely.
+// What each tattva means, spoken after the recitation (m=1).
+const MEANINGS = [
+ "The world you see is like a city reflected in a mirror. It seems to be outside, yet it shines within you.",
+ "The whole world rests in the Self like a tree inside a seed. Space and time unfold it, the way a magician conjures a show.",
+ "Everything you see shines only because existence shines through it. The guru points and says: you are That.",
+ "Your awareness is a lamp inside a pot full of holes. It shines out through the eyes and ears, and the world lights up.",
+ "You are not the body, the breath, the senses or the mind. Those are things you know. The knower is what you are.",
+ "In deep sleep you seem to vanish, like an eclipsed sun. On waking you say “I slept well”, so you were there all along.",
+ "Childhood ends, youth ends, dreams end. The “I am” that was present in all of them never ends.",
+ "Cause and effect, owner and owned, teacher and student, parent and child. One Self plays every role, like a dreamer who is every person in the dream."
+];
+
 export default async function handler(req, res) {
-  const v = Math.min(8, Math.max(1, parseInt(new URL(req.url, 'http://x').searchParams.get('v') || '1', 10) || 1));
+  const q = new URL(req.url, 'http://x').searchParams;
+  const v = Math.min(8, Math.max(1, parseInt(q.get('v') || '1', 10) || 1));
+  const meaning = q.get('m') === '1';
   const key = process.env.ELEVENLABS_API_KEY;
   const json = (code, msg) => { res.statusCode = code; res.setHeader('Content-Type', 'application/json'); res.setHeader('Cache-Control', 'no-store'); res.end(JSON.stringify({ error: msg })); };
   if (!key) return json(501, 'AI voice isn’t set up on the server.');
@@ -21,7 +35,7 @@ export default async function handler(req, res) {
   try {
     const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?output_format=mp3_44100_128', {
       method: 'POST', headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
-      body: JSON.stringify({ text: VERSES[v - 1], model_id: 'eleven_multilingual_v2', voice_settings: { stability: .55, similarity_boost: .75 } })
+      body: JSON.stringify({ text: meaning ? MEANINGS[v - 1] : VERSES[v - 1], model_id: 'eleven_multilingual_v2', voice_settings: { stability: .55, similarity_boost: .75 } })
     });
     if (!r.ok) { console.error('elevenlabs', r.status, await r.text()); return json(502, 'ElevenLabs didn’t return audio. Check the API key and credits.'); }
     const buf = Buffer.from(await r.arrayBuffer());

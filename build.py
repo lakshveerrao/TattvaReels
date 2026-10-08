@@ -23,7 +23,8 @@ head=f'''<!doctype html>
 </style>
 </head><body>
 '''
-js=tn+'\n'+mul+'\n'+e+'\n'+f+'\n'+app
+arc=''.join(open(os.path.join(SRC,'arcade',x)).read()+'\n' for x in sorted(os.listdir(os.path.join(SRC,'arcade'))) if x.endswith('.js'))
+js=tn+'\n'+mul+'\n'+e+'\n'+f+'\n'+arc+'\n'+app
 html=head+body+'\n<script src="/vendor/three.min.js"></script>\n<script>\n'+js+'\n</script>\n</body></html>\n'
 open(f'{OUT}/index.html','w').write(html)
 print(len(html),'bytes written to index.html')
