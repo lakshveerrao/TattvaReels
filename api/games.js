@@ -28,7 +28,8 @@ export default wrap(async (req, res) => {
       return send(res, 200, { game: out(rows[0]) });
     }
     const rows = await sb(`/rest/v1/games?select=${COLS}&order=created_at.desc&limit=100`).then(r => r.json());
-    return send(res, 200, { games: rows.map(out) });
+    // games made before the three styles (no settings.style) are retired
+    return send(res, 200, { games: rows.filter(r => r.settings && STYLES.includes(r.settings.style)).map(out) });
   }
   if (req.method === 'POST') {
     const b = await readBody(req);

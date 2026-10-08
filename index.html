@@ -2751,8 +2751,8 @@ function paintPlay(){const R=GS.live,box=$('#pl-body');if(!R||!box)return;const 
 /* ---------- games feed: the eight tattva games, then games people made ---------- */
 const gamesEl=$('#games');
 async function loadGames(){
- try{const j=await API('/api/games');GS.local=false;GS.games=(j.games||[]).map(cleanGame).filter(Boolean);}
- catch(e){GS.local=true;GS.games=LS.get('tr-games',[]).map(cleanGame).filter(Boolean);}
+ try{const j=await API('/api/games');GS.local=false;GS.games=(j.games||[]).filter(g=>g&&g.settings&&g.settings.style).map(cleanGame).filter(Boolean);}
+ catch(e){GS.local=true;GS.games=LS.get('tr-games',[]).filter(g=>g&&g.settings&&g.settings.style).map(cleanGame).filter(Boolean);}
  GS.loaded=true;renderGames();}
 const cardGame=el=>{const id=el.id.slice(2);if(/^o[slb]$/.test(id)){const st=STYLES.find(x=>SL[x]===id[1]);return official(st,GS.pick[st]);}return GS.games.find(g=>g.id===id);};
 function renderGames(){gamesEl.innerHTML='';setTimeout(paintLive,0);
