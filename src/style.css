@@ -645,3 +645,24 @@ body{background:var(--night) radial-gradient(120% 70% at 50% -10%,#2A2268 0,tran
 .langscreen>*:not(.lsy){width:100%;max-width:440px;margin-left:auto;margin-right:auto}.langscreen>.lsom{width:auto}
 .capbelow .arline{top:auto;bottom:calc(12px + env(safe-area-inset-bottom));max-width:300px;left:auto;right:8px;transform:none;width:58%;padding:6px 9px}.capbelow .arline b{font-size:14px}.capbelow .arline span{font-size:11px}.capbelow .arline.in{animation:none}
 .tchips{gap:4px;flex-wrap:nowrap}.tchip{width:31px;height:31px;flex:none}.tchip svg{width:18px;height:18px}
+/* me v2: one card for who you are, then tabs; nothing in the column may shrink */
+.top.me{gap:14px;padding:16px 16px 28px}
+.top>*{flex:none}
+.mecard{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:20px;background:linear-gradient(160deg,rgba(244,183,58,.12),rgba(31,26,78,.9) 55%);box-shadow:inset 0 0 0 1px rgba(244,183,58,.3)}
+.mecard .mehead{flex-wrap:nowrap}
+.meid h1{font-size:28px}
+.mebtns{display:flex;gap:8px;width:100%}
+.mbtn{flex:1;min-width:0;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:600;background:rgba(21,18,58,.6);box-shadow:inset 0 0 0 1px var(--faint)}
+.mbtn svg{width:17px;height:17px;color:var(--gold);flex:none}.mbtn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mstats{display:grid;grid-template-columns:repeat(4,1fr);border-radius:14px;background:rgba(21,18,58,.55)}
+.mstats div{display:flex;flex-direction:column;align-items:center;padding:8px 2px;text-align:center}
+.mstats div+div{border-left:1px solid var(--faint)}
+.mstats b{font-family:var(--f-disp);font-weight:600;font-size:22px;line-height:1.1;color:var(--gold2)}
+.mstats span{font-size:11.5px;line-height:1.2;color:var(--muted)}
+.metabs{position:sticky;top:-16px;z-index:2;background:var(--panel);box-shadow:0 6px 14px rgba(21,18,58,.8)}
+.metabs button{flex:none;padding:0 12px}
+.lb{display:flex;flex-direction:column;gap:10px}
+.lb .tgrid{margin-top:4px}
+.lrow{background:var(--panel)}.lrow:first-child{background:linear-gradient(90deg,rgba(244,183,58,.12),var(--panel) 60%)}
+.sbody>*,.gm-body>*,.pl-body>*,.rside>*,.sg-card>*{flex-shrink:0}
+.mala svg{max-width:420px;display:block;margin:0 auto}

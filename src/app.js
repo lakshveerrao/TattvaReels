@@ -214,7 +214,7 @@ function reelEl(r,ix){
   '<div class="music">'+ico('music')+'<div class="mq"><span></span></div></div></div>'+
   '<div class="prog"><i></i></div><div class="holdhint glass" hidden><span class="ring"></span><span>Hold to awaken</span></div><div class="holdglow" hidden></div>';
  el.querySelector('.ava').textContent=(r.name[0]||'t').toUpperCase();
- const nm=el.querySelector('.nm');nm.textContent=r.name;if(r.score!=null){const p=document.createElement('span');p.className='pill';p.textContent='Tune '+r.score+'%';nm.after(p);}
+ const nm=el.querySelector('.nm');nm.textContent=r.name;
  if(r.caption)el.querySelector('.rcap').textContent=r.caption;
  el.querySelector('.mq span').textContent=mus+'   ·   '+mus+'   ·   ';
  el.__r=r;el.__ix=ix;
@@ -368,9 +368,9 @@ document.addEventListener('keydown',e=>{if(S.view!=='feed'||sheetFor||/input|tex
  else if(e.key==='m'||e.key==='M')toggleSound();});
 
 /* ---------- me: my account, my reels, what I learnt, my game scores, and the top reels ---------- */
-S.meTab='mine';
+S.meTab='tattvas';
 function reelRow(r,k,n){const b=document.createElement('button');b.className='lrow';
- b.innerHTML='<span class="rk">'+(k+1)+'</span><span class="lthumb"><canvas></canvas></span><span class="lmid"><b></b><small></small></span><span class="lcount">'+ico('lotus')+fmt(n)+'<small>learnt</small></span>';
+ b.innerHTML='<span class="rk">'+(k+1)+'</span><span class="lthumb"><canvas></canvas></span><span class="lmid"><b></b><small></small></span><span class="lcount">'+ico('diya')+fmt(n)+'<small>'+esc(LX('learnt'))+'</small></span>';
  b.querySelector('b').textContent=r.caption||('Tattva '+TA(r).n+' · '+TA(r).name);
  const sm=b.querySelector('small');sm.textContent=r.name+' · '+r.style.Visuals;if(r.score!=null){const s=document.createElement('span');s.className='score';s.textContent='Tune '+r.score+'%';sm.appendChild(s);}
  b.onclick=()=>{const ix=reelList.findIndex(x=>x.id===r.id);showView('feed');if(ix>=0){reelsEl.scrollTop=ix*reelsEl.clientHeight;activate(ix,true);}};
@@ -382,18 +382,18 @@ function renderTop(){const c=counts(),all=allReels(),mine=all.filter(r=>r.own),l
  const box=$('#v-top .top');
  const got=new Set(learnt.map(r=>TA(r).n)),LN=(LANGS.find(l=>l[0]===lang())||LANGS[0])[1];
  const beads=Array.from({length:21},(_,i)=>'<circle cx="'+(10+i*15.5).toFixed(1)+'" cy="'+(22+9*Math.sin(i/20*Math.PI)).toFixed(1)+'" r="5.6" class="bead'+(i<Math.round(Math.min(108,learnt.length)/108*21)||(i===0&&learnt.length)?' on':'')+'"/>').join('');
- box.innerHTML='<div class="mehead">'+(u?'<span class="ava big">'+esc(u.handle[0].toUpperCase())+'</span><div class="meid"><h1>'+esc(u.handle)+'</h1><p class="note">'+esc(LX('{n} of 8 tattvas learnt').replace('{n}',got.size))+'</p></div>'+
-   '<div class="mebtns"><button class="tpill glass" id="me-edit">'+ico('edit')+esc(LX('Name'))+'</button><button class="tpill glass" id="me-out">'+ico('out')+esc(LX('Sign out'))+'</button></div>'
+ box.innerHTML='<div class="mecard"><div class="mehead">'+(u?'<span class="ava big">'+esc(u.handle[0].toUpperCase())+'</span><div class="meid"><h1>'+esc(u.handle)+'</h1><p class="note">'+esc(LX('{n} of 8 tattvas learnt').replace('{n}',got.size))+'</p></div>'
   :'<span class="ava big ghost">'+ico('user')+'</span><div class="meid"><h1>'+esc(LX('Your space'))+'</h1><p class="note">'+esc(LX('Sign in to keep your reels, learnings and game scores on every device.'))+'</p></div>')+'</div>'+
   (u?'':'<button class="btn gold" id="me-in">'+ico('mail')+esc(LX('Sign in with email'))+'</button>')+
-  '<button class="langrow" id="me-lang">'+ico('globe')+'<span>'+esc(LX('Language'))+'</span><b>'+esc(LN)+'</b></button>'+
-  '<div class="mala"><svg viewBox="0 0 330 40" aria-hidden="true">'+beads+'</svg><p>'+esc(LX('Learning mala: {n} of 108 reels').replace('{n}',fmt(learnt.length)))+'</p></div>'+
-  '<p class="lab">'+esc(LX('Your tattvas'))+'</p><div class="tgrid">'+TATTVAS.map(T=>'<div class="tt'+(got.has(T.n)?' got':'')+'">'+tsym(T.n)+'<span>'+esc(TL(T.n).name)+'</span></div>').join('')+'</div>'+
-  '<div class="stats s4"><div class="stat"><b>'+fmt(learnt.length)+'</b><span>'+esc(LX('Learnt'))+'</span></div><div class="stat"><b>'+fmt(mine.length)+'</b><span>'+esc(LX('My reels'))+'</span></div><div class="stat"><b>'+fmt(plays)+'</b><span>'+esc(LX('Games played'))+'</span></div><div class="stat"><b>'+fmt(best)+'</b><span>'+esc(LX('Best score'))+'</span></div></div>'+
-  '<div class="metabs" role="tablist">'+[['mine','My reels'],['learnt','Learnt'],['scores','Game scores'],['top','Top reels']].map(x=>'<button role="tab" data-tab="'+x[0]+'" aria-selected="'+(S.meTab===x[0])+'">'+esc(LX(x[1]))+'</button>').join('')+'</div><div class="lb" id="lb"></div>';
+  '<div class="mebtns">'+(u?'<button class="mbtn" id="me-edit">'+ico('edit')+'<span>'+esc(LX('Name'))+'</span></button>':'')+'<button class="mbtn" id="me-lang">'+ico('globe')+'<span>'+esc(LN)+'</span></button>'+(u?'<button class="mbtn" id="me-out">'+ico('out')+'<span>'+esc(LX('Sign out'))+'</span></button>':'')+'</div>'+
+  '<div class="mstats"><div><b>'+fmt(learnt.length)+'</b><span>'+esc(LX('Learnt'))+'</span></div><div><b>'+fmt(mine.length)+'</b><span>'+esc(LX('My reels'))+'</span></div><div><b>'+fmt(plays)+'</b><span>'+esc(LX('Games played'))+'</span></div><div><b>'+fmt(best)+'</b><span>'+esc(LX('Best score'))+'</span></div></div></div>'+
+  '<div class="metabs" role="tablist">'+[['tattvas','Your tattvas'],['mine','My reels'],['learnt','Learnt'],['scores','Game scores'],['top','Top reels']].map(x=>'<button role="tab" data-tab="'+x[0]+'" aria-selected="'+(S.meTab===x[0])+'">'+esc(LX(x[1]))+'</button>').join('')+'</div><div class="lb" id="lb"></div>';
  $('#me-lang').onclick=()=>openLang();
  if(u){$('#me-out').onclick=signOut;$('#me-edit').onclick=()=>openName(false);}else $('#me-in').onclick=()=>openSignin(()=>renderTop(),'Sign in');
- box.querySelectorAll('.metabs button').forEach(b=>b.onclick=()=>{S.meTab=b.dataset.tab;renderTop();});
+ box.querySelectorAll('.metabs button').forEach(b=>b.onclick=()=>{S.meTab=b.dataset.tab;renderTop();const sel=box.querySelector('.metabs [aria-selected="true"]');if(sel)sel.scrollIntoView({block:'nearest',inline:'center'});});
+ if(S.meTab==='tattvas'){$('#lb').innerHTML='<div class="mala"><svg viewBox="0 0 330 40" aria-hidden="true">'+beads+'</svg><p>'+esc(LX('Learning mala: {n} of 108 reels').replace('{n}',fmt(learnt.length)))+'</p></div>'+
+   '<div class="tgrid">'+TATTVAS.map(T=>'<div class="tt'+(got.has(T.n)?' got':'')+'">'+tsym(T.n)+'<span>'+esc(TL(T.n).name)+'</span></div>').join('')+'</div>'+
+   '<p class="note">'+esc(LX('A tattva lights up when you tap the diya on one of its reels.'))+'</p>';return;}
  const lb=$('#lb'),t=S.meTab;
  if(t==='scores'){if(!u){lb.innerHTML='<p class="note">Sign in and your best score in every game is kept here.</p>';return;}
   if(!S.scores.length){lb.innerHTML='<p class="note">No games yet. Play one from the Games tab.</p>';return;}
