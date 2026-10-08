@@ -1,16 +1,18 @@
 import { sb, send, wrap, readBody, anon, rid, HttpError } from './_db.js';
 
-// Games people make: one of the eight tattva arcade games with a difficulty and a title. Live play itself runs peer to peer
+// Games people make: a game style (Stickman Quest, Letter Builder, Block Builder) on one tattva, with a difficulty and a title. Live play itself runs peer to peer
 // over Supabase Realtime broadcast; this endpoint only stores and lists the games.
 const GID = /^g[a-z0-9]{6,24}$/;
 function clean(b) {
   const tattva = Number.isInteger(b.tattva) && b.tattva >= 1 && b.tattva <= 8 ? b.tattva : 1;
   const s = b.settings && typeof b.settings === 'object' ? b.settings : {};
-  const settings = { level: [1, 2, 3].includes(s.level) ? s.level : 2, seed: Number.isInteger(s.seed) ? Math.abs(s.seed) % 1e9 : 1 };
+  const settings = { style: STYLES.includes(s.style) ? s.style : 'stick', level: [1, 2, 3].includes(s.level) ? s.level : 2, seed: Number.isInteger(s.seed) ? Math.abs(s.seed) % 1e9 : 1 };
   const title = String(b.title || '').replace(/\s+/g, ' ').trim().slice(0, 60);
   return { type: 'arcade', tattva, settings, title };
 }
-const NAMES = ['Mirror Catch', 'Grow the Banyan', 'Find That', 'Light the World', 'Neti Neti', 'Escape Rāhu', 'Thread Runner', 'Wake Up'];
+const STYLES = ['stick', 'letters', 'build'];
+const STYLE_NAMES = { stick: 'Stickman Quest', letters: 'Letter Builder', build: 'Block Builder' };
+const TATTVA_NAMES = ['The mirror city', 'The seed', 'That you are', 'The lamp in the pot', 'Not the body', 'The eclipse', 'The unchanging I', 'The dream of roles'];
 const out = r => ({ id: r.id, name: r.name, title: r.title, type: r.type, tattva: r.tattva, settings: r.settings, plays: r.plays || 0, createdAt: Date.parse(r.created_at) || 0 });
 const COLS = 'id,name,title,type,tattva,settings,plays,created_at';
 
@@ -40,7 +42,7 @@ export default wrap(async (req, res) => {
     if (+((cr.headers.get('content-range') || '').split('/')[1] || 0) >= 10) throw new HttpError(429, 'You’ve made a lot of games this hour. Try again a bit later.');
     const g = clean(b);
     const name = String(b.name || '').replace(/[^\w.-]/g, '').slice(0, 24) || 'seeker';
-    const row = { id: 'g' + Date.now().toString(36) + rid(3), anon: me, name, ...g, title: g.title || NAMES[g.tattva - 1] };
+    const row = { id: 'g' + Date.now().toString(36) + rid(3), anon: me, name, ...g, title: g.title || STYLE_NAMES[g.settings.style] + ' · ' + TATTVA_NAMES[g.tattva - 1] };
     const ins = await sb('/rest/v1/games', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(row) }).then(r => r.json());
     return send(res, 201, { game: out(ins[0]) });
   }
