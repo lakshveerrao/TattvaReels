@@ -9,7 +9,11 @@ The eight tattvas on a 1.8" touch screen, in English, Telugu, Kannada or Hindi:
 
 Works on both versions of the board, V1 and V2. The code works out which one it is.
 
-## Install it (once)
+## Easiest: install from the browser
+
+Open **https://heytattva.vercel.app/flash** in Chrome or Edge on a laptop, plug the board in with USB-C, and click **Install Hey Tattva**. No Arduino setup needed. (After changing the code, rebuild and copy the trimmed merged image to `flash/heytattva.bin`.)
+
+## Install it with Arduino IDE
 
 1. Install **Arduino IDE 2** (arduino.cc/en/software).
 2. In **File → Preferences → Additional boards manager URLs**, paste:
@@ -19,7 +23,7 @@ Works on both versions of the board, V1 and V2. The code works out which one it 
 5. Open `device/HeyTattva/HeyTattva.ino`.
 6. In the **Tools** menu, set:
    - **Board:** Waveshare ESP32-S3-Touch-AMOLED-1.8
-   - **PSRAM:** Enabled (required)
+   - **PSRAM:** Enabled (required; it is Disabled by default for this board, and without it the screen only shows "PSRAM is off")
    - **USB CDC On Boot:** Enabled (optional; it shows messages in the Serial Monitor)
    - **Partition Scheme:** leave as is. The sketch carries its own `partitions.csv` (7 MB app, 9 MB storage for voices), and the IDE uses it automatically.
 7. Plug the board in with USB-C, pick its port in **Tools → Port**, and click **Upload**.

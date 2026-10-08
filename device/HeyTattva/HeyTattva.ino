@@ -23,6 +23,7 @@
 #define EXPANDER 0x20
 #define PMU 0x34
 
+SET_LOOP_TASK_STACK_SIZE(24 * 1024);  // the UI's drawing code needs more than the default 8 KB
 static Arduino_DataBus *bus = nullptr;
 static Arduino_OLED *gfx = nullptr;
 static int boardV = 2; static uint8_t tpAddr = 0x15;
@@ -62,9 +63,29 @@ static bool touchRead(int &x, int &y) {
 }
 static void setBright(int lvl) { env.bright = lvl < 1 ? 1 : lvl > 5 ? 5 : lvl; gfx->setBrightness(BRIGHT[env.bright]); pref.putUChar("bright", env.bright); }
 static void flush() { gfx->draw16bitRGBBitmap(0, 0, ui.cv.px, SW, SH); }
+// plain text straight to the screen, used before the frame buffer exists (and for start-up problems)
+static void say(const char *a, const char *b) {
+  gfx->fillScreen(0); gfx->setTextColor(0xFDA7); gfx->setTextSize(3); gfx->setCursor(24, 180); gfx->println(a);
+  gfx->setTextColor(0xEF5A); gfx->setTextSize(2); gfx->setCursor(24, 230); gfx->println(b); Serial.printf("%s: %s\n", a, b);
+}
+// the text masks are stored compressed; unpack them into PSRAM with the ESP32's ROM inflate (state on the heap:
+// it is ~11 KB, too big for the Arduino loop task's stack)
+static bool unpackAssets() {
+  ADATA = (uint8_t *)ps_malloc(ADATA_LEN);
+  tinfl_decompressor *d = (tinfl_decompressor *)malloc(sizeof(tinfl_decompressor));
+  if (!ADATA || !d) return false;
+  tinfl_init(d);
+  size_t inLen = ADATA_ZLEN, outLen = ADATA_LEN;
+  tinfl_status st = tinfl_decompress(d, ADATA_Z, &inLen, ADATA, ADATA, &outLen, TINFL_FLAG_PARSE_ZLIB_HEADER | TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF);
+  free(d);
+  Serial.printf("assets: status %d, %u of %u bytes\n", (int)st, (unsigned)outLen, (unsigned)ADATA_LEN);
+  return st == TINFL_STATUS_DONE && outLen == ADATA_LEN;
+}
 
 void setup() {
   Serial.begin(115200);
+  delay(300);
+  Serial.println("Hey Tattva: start");
   Wire.begin(IIC_SDA, IIC_SCL, 400000);
   expanderReset();
   // V1 has an FT3168 touch chip at 0x38, V2 a CST820 at 0x15
@@ -79,12 +100,13 @@ void setup() {
   ui.lang = pref.getChar("lang", -1);
   env.bright = pref.getUChar("bright", 4);
   gfx->setBrightness(BRIGHT[env.bright]);
-  ADATA = (uint8_t *)ps_malloc(ADATA_LEN);
-  if (ADATA) tinfl_decompress_mem_to_mem(ADATA, ADATA_LEN, ADATA_Z, ADATA_ZLEN, TINFL_FLAG_PARSE_ZLIB_HEADER);
+  say("Hey Tattva", "starting...");
+  if (!psramFound()) { say("PSRAM is off", "Arduino: Tools > PSRAM > Enabled"); while (1) delay(1000); }
+  if (!unpackAssets()) { say("Could not unpack", "re-flash the firmware"); while (1) delay(1000); }
   ui.cv.px = (uint16_t *)ps_malloc(SW * SH * 2);
   ui.cv.bg = (uint16_t *)ps_malloc(SW * SH * 2);
   ui.cv.yantra = (uint8_t *)ps_malloc(300 * 300);
-  if (!ADATA || !ui.cv.px || !ui.cv.bg || !ui.cv.yantra) { Serial.println("PSRAM missing: set Tools > PSRAM > Enabled"); while (1) delay(1000); }
+  if (!ui.cv.px || !ui.cv.bg || !ui.cv.yantra) { say("Out of memory", "PSRAM must be Enabled"); while (1) delay(1000); }
   ui.cv.makeBg(); ui.cv.loadYantra();
   pinMode(BOOT_PIN, INPUT_PULLUP);
   pmuInit(); pmuRead();
