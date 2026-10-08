@@ -70,7 +70,7 @@ export default async function handler(req, res) {
   try {
     const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voice + '?output_format=' + (pcm ? 'pcm_16000' : 'mp3_44100_128'), {
       method: 'POST', headers: { 'xi-api-key': key, 'Content-Type': 'application/json', Accept: pcm ? 'audio/pcm' : 'audio/mpeg' },
-      body: JSON.stringify({ text: meaning ? MEANINGS[v - 1] : VERSES[v - 1], model_id: 'eleven_multilingual_v2', voice_settings: singer ? { stability: .42, similarity_boost: .9, style: .35, use_speaker_boost: true } : { stability: .55, similarity_boost: .75 } })
+      body: JSON.stringify({ text: meaning ? MEANINGS[v - 1] : VERSES[v - 1], model_id: 'eleven_multilingual_v2', voice_settings: singer ? (q.get('rock') === '1' ? { stability: .3, similarity_boost: .9, style: .7, use_speaker_boost: true } : { stability: .42, similarity_boost: .9, style: .35, use_speaker_boost: true }) : { stability: .55, similarity_boost: .75 } })
     });
     if (!r.ok) { console.error('elevenlabs', r.status, await r.text()); return json(502, 'ElevenLabs didn’t return audio. Check the API key and credits.'); }
     let buf = Buffer.from(await r.arrayBuffer());
