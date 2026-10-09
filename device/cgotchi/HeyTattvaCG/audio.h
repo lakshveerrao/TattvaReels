@@ -196,14 +196,25 @@ static int16_t *download(const String &url, uint32_t &n) {
   }
   return nullptr;
 }
-static bool fetchOne(bool isBand, int n) {
+// put a buffer of ADPCM in place for the mixer
+static void install(bool isBand, int n, uint8_t *b, size_t bytes) {
+  xSemaphoreTake(mx, portMAX_DELAY);
+  if (isBand) { if (bndBuf) free(bndBuf); bndBuf = b; bndN = n; bnd.set(b, bytes * 2); }
+  else { if (vocBuf) free(vocBuf); vocBuf = b; vocN = n; voc.set(b, bytes * 2); }
+  xSemaphoreGive(mx);
+}
+// download, pack to ADPCM, try to keep a copy in FFat (if the storage is full it still plays, from memory)
+static uint8_t *fetchOne(bool isBand, int n, size_t &bytes) {
   String url = isBand ? String(SITE) + "/api/music?v=" + n + "&fmt=pcm" : String(SITE) + "/api/tts?v=" + n + "&fmt=pcm&voice=singer&sv=2";
-  uint32_t ns; int16_t *s = download(url, ns); if (!s) return false;
-  uint8_t *a = encode(s, ns); free(s); if (!a) return false;
-  size_t bytes = ns / 2 + 1;
-  if (ffatOk) { makeRoom(bytes); File f = FFat.open(path(isBand, n), "w"); if (f) { f.write(a, bytes); f.close(); } }
-  free(a);
-  return true;
+  bytes = 0; uint32_t ns; int16_t *s = download(url, ns); if (!s) return nullptr;
+  uint8_t *a = encode(s, ns); free(s); if (!a) { lastErr = 2; return nullptr; }
+  bytes = ns / 2 + 1;
+  if (ffatOk) {
+    makeRoom(bytes); File f = FFat.open(path(isBand, n), "w"); size_t w = 0;
+    if (f) { w = f.write(a, bytes); f.close(); }
+    if (w != bytes) { FFat.remove(path(isBand, n)); Serial.printf("FFat: could not keep %s (%u of %u bytes; %u free)\n", path(isBand, n).c_str(), (unsigned)w, (unsigned)bytes, (unsigned)(FFat.totalBytes() - FFat.usedBytes())); }
+  }
+  return a;
 }
 // what the current reel / stage still needs
 static void fetchFn(void *) {
@@ -213,9 +224,9 @@ static void fetchFn(void *) {
       int m = mode, n = curN; bool wantV = (m == M_REEL || m == M_ROCK) && voice == 1, wantB = m == M_ROCK && band == 1;
       if (!wantV && !wantB) break;
       bool isBand = !wantV;  // the voice first: it is smaller
-      bool ok = fetchOne(isBand, n);
-      if (curN != n || mode != m) continue;  // moved on meanwhile: it is cached for later
-      if (ok && loadFile(isBand, n)) { if (isBand) band = 2; else { clk = 0; vStart = AU_SR * 6 / 5; voice = 2; } }
+      size_t bytes; uint8_t *a = fetchOne(isBand, n, bytes);
+      if (curN != n || mode != m) { if (a) free(a); continue; }  // moved on meanwhile (kept in FFat if there was room)
+      if (a) { install(isBand, n, a, bytes); if (isBand) band = 2; else { clk = 0; vStart = AU_SR * 6 / 5; voice = 2; } }
       else { int st = WiFi.status() == WL_CONNECTED ? 4 : 3; if (isBand) band = st; else voice = st; }
     }
   }
@@ -235,7 +246,8 @@ static bool begin() {
   es8311_voice_volume_set(codec, 82, nullptr);
   digitalWrite(PIN_PA_CTRL, HIGH);
   ffatOk = FFat.begin(true);
-  if (ffatOk) { for (int n = 1; n <= 8; n++) FFat.remove(String("/cv") + n + ".pcm"); }  // the first build kept raw PCM
+  if (ffatOk) { for (int n = 1; n <= 8; n++) FFat.remove(String("/cv") + n + ".pcm");  // the first build kept raw PCM
+    Serial.printf("FFat: %u of %u bytes used\n", (unsigned)FFat.usedBytes(), (unsigned)FFat.totalBytes()); }
   return true;
 }
 static void startTask() {
