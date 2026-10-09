@@ -1,0 +1,39 @@
+name: rock-assets
+# Fetches the device rock mixes (band + singer's rock voice, 16 kHz WAV) for the Cheeko tattvas from the live site
+# and commits them to the branch "rock-assets", so they can be packed into the Cheeko's flash image.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/rock-assets.yml']
+permissions:
+  contents: write
+  statuses: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch the mixes
+        run: |
+          set +e
+          mkdir out && cd out
+          for n in 1 2 4 6 8; do
+            for t in 1 2 3; do
+              curl -s -m 280 -D h$n.txt -o rock-v$n.wav "https://heytattva.vercel.app/api/music?v=$n&fmt=pcm&mix=1"
+              grep -qi "x-voice-len: [1-9]" h$n.txt && [ $(stat -c%s rock-v$n.wav) -gt 500000 ] && break; sleep 20
+            done
+            tr -d '\r' < h$n.txt | grep -i -E "^x-voice-(start|len):" > rock-v$n.hdr
+          done
+          ls -la; cat *.hdr
+      - name: Commit to rock-assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd out && rm -f h*.txt
+          git init -q && git checkout -q -b rock-assets
+          git config user.email "actions@github.com" && git config user.name "rock-assets"
+          git add . && git commit -q -m "rock mixes for the Cheeko ($(date -u +%F))"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" rock-assets
+          S=$(ls -la | awk '{s+=$5} END {print s}')
+          curl -s -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}" \
+            -d "{\"state\":\"success\",\"context\":\"rock-assets\",\"description\":\"$(cat *.hdr | tr -d '\n' | cut -c1-120)\"}" > /dev/null
