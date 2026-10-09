@@ -77,6 +77,7 @@ export default async function handler(req, res) {
     if (pcm) buf = Buffer.concat([wavHeader(buf.length, 16000), buf]);
     res.statusCode = 200;
     res.setHeader('Content-Type', pcm ? 'audio/wav' : 'audio/mpeg');
+    res.setHeader('Content-Length', buf.length);  // the devices stream it and need the length up front
     res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=31536000, stale-while-revalidate=86400');
     res.end(buf);
   } catch (e) { console.error(e); json(502, 'Couldn’t reach ElevenLabs. Try again.'); }
