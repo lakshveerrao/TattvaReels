@@ -64,12 +64,16 @@ async function rockMix(origin, v, band) {
   const start = 32000; if (!voc) return { buf: wav16k(bnd), start: 0, len: 0 };
   const vx = rockChain(voc), n = Math.max(bnd.length, start + vx.length + 24000), out = new Float32Array(n);
   let bpk = 1e-6, vpk = 1e-6; for (const s of bnd) bpk = Math.max(bpk, Math.abs(s)); for (const s of vx) vpk = Math.max(vpk, Math.abs(s));
-  const gb = 0.55 / bpk, gv = 0.9 / vpk; let env = 0, duck = 1;
+  // band loud (Laksh: guitar to max, vocal less): the band at full level, only a light dip under the voice
+  const gb = 1.0 / bpk, gv = 0.42 / vpk; let env = 0, duck = 1;
   for (let i = 0; i < n; i++) {
     const vi = i - start, vs = vi >= 0 && vi < vx.length ? vx[vi] * gv : 0;
-    env = Math.max(Math.abs(vs), env * 0.9995); duck += ((env > 0.05 ? 0.5 : 1) - duck) * 0.0006;
+    env = Math.max(Math.abs(vs), env * 0.9995); duck += ((env > 0.03 ? 0.85 : 1) - duck) * 0.0006;
     out[i] = bnd[i % bnd.length] * gb * duck + vs;
   }
+  // make it loud: level so that the 99.5th percentile hits 0.9, soft-limit what is above
+  const sorted = Float32Array.from(out, Math.abs).sort(), p995 = sorted[Math.floor(sorted.length * 0.995)] || 1, g = 0.9 / p995;
+  for (let i = 0; i < n; i++) { const x = out[i] * g, a = Math.abs(x); out[i] = a <= 0.9 ? x : Math.sign(x) * (0.9 + 0.1 * Math.tanh((a - 0.9) / 0.1)); }
   return { buf: wav16k(out), start, len: vx.length };
 }
 async function send(res, buf, pcm, mix, req, v) {
