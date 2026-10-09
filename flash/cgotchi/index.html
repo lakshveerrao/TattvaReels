@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Flash Hey Tattva</title>
+<title>Hey Tattva Cheeko</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Eczar:wght@600&family=Mukta:wght@400;600;700&display=swap">
 <script type="module" src="https://unpkg.com/esp-web-tools@10.2.1/dist/web/install-button.js?module"></script>
@@ -15,18 +15,19 @@ ol{padding-left:22px;margin:0 0 22px}li{margin:0 0 10px}b{color:#FFF4DC}
 esp-web-install-button button,.btn{font:700 18px Mukta,sans-serif;background:var(--gold);color:#1A1206;border:0;border-radius:99px;padding:14px 26px;cursor:pointer}
 .note{color:var(--muted);font-size:15px}code{color:#FFD98A}
 </style></head><body><div class="w">
-<h1>Hey Tattva device</h1><p class="dv">Waveshare ESP32-S3-Touch-AMOLED-1.8 · one-click install</p>
+<h1>Hey Tattva on Cheeko Gotchi</h1><p class="dv">Cheeko Gotchi v1.2 · one-click install · 2 reels + 2 games</p>
 <div class="card"><ol>
 <li>Use <b>Chrome or Edge on a laptop</b> (Safari and phones can't do this).</li>
 <li>Plug the board in with a <b>USB-C data cable</b>.</li>
-<li>Click <b>Install Hey Tattva</b>, pick the port that appears (often "USB JTAG/serial debug unit"), then <b>Install</b>. Allow it to erase the board.</li>
-<li>Wait until it says done (about a minute), then press <b>PWR</b> or unplug and plug in again.</li>
+<li>Click <b>Install Hey Tattva</b>, pick the port that appears (often "USB JTAG/serial debug unit"), then <b>Install</b>. Leave "erase" off so the recovery bootloader stays.</li>
+<li>Wait until it says done (about a minute), then unplug and plug in again (or press the middle key).</li>
 </ol>
-<esp-web-install-button manifest="/flash/manifest.json">
+<esp-web-install-button manifest="/flash/cgotchi/manifest.json">
  <button slot="activate">Install Hey Tattva</button>
  <span slot="unsupported"><b>This browser can't install.</b> Please open this page in Chrome or Edge on a laptop.</span>
  <span slot="not-allowed"><b>This page must be opened over https.</b></span>
 </esp-web-install-button></div>
-<div class="card"><p><b>No port in the list?</b> Hold <b>BOOT</b>, press and release <b>PWR</b> (or unplug and replug while holding BOOT), let go, then click Install again. Some cables only charge; try another.</p>
-<p class="note">After installing: pick your language, then on your phone join the Wi-Fi <code>HeyTattva-Setup</code> and choose your home Wi-Fi.</p><p class="note">Have a Cheeko Gotchi? <a href="/flash/cgotchi" style="color:#FFD98A">Install Hey Tattva on Cheeko</a></p></div>
+<div class="card"><p><b>No port in the list, or the port has a long odd name?</b> The Cheeko may be in its recovery mode. Unplug it, plug it back in and try again; some cables only charge, so try another.</p>
+<p class="note">On the device: <b>Reels</b> (swipe up for the other tattva, tap to pause), <b>Games</b> (Mirror Letters, Lamp Tilt). Middle key = back; hold it 5 s to forget Wi-Fi. Side keys = volume. For the singer's voice, join the Wi-Fi <code>HeyTattva-Setup</code> on your phone and choose your home Wi-Fi; without Wi-Fi the reels play the music only.</p>
+<p class="note">Other device: <a href="/flash" style="color:#FFD98A">Waveshare AMOLED 1.8</a></p></div>
 </div></body></html>

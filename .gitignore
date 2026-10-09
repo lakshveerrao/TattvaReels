@@ -5,3 +5,6 @@ tunes/audio/
 __pycache__/
 device/tools/out/
 device/sim/out/
+device/cgotchi/HeyTattvaCG/build/
+device/cgotchi/tools/out/
+device/cgotchi/sim/sim
