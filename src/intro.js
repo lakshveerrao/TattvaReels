@@ -128,8 +128,8 @@ function runTour(tries){tries=tries||0;if(document.querySelector('.tour'))return
   {el:()=>curReel('[data-a="read"]'),d:'Open the meaning of the verse, word by word.'},
   {el:()=>curReel('[data-a="remix"]'),d:'Make your own reel of this verse: your music, your voice.'},
   {el:()=>curReel('[data-a="share"]'),d:'Send this reel to a friend.'},
-  {el:()=>curReel('[data-a="rock"]'),d:"Hear this tattva as rock: the singer's voice over a rock band."},
   {el:()=>vis('#nv-games'),d:'Play the tattvas: four games, alone or live with friends.'},
+  {el:()=>vis('#nv-rock'),d:"Hear this tattva as rock: the singer's voice over a rock band."},
   {el:()=>vis('#nv-create'),d:'Create a reel: pick a tattva, instruments and sing the shloka.'},
   {el:()=>vis('#nv-top'),d:'Your page: tattvas learnt, your reels, scores, name and language.'},
   {t:'That’s it. Start with the first tattva.',end:true}].filter(s=>!s.el||s.el());

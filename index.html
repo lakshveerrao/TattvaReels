@@ -806,6 +806,9 @@ body.introon #app{visibility:hidden}
 .rk-m>div{height:8px;border-radius:4px;background:#070505;overflow:hidden}.rk-m>div i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3CD070,#FFB627 70%,#FF4A1C)}
 .rk-m input{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:linear-gradient(90deg,#FF4A1C,#FFB627)}.rk-m input::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#eee,#777 70%,#333);box-shadow:0 0 0 2px #000}
 @media (min-width:900px){.rockstage{position:fixed}.rk-yan{width:220px;height:220px}.rk-name{font-size:60px}.rk-ln{font-size:21px}}
+.nav .rocknav svg{color:#FF7A3C;filter:drop-shadow(0 0 5px rgba(255,74,28,.6))}
+.nav .rocknav span{color:#FFB08A}
+@media (min-width:900px){.nav .rocknav{background:linear-gradient(90deg,rgba(255,74,28,.12),transparent)}}
 
 </style>
 </head><body>
@@ -839,6 +842,7 @@ body.introon #app{visibility:hidden}
     <button id="nv-feed" aria-current="page" aria-label="Reels"></button>
     <button id="nv-games" aria-label="Games"></button>
     <button id="nv-create" class="create" aria-label="Create a reel"></button>
+    <button id="nv-rock" class="rocknav" aria-label="Rock"></button>
     <button id="nv-top" aria-label="Me"></button>
   </nav>
 
@@ -2852,10 +2856,12 @@ function showView(v){
  if(v==='feed')requestAnimationFrame(()=>activate(currentIx(),true));
  if(v==='top')renderTop();}
 $('#snd').onclick=toggleSound;$('#hint').onclick=toggleSound;$('#cr-snd').onclick=toggleSound;
-function paintNavLabels(){$('#nv-feed').innerHTML=ico('home')+'<span>'+esc(LX('Reels'))+'</span>';$('#nv-create').innerHTML=ico('plus')+'<span class="cl">'+esc(LX('Create a reel'))+'</span>';$('#nv-create').setAttribute('aria-label',LX('Create a reel'));if(typeof paintNav==='function')paintNav();if($('#nv-games'))$('#nv-games').innerHTML=ico('chakra')+'<span>'+esc(LX('Games'))+'</span>';}
+function paintNavLabels(){$('#nv-feed').innerHTML=ico('home')+'<span>'+esc(LX('Reels'))+'</span>';$('#nv-rock').innerHTML=ico('guitar')+'<span>'+esc(LX('Rock'))+'</span>';$('#nv-rock').setAttribute('aria-label',LX('Rock'));$('#nv-create').innerHTML=ico('plus')+'<span class="cl">'+esc(LX('Create a reel'))+'</span>';$('#nv-create').setAttribute('aria-label',LX('Create a reel'));if(typeof paintNav==='function')paintNav();if($('#nv-games'))$('#nv-games').innerHTML=ico('chakra')+'<span>'+esc(LX('Games'))+'</span>';}
 paintNavLabels();
 $('#nv-feed').onclick=()=>{if(S.view==='feed'){reelsEl.scrollTo({top:0,behavior:'smooth'});return;}showView('feed');};
 $('#nv-create').onclick=()=>openCreate();
+// Rock opens on the tattva of the reel you're on (or tattva 1)
+$('#nv-rock').onclick=()=>{let n=1;try{const el=reelNode(S.idx);if(S.view==='feed'&&el&&el.__r)n=TA(el.__r).n;}catch(e){}openRock(n);};
 $('#nv-top').onclick=()=>showView('top');
 $('#hint').innerHTML=ico('soff')+'Tap for sound';
 document.addEventListener('keydown',e=>{if(S.view!=='feed'||sheetFor||/input|textarea/i.test(e.target.tagName))return;
@@ -3702,8 +3708,8 @@ function runTour(tries){tries=tries||0;if(document.querySelector('.tour'))return
   {el:()=>curReel('[data-a="read"]'),d:'Open the meaning of the verse, word by word.'},
   {el:()=>curReel('[data-a="remix"]'),d:'Make your own reel of this verse: your music, your voice.'},
   {el:()=>curReel('[data-a="share"]'),d:'Send this reel to a friend.'},
-  {el:()=>curReel('[data-a="rock"]'),d:"Hear this tattva as rock: the singer's voice over a rock band."},
   {el:()=>vis('#nv-games'),d:'Play the tattvas: four games, alone or live with friends.'},
+  {el:()=>vis('#nv-rock'),d:"Hear this tattva as rock: the singer's voice over a rock band."},
   {el:()=>vis('#nv-create'),d:'Create a reel: pick a tattva, instruments and sing the shloka.'},
   {el:()=>vis('#nv-top'),d:'Your page: tattvas learnt, your reels, scores, name and language.'},
   {t:'That’s it. Start with the first tattva.',end:true}].filter(s=>!s.el||s.el());

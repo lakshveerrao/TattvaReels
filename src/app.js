@@ -364,10 +364,12 @@ function showView(v){
  if(v==='feed')requestAnimationFrame(()=>activate(currentIx(),true));
  if(v==='top')renderTop();}
 $('#snd').onclick=toggleSound;$('#hint').onclick=toggleSound;$('#cr-snd').onclick=toggleSound;
-function paintNavLabels(){$('#nv-feed').innerHTML=ico('home')+'<span>'+esc(LX('Reels'))+'</span>';$('#nv-create').innerHTML=ico('plus')+'<span class="cl">'+esc(LX('Create a reel'))+'</span>';$('#nv-create').setAttribute('aria-label',LX('Create a reel'));if(typeof paintNav==='function')paintNav();if($('#nv-games'))$('#nv-games').innerHTML=ico('chakra')+'<span>'+esc(LX('Games'))+'</span>';}
+function paintNavLabels(){$('#nv-feed').innerHTML=ico('home')+'<span>'+esc(LX('Reels'))+'</span>';$('#nv-rock').innerHTML=ico('guitar')+'<span>'+esc(LX('Rock'))+'</span>';$('#nv-rock').setAttribute('aria-label',LX('Rock'));$('#nv-create').innerHTML=ico('plus')+'<span class="cl">'+esc(LX('Create a reel'))+'</span>';$('#nv-create').setAttribute('aria-label',LX('Create a reel'));if(typeof paintNav==='function')paintNav();if($('#nv-games'))$('#nv-games').innerHTML=ico('chakra')+'<span>'+esc(LX('Games'))+'</span>';}
 paintNavLabels();
 $('#nv-feed').onclick=()=>{if(S.view==='feed'){reelsEl.scrollTo({top:0,behavior:'smooth'});return;}showView('feed');};
 $('#nv-create').onclick=()=>openCreate();
+// Rock opens on the tattva of the reel you're on (or tattva 1)
+$('#nv-rock').onclick=()=>{let n=1;try{const el=reelNode(S.idx);if(S.view==='feed'&&el&&el.__r)n=TA(el.__r).n;}catch(e){}openRock(n);};
 $('#nv-top').onclick=()=>showView('top');
 $('#hint').innerHTML=ico('soff')+'Tap for sound';
 document.addEventListener('keydown',e=>{if(S.view!=='feed'||sheetFor||/input|textarea/i.test(e.target.tagName))return;
