@@ -88,7 +88,7 @@ export const REEL_ID = /^r[a-z0-9]{6,24}$/;
 const INSTR = ['sitar', 'veena', 'bansuri', 'violin', 'harmonium', 'piano', 'guitar', 'santoor', 'sarangi', 'nadaswaram', 'harp', 'cello'];
 const TONES = ['Tabla', 'Mridangam', 'Rock', 'Lo-fi', 'None'];
 const VIS = ['Tattva film', 'Mirror city', 'Splat bloom', 'Sound sand', 'Flow rivers', 'Embers', 'Gravity orbits', 'Beatbox text'];
-const REC = ['None', 'My recording', 'AI voice'];
+const REC = ['None', 'My recording', 'AI voice', 'Singer voice'];
 export function cleanStyle(s) {
   s = s && typeof s === 'object' ? s : {};
   const snd = Array.isArray(s.Sound) ? [...new Set(s.Sound.filter(x => INSTR.includes(x)))].slice(0, 12) : [];
