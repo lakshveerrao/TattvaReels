@@ -65,7 +65,7 @@ async function rockMix(origin, v, band) {
   const vx = rockChain(voc), n = Math.max(bnd.length, start + vx.length + 24000), out = new Float32Array(n);
   let bpk = 1e-6, vpk = 1e-6; for (const s of bnd) bpk = Math.max(bpk, Math.abs(s)); for (const s of vx) vpk = Math.max(vpk, Math.abs(s));
   // band loud (Laksh: guitar to max, vocal less): the band at full level, only a light dip under the voice
-  const gb = 1.0 / bpk, gv = 0.42 / vpk; let env = 0, duck = 1;
+  const gb = 0.75 / bpk, gv = 0.42 / vpk; let env = 0, duck = 1;  // band ~2.5 dB under full (Laksh: "slightly decrease the guitar")
   for (let i = 0; i < n; i++) {
     const vi = i - start, vs = vi >= 0 && vi < vx.length ? vx[vi] * gv : 0;
     env = Math.max(Math.abs(vs), env * 0.9995); duck += ((env > 0.03 ? 0.85 : 1) - duck) * 0.0006;
