@@ -2,7 +2,7 @@
 // the rock band are streamed live from heytattva.vercel.app (16 kHz WAV) through a ring buffer in PSRAM.
 //  - a reel: the tattva's music bed (sitar, tanpura, tabla; in the firmware) + the singer's recitation, streamed from
 //    /api/tts; the bed ducks under the voice; after a pause it is streamed again,
-//  - the Rock stage: /api/music?mix=1 = the app's rock band with the singer's rock voice already mixed in on the
+//  - the Rock stage: the mixes built into the flash (see rockLocal); if missing, streamed from /api/music?mix=1 = the app's rock band with the singer's rock voice already mixed in on the
 //    server, streamed and looped (the bed with some grit fills the gap while it connects),
 //  - a game: the bed, quietly; plus short square-wave sound effects.
 #pragma once
@@ -14,6 +14,7 @@
 #include <esp_netif.h>
 #include <lwip/ip4_addr.h>
 #include <esp_heap_caps.h>
+#include <esp_partition.h>
 #include "beds.h"
 
 #define PIN_PA_CTRL 4
@@ -72,6 +73,33 @@ static volatile uint32_t clk = 0, nextAt = 0, errAt = 0;  // samples since start
 static String url;
 static TaskHandle_t task = nullptr, streamer = nullptr;
 
+// ---- the rock mixes built into the flash (flash/cgotchi/rock.bin, written by the installer into the "ffat"
+// partition): band + the singer's rock voice, 16 kHz G.711 mu-law, so Rock plays with no Wi-Fi at all ----
+struct RockEnt { uint32_t tattva, off, samples, vStart, vLen; };
+struct RockHdr { char magic[4]; uint32_t n; RockEnt e[8]; };
+struct Mu {  // mu-law samples in flash, looping
+  const uint8_t *d = nullptr; uint32_t n = 0, pos = 0;
+  void set(const uint8_t *data, uint32_t samples) { d = data; n = samples; pos = 0; }
+  inline int16_t next() { if (pos >= n) pos = 0; uint8_t u = ~d[pos++]; int e = (u >> 4) & 7, x = ((((u & 15) << 3) + 0x84) << e) - 0x84; return (int16_t)(u & 0x80 ? -x : x); }
+};
+static Mu rk; static bool local = false;
+static esp_partition_mmap_handle_t rkMap = 0; static bool rkMapped = false;
+static bool rockLocal(int n) {
+  const esp_partition_t *p = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_ANY, "ffat"); if (!p) return false;
+  RockHdr h; if (esp_partition_read(p, 0, &h, sizeof h) != ESP_OK || memcmp(h.magic, "HTRU", 4) || h.n > 8) return false;
+  for (uint32_t i = 0; i < h.n; i++) if ((int)h.e[i].tattva == n) {
+    const RockEnt &e = h.e[i]; uint32_t bytes = e.samples, base = e.off & ~0xFFFFu, delta = e.off - base;
+    if (e.off + bytes > p->size) return false;
+    if (rkMapped) { esp_partition_munmap(rkMap); rkMapped = false; }
+    const void *ptr = nullptr;
+    if (esp_partition_mmap(p, base, delta + bytes, ESP_PARTITION_MMAP_DATA, &ptr, &rkMap) != ESP_OK) return false;
+    rkMapped = true; rk.set((const uint8_t *)ptr + delta, e.samples); vStart = e.vStart; vLen = e.vLen; sTotal = e.samples;
+    Serial.printf("rock: tattva %d from flash, %u samples\n", n, (unsigned)e.samples);
+    return true;
+  }
+  return false;
+}
+
 // ---- sound effects ----
 struct Note { float f; int len; };
 static Note sfxQ[4]; static volatile int sfxN = 0, sfxI = 0; static int sfxPos = 0; static float sfxPh = 0;
@@ -107,7 +135,8 @@ static void taskFn(void *) {
       if (m != M_IDLE && !paused) {
         // the stream: the voice (reel) or the whole mixed rock track
         bool live = false; float x = 0;
-        if (m != M_GAME && (sst == S_OPEN || sst == S_DONE) && clk >= nextAt) {
+        if (m == M_ROCK && local) { x = rk.next(); played = rk.pos; live = true; }
+        else if (m != M_GAME && (sst == S_OPEN || sst == S_DONE) && clk >= nextAt) {
           uint32_t av = wr - rd;
           if (!primed && (av >= PRIME || sst == S_DONE)) primed = true;
           if (primed && av) { x = ring[rd % RING]; rd++; played++; live = true; }
@@ -134,7 +163,8 @@ static void taskFn(void *) {
     i2s.write((uint8_t *)out, sizeof out);
     // keep the UI's view of the stream up to date
     if (m == M_REEL) voice = (sst == S_OPEN || sst == S_DONE) ? (primed || clk < nextAt || sst == S_DONE ? 2 : 1) : sst == S_ERR ? (WiFi.status() == WL_CONNECTED ? 4 : 3) : voice;
-    if (m == M_ROCK) { int b = (sst == S_OPEN || sst == S_DONE) && primed ? 2 : sst == S_ERR ? (WiFi.status() == WL_CONNECTED ? 4 : 3) : band == 2 ? 2 : 1; band = b;  // looping: stay 'playing' while it reconnects
+    if (m == M_ROCK && local) { band = 2; voice = vLen && played >= vStart && played < vStart + vLen ? 2 : 0; }
+    else if (m == M_ROCK) { int b = (sst == S_OPEN || sst == S_DONE) && primed ? 2 : sst == S_ERR ? (WiFi.status() == WL_CONNECTED ? 4 : 3) : band == 2 ? 2 : 1; band = b;  // looping: stay 'playing' while it reconnects
       voice = b == 2 && vLen && played >= vStart && played < vStart + vLen ? 2 : 0; }
   }
 }
@@ -211,7 +241,7 @@ static String streamUrl() {
 static void streamFn(void *) {
   for (;;) {
     ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(40));
-    int m = mode; if (m != M_REEL && m != M_ROCK) continue;
+    int m = mode; if (m != M_REEL && (m != M_ROCK || local)) continue;
     bool start = sst == S_IDLE || (sst == S_DONE && rd >= wr && clk >= nextAt) || (sst == S_ERR && clk - errAt > AU_SR * 8);
     if (!start || paused) continue;
     if (sst == S_DONE) nextAt = clk + (m == M_REEL ? AU_SR * 5 : 0);  // the reel says it again after a pause
@@ -242,16 +272,16 @@ static void startTask() {
 static void start(int m, int k, int n) {
   gen++;                       // any stream still running stops writing
   mode = M_IDLE; paused = false; curK = k; curN = n; bed.set(BEDS[k], BEDN[k]);
-  resetRing(); sst = S_IDLE; lastErr = 0; clk = 0; nextAt = m == M_REEL ? AU_SR * 6 / 5 : 0;
-  voice = m == M_REEL ? 1 : 0; band = m == M_ROCK ? 1 : 0;
+  resetRing(); sst = S_IDLE; lastErr = 0; clk = 0; diag[0] = 0;
+  local = m == M_ROCK && rockLocal(n); nextAt = m == M_REEL ? AU_SR * 6 / 5 : 0;
+  voice = m == M_REEL ? 1 : 0; band = m == M_ROCK ? (local ? 2 : 1) : 0;
   mode = m;
-  if (m == M_REEL || m == M_ROCK) WiFi.setSleep(false);  // no modem sleep while streaming
-  if (streamer && (m == M_REEL || m == M_ROCK)) xTaskNotifyGive(streamer);
+  if (m == M_REEL || (m == M_ROCK && !local)) { WiFi.setSleep(false); if (streamer) xTaskNotifyGive(streamer); }  // stream (no modem sleep)
 }
 static void reel(int k, int n) { start(M_REEL, k, n); }
 static void rock(int k, int n) { start(M_ROCK, k, n); }
 static void game(int k) { start(M_GAME, k, 0); }
-static void stop() { gen++; mode = M_IDLE; paused = false; voice = 0; band = 0; sst = S_IDLE; }
+static void stop() { gen++; mode = M_IDLE; local = false; paused = false; voice = 0; band = 0; sst = S_IDLE; }
 static float voiceProg() {
   if (mode == M_ROCK) return vLen && played > vStart ? fminf(1.f, (float)(played - vStart) / vLen) : 0;
   return sTotal && voice == 2 ? fminf(1.f, (float)played / sTotal) : 0;
