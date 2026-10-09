@@ -1,6 +1,7 @@
 /* Hey Tattva for the Cheeko Gotchi v1.2 (ESP32-S3, 240x296 ST7789, CST810 touch, ES8311 speaker, LIS2DH12 tilt).
-   Two reels (tattva 1 The mirror city, tattva 4 The lamp in the pot) with the singer's recitation over a sitar /
-   tanpura / tabla bed, and two games (Mirror Letters, Lamp Tilt). Wi-Fi setup from a phone (HeyTattva-Setup).
+   Five reels (tattvas 1, 2, 4, 6, 8) with the singer's recitation over a sitar / tanpura / tabla bed, five games
+   (Mirror Letters, Grow the Seed, Lamp Tilt, Eclipse, Dream Cards) and the Rock stage (the app's rock band + the
+   singer through a rock vocal chain, downloaded once over Wi-Fi). Wi-Fi setup from a phone (HeyTattva-Setup).
    Board: XIAO_ESP32S3 profile, FQBN esp32:esp32:XIAO_ESP32S3:PSRAM=opi,PartitionScheme=tinyuf2_noota. See README.md. */
 #include <Arduino.h>
 #include <Wire.h>
@@ -142,7 +143,7 @@ void setup() {
   if (!ui.cv.px || !ui.cv.bg || !ui.cv.yantra || !shown) { say(RGB(196, 38, 46), "out of memory"); while (1) delay(1000); }
   ui.cv.makeBg(); ui.cv.loadYantra();
   pref.begin("hcg", false);
-  env.vol = pref.getUChar("vol", 6); env.best[0] = pref.getUShort("b0", 0); env.best[1] = pref.getUShort("b1", 0);
+  env.vol = pref.getUChar("vol", 6); for (int g = 0; g < NT; g++) { char k[4] = {'b', (char)('0' + g), 0}; env.best[g] = pref.getUShort(k, 0); }
   Audio::vol = env.vol;
   accelOk = accelInit(); env.accel = accelOk;
   wr(CST810, 0xFE, 0x01);  // keep the touch chip from auto-sleeping
@@ -184,34 +185,29 @@ void loop() {
   env.rssi = WiFi.status() == WL_CONNECTED ? WiFi.RSSI() : -100;
   struct tm tmv; time_t t = time(nullptr); env.timeOk = t > 1700000000; if (env.timeOk) { localtime_r(&t, &tmv); env.hh = tmv.tm_hour; env.mm = tmv.tm_min; }
   if (accelOk) accelRead();
-  env.voice = (VoiceSt)Audio::voice; env.voiceProg = Audio::voiceProg(); env.bedT = Audio::bedT();
+  env.voice = (VoiceSt)Audio::voice; env.band = (VoiceSt)Audio::band; env.voiceProg = Audio::voiceProg(); env.bedT = Audio::bedT(); env.bedLen = Audio::bedLen(); env.level = Audio::level;
   // ---- requests from the UI ----
   Act a;
   while (ui.pop(a)) {
     switch (a.t) {
       case A_REEL: Audio::reel(a.a, TTN[a.a]); break;
-      case A_REEL_PAUSE: Audio::paused = true; break;
-      case A_REEL_RESUME: Audio::paused = false; break;
-      case A_REEL_STOP: Audio::stop(); break;
+      case A_ROCK: Audio::rock(a.a, TTN[a.a]); break;
+      case A_GAME: Audio::game(a.a); break;
+      case A_PAUSE: Audio::paused = true; break;
+      case A_RESUME: Audio::paused = false; break;
+      case A_STOP: Audio::stop(); break;
       case A_SFX: Audio::sfx(a.a); break;
       case A_VOL: setVol(a.a); break;
-      case A_BEST: env.best[a.a] = a.b; pref.putUShort(a.a ? "b1" : "b0", a.b); break;
+      case A_BEST: { env.best[a.a] = a.b; char k[4] = {'b', (char)('0' + a.a), 0}; pref.putUShort(k, a.b); } break;
       case A_WIFI_RESET: ui.toast("Restarting...", now); ui.frame(env); flush(); Net::reset(); break;
       case A_WIFI_SKIP: Net::skip(); break;
       default: break;
     }
   }
-  // a quiet bed under the games
-  static int lastScr = -1;
-  if (ui.scr != lastScr) {
-    if (ui.scr == SC_G1 || ui.scr == SC_G2) Audio::gameBed(ui.scr == SC_G2 ? 1 : 0);
-    else if (ui.scr != SC_REEL && (lastScr == SC_G1 || lastScr == SC_G2)) Audio::stop();
-    lastScr = ui.scr;
-  }
   // ---- sleep: backlight off after three idle minutes (not while a reel plays or during setup) ----
-  bool busy = (ui.scr == SC_REEL && !ui.paused) || ui.scr == SC_SETUP;
+  bool busy = ((ui.scr == SC_REEL || ui.scr == SC_ROCK) && !ui.paused) || ui.scr == SC_SETUP;
   if (busy) lastInput = now;
-  if (!asleep && now - lastInput > 180000) { asleep = true; digitalWrite(PIN_LCD_BL, LOW); Audio::stop(); if (ui.scr == SC_REEL) ui.go(SC_HOME, now); }
+  if (!asleep && now - lastInput > 180000) { asleep = true; digitalWrite(PIN_LCD_BL, LOW); Audio::stop(); if (ui.scr == SC_REEL || ui.scr == SC_ROCK || ui.scr == SC_GAME) ui.go(SC_HOME, now); }
   if (asleep) { delay(20); return; }
   // ---- draw ----
   static uint32_t lastFrame = 0;

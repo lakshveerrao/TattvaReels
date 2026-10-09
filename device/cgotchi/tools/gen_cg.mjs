@@ -1,4 +1,4 @@
-// Renders the text and line art for Hey Tattva on the Cheeko Gotchi (240x296): verse lines for the two reels,
+// Renders the text and line art for Hey Tattva on the Cheeko Gotchi (240x296): verse lines for the five reels,
 // akshara tiles and words for the two games, ASCII fonts for dynamic English text, icons, the Sri Yantra and the
 // two tattva symbols. Writes PNG layers + manifest; pack_cg.py turns them into ../HeyTattvaCG/assets.h.
 // Run: node device/cgotchi/tools/gen_cg.mjs   (PLAYWRIGHT, CHROMIUM, FONTROUTE env vars as for the Waveshare tools)
@@ -8,7 +8,7 @@ const HERE=path.dirname(fileURLToPath(import.meta.url)),ROOT=path.resolve(HERE,'
 fs.rmSync(OUT,{recursive:true,force:true});fs.mkdirSync(OUT,{recursive:true});
 const src=f=>fs.readFileSync(path.join(ROOT,'src',f),'utf8');
 const app=src('app.js'),IC=app.slice(app.indexOf('const IC={'),app.indexOf('};',app.indexOf('const IC={'))+2);
-export const TT=[1,4];
+export const TT=[1,2,4,6,8];
 const html=`<!doctype html><html><head><meta charset="utf-8">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Eczar:wght@500;600;700&family=Tiro+Devanagari+Sanskrit&family=Mukta:wght@400;500;600;700&display=block">
 <style>html,body{margin:0;background:transparent}#s{position:absolute;left:0;top:0;width:240px;height:296px;color:#fff;font-family:Mukta,sans-serif}#s *{box-sizing:border-box}.hide{visibility:hidden!important}</style></head><body><div id="s"></div>
@@ -19,7 +19,7 @@ const ctx=await b.newContext({viewport:{width:240,height:296},deviceScaleFactor:
 if(process.env.FONTROUTE){const m=await import(process.env.FONTROUTE);await m.fontRoute(ctx);}
 const p=await ctx.newPage();p.on('pageerror',e=>console.log('PE',e.message));
 await p.goto('file://'+path.join(OUT,'gen.html'));
-await p.evaluate(async()=>{for(const f of ['600 20px Eczar','20px "Tiro Devanagari Sanskrit"','500 20px Mukta','600 20px Mukta'])await document.fonts.load(f,'अ a');});
+await p.evaluate(async()=>{for(const f of ['40px "Bebas Neue"','600 20px Eczar','20px "Tiro Devanagari Sanskrit"','500 20px Mukta','600 20px Mukta'])await document.fonts.load(f,'अ a');});
 const man=[];let seq=0;
 async function shoot(id,clip,extra){const f=`${seq++}.png`;await p.screenshot({path:path.join(OUT,f),omitBackground:true,clip});man.push(Object.assign({id,layers:[{file:f,color:'w'}]},extra||{}));}
 async function build(fn,arg){return p.evaluate(([fn,arg])=>{const s=document.getElementById('s');s.innerHTML='';return (0,eval)('('+fn+')')(s,arg);},[fn.toString(),arg]);}
@@ -40,12 +40,12 @@ for(const [i,a] of ak.entries()){await build(function(s,a){s.innerHTML='<span st
 for(const t of W)for(const [j,w] of t.words.entries()){await text(`WD_${t.n}_${j}`,w.dev,216,"font-family:'Tiro Devanagari Sanskrit';font-size:20px;line-height:1.3;text-align:center");
  await text(`WM_${t.n}_${j}`,w.iast+' · '+w.mean.replace(/\s*\(.*\)\s*/g,'').trim(),216,'font-size:14px;line-height:1.25;text-align:center');}
 // ---- ASCII fonts for dynamic English text ----
-for(const [tag,css,size] of [['F14','font-weight:500;font-size:15px',15],['F18','font-weight:600;font-size:19px',19],['F26','font-family:Eczar;font-weight:600;font-size:27px',27],['F48','font-family:Eczar;font-weight:600;font-size:50px',50]]){
+for(const [tag,css,size] of [['F14','font-weight:500;font-size:15px',15],['F18','font-weight:600;font-size:19px',19],['F26','font-family:Eczar;font-weight:600;font-size:27px',27],['F48','font-family:Eczar;font-weight:600;font-size:50px',50],['FB','font-family:"Bebas Neue";font-size:40px;letter-spacing:1px',40]]){
  const chars=tag==='F48'?'0123456789:%/ ':Array.from({length:95},(_,i)=>String.fromCharCode(32+i)).join('');
  for(const ch of chars){const r=await build(function(s,a){const e=document.createElement('span');e.style.cssText='position:absolute;left:4px;top:0;white-space:pre;line-height:1.25;'+a[1];e.textContent=a[0];s.appendChild(e);return e.getBoundingClientRect().width;},[ch,css]);
   await shoot(`G_${tag}_${ch.charCodeAt(0)}`,{x:0,y:0,width:Math.ceil(size*1.4)+8,height:Math.ceil(size*1.3)},{adv:r});}}
 // ---- icons, yantra, symbols ----
-const ICONS={play:'IC.play',pause:'IC.pause',back:'IC.back',right:'IC.right',check:'IC.check',x:'IC.x',chakra:'IC.chakra',diya:'IC.diya',music:'IC.music',lotus:'IC.lotus',
+const ICONS={guitar:'IC.guitar',play:'IC.play',pause:'IC.pause',back:'IC.back',right:'IC.right',check:'IC.check',x:'IC.x',chakra:'IC.chakra',diya:'IC.diya',music:'IC.music',lotus:'IC.lotus',
  film:"'<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"14\" rx=\"2.5\"/><path d=\"M10 9.5v5l4.5-2.5Z\" fill=\"#fff\"/>'",
  gear:"'<circle cx=\"12\" cy=\"12\" r=\"3.2\"/><path d=\"M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M5.5 18.5l1.8-1.8M16.7 7.3l1.8-1.8\"/><circle cx=\"12\" cy=\"12\" r=\"6.6\"/>'",
  wifi:"'<path d=\"M2.5 9a14 14 0 0 1 19 0\"/><path d=\"M5.8 12.6a9 9 0 0 1 12.4 0\"/><path d=\"M9.2 16.1a4.2 4.2 0 0 1 5.6 0\"/><circle cx=\"12\" cy=\"19.3\" r=\"1\" fill=\"#fff\"/>'",

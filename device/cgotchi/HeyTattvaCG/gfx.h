@@ -134,7 +134,7 @@ struct Canvas {
   // centre an item's ink horizontally on cx; y is the top of its ink
   void itemC(int id, int cx, int y, uint16_t tint = 0, uint32_t a = 32) { int x0 = itemX0(id), w = itemW(id) - x0; item(id, cx - w / 2 - x0, y - itemY0(id), tint, a); }
   // ---- dynamic ASCII text: font 0 = 15 px, 1 = 19 px, 2 = 27 px display, 3 = 50 px digits ----
-  static const uint16_t *font(int f) { return f == 2 ? GF26 : f == 1 ? GF18 : GF14; }
+  static const uint16_t *font(int f) { return f == 4 ? GFB : f == 2 ? GF26 : f == 1 ? GF18 : GF14; }  // 4 = Bebas Neue (rock)
   static int glyph(int f, unsigned ch) { if (f == 3) { const char *p = strchr(G48CH, (int)ch); return p && ch ? GF48[p - G48CH] : GF48[13]; } if (ch < 32 || ch > 126) ch = '?'; return font(f)[ch - 32]; }
   int text(const char *s, int x, int y, uint16_t c, int f = 0, uint32_t a = 32) { int cx = x; for (; *s; s++) { int id = glyph(f, (uint8_t)*s); item(id, cx - 4, y, c, a); cx += ITEMS[id].adv; } return cx - x; }
   static int textW(const char *s, int f = 0) { int w = 0; for (; *s; s++) w += ITEMS[glyph(f, (uint8_t)*s)].adv; return w; }
