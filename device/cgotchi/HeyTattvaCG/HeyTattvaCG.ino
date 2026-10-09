@@ -185,7 +185,7 @@ void loop() {
   env.rssi = WiFi.status() == WL_CONNECTED ? WiFi.RSSI() : -100;
   struct tm tmv; time_t t = time(nullptr); env.timeOk = t > 1700000000; if (env.timeOk) { localtime_r(&t, &tmv); env.hh = tmv.tm_hour; env.mm = tmv.tm_min; }
   if (accelOk) accelRead();
-  env.voice = (VoiceSt)Audio::voice; env.band = (VoiceSt)Audio::band; env.voiceProg = Audio::voiceProg(); env.bedT = Audio::bedT(); env.bedLen = Audio::bedLen(); env.level = Audio::level;
+  env.voice = (VoiceSt)Audio::voice; env.band = (VoiceSt)Audio::band; env.voiceProg = Audio::voiceProg(); env.bedT = Audio::bedT(); env.bedLen = Audio::bedLen(); env.level = Audio::level; env.err = Audio::lastErr;
   // ---- requests from the UI ----
   Act a;
   while (ui.pop(a)) {

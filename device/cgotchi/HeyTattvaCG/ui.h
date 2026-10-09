@@ -19,6 +19,7 @@ struct Env {
   NetSt net = NET_OFF; char ssid[33] = ""; int rssi = -100;
   VoiceSt voice = VO_NONE, band = VO_NONE;  // the recitation; the rock band track
   float voiceProg = 0, bedT = 0, bedLen = 30, level = 0;
+  int err = 0;                               // last download problem, shown with the message
   int vol = 6;                               // 0..10
   bool accel = false; float tx = 0, ty = 0;  // tilt in g, already mapped to screen axes
   int best[NT] = {0};
@@ -98,7 +99,7 @@ struct UI {
     else if (id == B_BACK) back(e);
     else if (id >= B_G0 && id < B_G0 + NT) startGame(id - B_G0, ms);
     else if (id == B_AGAIN) startGame(lastGame, ms);
-    else if (id == B_PLAY) togglePause();
+    else if (id == B_PLAY) { if (scr == SC_ROCK && (e.band == VO_ERR || e.band == VO_NEEDNET || e.voice == VO_ERR || e.voice == VO_NEEDNET)) { paused = false; push(A_ROCK, rock); } else togglePause(); }  // after a failed download: try again
     else if (id == B_PREV) step(-1);
     else if (id == B_NEXT) step(1);
     else if (id == B_VDN) push(A_VOL, e.vol > 0 ? e.vol - 1 : 0);
@@ -286,12 +287,15 @@ struct UI {
     char b[24]; snprintf(b, sizeof b, "TATTVA %d", n); cv.textR(b, 226, 12, C_GOLD2, 1); cv.textC(TNAME[rock], 120, 44, C_INK, 0);
     dots(rock, C_FIRE);
     // controls on the stage
-    bool pp = pressId == B_PLAY && down; cv.disc(120, 110, 28, C_KUM, pp ? 22 : 30); cv.ring(120, 110, 28, 1.6f, C_EMBER, 24); cv.item(ICON[paused ? IC_PLAY : IC_PAUSE], 104, 94, C_INK); btn(88, 78, 64, 64, B_PLAY);
+    bool pp = pressId == B_PLAY && down; cv.disc(120, 110, 28, C_KUM, pp ? 22 : 30); cv.ring(120, 110, 28, 1.6f, C_EMBER, 24); cv.item(ICON[paused || e.band == VO_ERR || e.band == VO_NEEDNET ? IC_PLAY : IC_PAUSE], 104, 94, C_INK); btn(88, 78, 64, 64, B_PLAY);
     for (int k = 0; k < 2; k++) { int x = k ? 196 : 44, id = k ? B_NEXT : B_PREV; bool pr = pressId == id && down; cv.disc(x, 110, 18, RGB(40, 14, 16), pr ? 20 : 30);
       int s = k ? 1 : -1; for (int j = 0; j < 7; j++) cv.fillRect(x - s * 4 + s * j, 110 - (6 - j), 2, 2 * (6 - j) + 1, C_INK); btn(x - 22, 88, 44, 44, id); }
     versePanel(rock, e, RGB(20, 8, 10), C_FIRE, 18);
     const char *st = e.band == VO_LOADING ? "Loading the band..." : e.voice == VO_LOADING ? "Loading voice..." : e.band == VO_NEEDNET ? "Wi-Fi needed for the band" : e.band == VO_ERR ? "Band not reachable" : nullptr;
-    if (st) pill(st, 148, RGB(30, 10, 12));
+    char eb[40]; if (st && e.band == VO_ERR && e.err) { snprintf(eb, sizeof eb, "Band not reachable (%d)", e.err); st = eb; }
+    bool failed = e.band == VO_ERR || e.band == VO_NEEDNET;
+    if (st) pill(st, failed ? 138 : 148, RGB(30, 10, 12));
+    if (failed) pill("Tap play to try again", 160, RGB(30, 10, 12));
   }
   void gamesScreen(const Env &e) {
     backBtn(); cv.text("Games", 52, 6, C_INK, 2);

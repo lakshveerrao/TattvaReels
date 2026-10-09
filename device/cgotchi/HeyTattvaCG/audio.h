@@ -161,28 +161,40 @@ static void makeRoom(size_t need) {
     root.close(); if (!victim.length()) break; FFat.remove(victim);
   }
 }
+// where a download lands: PSRAM, grown as needed (HTTPClient::writeToStream also undoes chunked encoding)
+struct Sink : public Stream {
+  uint8_t *b = nullptr; size_t len = 0, cap = 0; bool bad = false;
+  size_t write(uint8_t c) override { return write(&c, 1); }
+  size_t write(const uint8_t *d, size_t n) override {
+    if (bad) return 0;
+    if (len + n > cap) { size_t nc = cap ? cap * 2 : 1024 * 1024; while (nc < len + n) nc *= 2; if (nc > 6u * 1024 * 1024) { bad = true; return 0; }
+      uint8_t *nb = (uint8_t *)ps_realloc(b, nc); if (!nb) { bad = true; return 0; } b = nb; cap = nc; }
+    memcpy(b + len, d, n); len += n; return n;
+  }
+  int available() override { return 0; } int read() override { return -1; } int peek() override { return -1; } void flush() override {}
+};
+static volatile int lastErr = 0;  // shown on screen: HTTP status, or a negative HTTPClient error, or 1 = not a WAV
 // GET a 16 kHz mono WAV and return its samples (PSRAM); n = sample count
 static int16_t *download(const String &url, uint32_t &n) {
   n = 0; if (WiFi.status() != WL_CONNECTED) return nullptr;
-  WiFiClientSecure cli; cli.setInsecure(); cli.setTimeout(30);
-  HTTPClient http; http.setTimeout(60000); http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
-  int16_t *res = nullptr;
-  if (http.begin(cli, url)) {
-    if (http.GET() == 200) {
-      const size_t cap = 3 * 1024 * 1024; uint8_t *b = (uint8_t *)ps_malloc(cap); size_t len = 0;
-      if (b) {
-        WiFiClient *st = http.getStreamPtr(); int total = http.getSize(); uint32_t last = millis();
-        while ((http.connected() || st->available()) && len < cap && (total < 0 || (int)len < total)) {
-          int a = st->available(); if (a > 0) { len += st->readBytes(b + len, min((size_t)a, cap - len)); last = millis(); } else { if (millis() - last > 10000) break; delay(5); }
-        }
-        size_t off = 0, dlen = 0;  // the WAV "data" chunk
-        if (len > 44 && !memcmp(b, "RIFF", 4)) { size_t p = 12; while (p + 8 <= len) { uint32_t cl; memcpy(&cl, b + p + 4, 4); if (!memcmp(b + p, "data", 4)) { off = p + 8; dlen = min((size_t)cl, len - off); break; } p += 8 + cl; } }
-        if (dlen > 3200) { memmove(b, b + off, dlen); res = (int16_t *)b; n = dlen / 2; } else free(b);
-      }
-    }
-    http.end();
+  for (int attempt = 0; attempt < 3; attempt++) {
+    if (attempt) delay(2000 * attempt);
+    WiFiClientSecure cli; cli.setInsecure(); cli.setTimeout(30);
+    HTTPClient http; http.setTimeout(60000); http.setConnectTimeout(15000); http.setFollowRedirects(HTTPC_FORCE_FOLLOW_REDIRECTS);
+    http.setUserAgent("HeyTattva-Cheeko/2");
+    if (!http.begin(cli, url)) { lastErr = -100; continue; }
+    int code = http.GET();
+    Serial.printf("GET %s -> %d (size %d)\n", url.c_str(), code, http.getSize());
+    if (code != 200) { lastErr = code; http.end(); continue; }
+    Sink sk; int got = http.writeToStream(&sk); http.end();
+    Serial.printf("  got %d bytes (sink %u)\n", got, (unsigned)sk.len);
+    uint8_t *b = sk.b; size_t len = sk.len;
+    size_t off = 0, dlen = 0;  // the WAV "data" chunk
+    if (b && len > 44 && !memcmp(b, "RIFF", 4)) { size_t p = 12; while (p + 8 <= len) { uint32_t cl; memcpy(&cl, b + p + 4, 4); if (!memcmp(b + p, "data", 4)) { off = p + 8; dlen = min((size_t)cl, len - off); break; } p += 8 + cl; } }
+    if (dlen > 3200) { memmove(b, b + off, dlen); n = dlen / 2; lastErr = 0; return (int16_t *)b; }
+    lastErr = got < 0 ? got : 1; if (b) free(b);
   }
-  return res;
+  return nullptr;
 }
 static bool fetchOne(bool isBand, int n) {
   String url = isBand ? String(SITE) + "/api/music?v=" + n + "&fmt=pcm" : String(SITE) + "/api/tts?v=" + n + "&fmt=pcm&voice=singer&sv=2";
@@ -228,7 +240,7 @@ static bool begin() {
 }
 static void startTask() {
   xTaskCreatePinnedToCore(taskFn, "mix", 6144, nullptr, 3, &task, 0);
-  xTaskCreatePinnedToCore(fetchFn, "fetch", 12288, nullptr, 1, &fetcher, 0);
+  xTaskCreatePinnedToCore(fetchFn, "fetch", 20480, nullptr, 1, &fetcher, 0);  // TLS needs a deep stack
 }
 static void startVoice() { voc.rewind(); clk = 0; vStart = AU_SR * 6 / 5; voice = 2; }
 // k = 0..NT-1 (which tattva), n = tattva number

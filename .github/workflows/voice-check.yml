@@ -31,8 +31,8 @@ jobs:
           curl -s -m 60 -o old.mp3 "$SITE/api/tts?v=3&voice=singer"; curl -s -m 60 -o ai.mp3 "$SITE/api/tts?v=3"
           mcode=$(curl -s -m 280 -o m.mp3 -w "%{http_code}" "$SITE/api/music?v=1"); msize=$(stat -c%s m.mp3)
           OK=0; for n in 2 3 4 5 6 7 8; do c=$(curl -s -m 290 -o mm.mp3 -w "%{http_code}" "$SITE/api/music?v=$n"); [ "$c" = "200" ] && [ $(stat -c%s mm.mp3) -gt 100000 ] && OK=$((OK+1)); done
-          pc=$(curl -s -m 120 -o p.wav -w "%{http_code}" "$SITE/api/music?v=2&fmt=pcm"); PS=$(stat -c%s p.wav); PH=$(head -c 4 p.wav | tr -dc "A-Z")
-          curl -s -m 60 -o r.mp3 "$SITE/api/tts?v=3&voice=singer&sv=2&rock=1"; RS=$(stat -c%s r.mp3); MUS="pcm $pc $PH ${PS}B music $mcode ${msize}B +$OK/7 rock-tts ${RS}B $(head -c 120 m.mp3 | tr -dc '[:print:]' | grep -o 'error.*' | cut -c1-60)"
+          pc=$(curl -s -m 120 -o p.wav -w "%{http_code}" "$SITE/api/music?v=2&fmt=pcm"); PS=$(stat -c%s p.wav); PH=$(head -c 4 p.wav | tr -dc "A-Z"); TE=$(curl -s --http1.1 -m 120 -o /dev/null -D - -A "HeyTattva-Cheeko/2" -H "Accept-Encoding: identity" "$SITE/api/music?v=6&fmt=pcm" | tr -d "\r" | grep -i -E "^(transfer-encoding|content-length|x-vercel-cache|content-encoding):" | sed "s/: */=/" | tr "\n" " ")
+          curl -s -m 60 -o r.mp3 "$SITE/api/tts?v=3&voice=singer&sv=2&rock=1"; RS=$(stat -c%s r.mp3); MUS="pcm $pc $PH ${PS}B [$TE] music $mcode ${msize}B +$OK/7 rock-tts ${RS}B $(head -c 120 m.mp3 | tr -dc '[:print:]' | grep -o 'error.*' | cut -c1-60)"
           NEW=$(sha1sum v.mp3 | cut -c1-6); OLD=$(sha1sum old.mp3 | cut -c1-6); AI=$(sha1sum ai.mp3 | cut -c1-6)
           if [ "$code" = "200" ] && [ "$size" -gt 20000 ]; then state=success; else state=failure; fi
           desc=$(MUS="$MUS" NEW=$NEW OLD=$OLD AI=$AI python3 - "$S" "$code" "$size" <<'P'
