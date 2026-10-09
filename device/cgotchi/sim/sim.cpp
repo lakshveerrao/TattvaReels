@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
   tapAt(120, 110); check(ui.paused && popT(A_PAUSE), "play button pauses the rock");
   tapAt(120, 110); check(!ui.paused && popT(A_RESUME), "and plays again");
   swipe(120, 220, 120, 120); check(ui.rock == 1, "swipe up on the stage: next tattva");
-  env.band = VO_ERR; env.err = -11; shot("37_rock_err"); tapAt(120, 110); check(!ui.paused && popT(A_ROCK, &a) && a.a == 1, "band failed: play button tries again"); env.band = VO_PLAYING; env.err = 0;
+  env.band = VO_ERR; env.err = -1; strcpy(env.diag, "-1 dns ok tls -30592 heap 31k"); shot("37_rock_err"); tapAt(120, 110); check(!ui.paused && popT(A_ROCK, &a) && a.a == 1, "band failed: play button tries again"); env.band = VO_PLAYING; env.err = 0;
   tapAt(24, 22); check(ui.scr == SC_HOME && popT(A_STOP), "back from rock stops it");
   tapAt(120, 229); check(ui.scr == SC_GAMES, "Games");
   for (int g = 0; g < NT; g++) {

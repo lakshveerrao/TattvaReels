@@ -1,6 +1,6 @@
 {
   "name": "Hey Tattva for Cheeko Gotchi",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "new_install_prompt_erase": false,
   "builds": [
     { "chipFamily": "ESP32-S3", "parts": [ { "path": "heytattva-cg.bin", "offset": 0 } ] }

@@ -11,6 +11,9 @@
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
 #include "es8311.h"
+#include <esp_netif.h>
+#include <lwip/ip4_addr.h>
+#include <esp_heap_caps.h>
 #include "beds.h"
 
 #define PIN_PA_CTRL 4
@@ -54,6 +57,7 @@ static volatile int voice = 0, band = 0;  // ::VoiceSt for the UI
 static volatile int curK = 0, curN = 0;
 static volatile float level = 0;
 static volatile int lastErr = 0;          // HTTP status or a negative HTTPClient error (1 = not a WAV)
+static volatile char diag[48] = "";        // why the last stream failed, shown on screen
 static Adp bed;
 // ---- the stream ----
 enum SSt { S_IDLE, S_CONNECT, S_OPEN, S_DONE, S_ERR };
@@ -136,6 +140,13 @@ static void taskFn(void *) {
 }
 
 // ---- streaming ----
+static void setDns(const char *a, const char *b) {
+  esp_netif_t *nif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF"); if (!nif) return;
+  esp_netif_dns_info_t d = {}; d.ip.type = ESP_IPADDR_TYPE_V4;
+  d.ip.u_addr.ip4.addr = ipaddr_addr(a); esp_netif_set_dns_info(nif, ESP_NETIF_DNS_MAIN, &d);
+  d.ip.u_addr.ip4.addr = ipaddr_addr(b); esp_netif_set_dns_info(nif, ESP_NETIF_DNS_BACKUP, &d);
+  Serial.println("DNS: switched to 8.8.8.8 / 1.1.1.1");
+}
 static void resetRing() { xSemaphoreTake(mx, portMAX_DELAY); wr = rd = 0; played = 0; primed = false; sTotal = vStart = vLen = 0; xSemaphoreGive(mx); }
 // read exactly n bytes (or until the stream ends / is replaced)
 static int readFull(WiFiClient *st, uint8_t *b, int n, uint32_t g) {
@@ -147,13 +158,26 @@ static void streamOnce(uint32_t g, const String &u) {
   if (WiFi.status() != WL_CONNECTED) { lastErr = 0; sst = S_ERR; errAt = clk; return; }
   if (gen != g) return;
   sst = S_CONNECT; resetRing();
-  WiFiClientSecure cli; cli.setInsecure(); cli.setTimeout(30);
-  HTTPClient http; http.setTimeout(60000); http.setConnectTimeout(15000); http.setUserAgent("HeyTattva-Cheeko/3");
-  const char *hk[] = {"X-Voice-Start", "X-Voice-Len"}; http.collectHeaders(hk, 2);
-  if (!http.begin(cli, u)) { lastErr = -100; sst = S_ERR; errAt = clk; return; }
-  int code = http.GET();
-  Serial.printf("stream %s -> %d (%d bytes)\n", u.c_str(), code, http.getSize());
-  if (code != 200) { lastErr = code; http.end(); if (gen == g) { sst = S_ERR; errAt = clk; } return; }
+  // name lookup first; if the router's DNS fails, fall back to Google / Cloudflare DNS
+  IPAddress ip; bool dns = WiFi.hostByName("heytattva.vercel.app", ip) == 1;
+  if (!dns) { setDns("8.8.8.8", "1.1.1.1"); dns = WiFi.hostByName("heytattva.vercel.app", ip) == 1; }
+  WiFiClientSecure cli; HTTPClient http; int code = -1;
+  for (int attempt = 0; attempt < 3 && gen == g; attempt++) {
+    if (attempt) { http.end(); cli.stop(); delay(1500 * attempt); }
+    cli.setInsecure(); cli.setHandshakeTimeout(30);
+    http.setTimeout(60000); http.setConnectTimeout(20000); http.setUserAgent("HeyTattva-Cheeko/3"); http.setReuse(false);
+    const char *hk[] = {"X-Voice-Start", "X-Voice-Len"}; http.collectHeaders(hk, 2);
+    if (!http.begin(cli, u)) { code = -100; continue; }
+    code = http.GET();
+    Serial.printf("stream %s -> %d (%d bytes)\n", u.c_str(), code, http.getSize());
+    if (code == 200 || code > 0) break;
+  }
+  if (code != 200) {
+    char tls[64] = ""; int te = cli.lastError(tls, sizeof tls);
+    snprintf((char *)diag, sizeof diag, "%d %s %s%d heap %uk", code, dns ? "dns ok" : "no dns", te ? "tls " : "", te, (unsigned)(heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL) / 1024));
+    Serial.printf("stream failed: %s (%s)\n", (const char *)diag, tls);
+    lastErr = code; http.end(); if (gen == g) { sst = S_ERR; errAt = clk; } return;
+  }
   if (gen == g) { vStart = http.header("X-Voice-Start").toInt(); vLen = http.header("X-Voice-Len").toInt(); }
   WiFiClient *st = http.getStreamPtr();
   // the WAV header: walk the chunks to "data"
@@ -162,7 +186,7 @@ static void streamOnce(uint32_t g, const String &u) {
     if (!memcmp(c, "data", 4)) { dataLen = cl; break; }
     uint8_t skip[64]; while (cl && ok) { int k = cl > 64 ? 64 : cl; ok = readFull(st, skip, k, g) == k; cl -= k; } }
   if (!ok || gen != g) { if (gen == g) { lastErr = 1; sst = S_ERR; errAt = clk; } http.end(); return; }
-  if (gen == g) { sTotal = dataLen / 2; lastErr = 0; sst = S_OPEN; }
+  if (gen == g) { sTotal = dataLen / 2; lastErr = 0; diag[0] = 0; sst = S_OPEN; }
   static uint8_t buf[2048]; uint32_t left = dataLen, odd = 0; uint8_t carry = 0;
   while (left && gen == g) {
     while (wr - rd > RING - 1024 && gen == g) delay(8);  // full: wait for the speaker
@@ -221,6 +245,7 @@ static void start(int m, int k, int n) {
   resetRing(); sst = S_IDLE; lastErr = 0; clk = 0; nextAt = m == M_REEL ? AU_SR * 6 / 5 : 0;
   voice = m == M_REEL ? 1 : 0; band = m == M_ROCK ? 1 : 0;
   mode = m;
+  if (m == M_REEL || m == M_ROCK) WiFi.setSleep(false);  // no modem sleep while streaming
   if (streamer && (m == M_REEL || m == M_ROCK)) xTaskNotifyGive(streamer);
 }
 static void reel(int k, int n) { start(M_REEL, k, n); }

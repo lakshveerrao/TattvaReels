@@ -20,6 +20,7 @@ struct Env {
   VoiceSt voice = VO_NONE, band = VO_NONE;  // the recitation; the rock band track
   float voiceProg = 0, bedT = 0, bedLen = 30, level = 0;
   int err = 0;                               // last download problem, shown with the message
+  char diag[48] = "";                        // its details (DNS, TLS, memory)
   int vol = 6;                               // 0..10
   bool accel = false; float tx = 0, ty = 0;  // tilt in g, already mapped to screen axes
   int best[NT] = {0};
@@ -267,7 +268,8 @@ struct UI {
     dots(reel, C_GOLD);
     versePanel(reel, e, C_DEEP, 0, 0);
     const char *st = e.voice == VO_LOADING ? "Loading voice..." : e.voice == VO_NEEDNET ? "No Wi-Fi: music only" : e.voice == VO_ERR ? "Voice not reachable" : nullptr;
-    if (st) pill(st, 156);
+    if (st) pill(st, e.voice == VO_ERR && e.diag[0] ? 134 : 156);
+    if (e.voice == VO_ERR && e.diag[0]) pill(e.diag, 158);
     if (paused) { cv.disc(120, 100, 30, C_NIGHT, 24); cv.item(ICON[IC_PLAY], 104, 84, C_INK); }
   }
   // ---- Rock stage: black and fire, stage lights, the band's level on an equaliser ----
@@ -295,7 +297,7 @@ struct UI {
     char eb[40]; if (st && e.band == VO_ERR && e.err) { snprintf(eb, sizeof eb, "Band not reachable (%d)", e.err); st = eb; }
     bool failed = e.band == VO_ERR || e.band == VO_NEEDNET;
     if (st) pill(st, failed ? 138 : 148, RGB(30, 10, 12));
-    if (failed) pill("Tap play to try again", 160, RGB(30, 10, 12));
+    if (failed) pill(e.band == VO_ERR && e.diag[0] ? e.diag : "Tap play to try again", 160, RGB(30, 10, 12));
   }
   void gamesScreen(const Env &e) {
     backBtn(); cv.text("Games", 52, 6, C_INK, 2);
