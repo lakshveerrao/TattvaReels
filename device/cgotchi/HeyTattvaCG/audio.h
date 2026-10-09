@@ -143,7 +143,7 @@ static void taskFn(void *) {
           else if (primed && sst == S_OPEN) primed = false;  // ran dry: wait for more
         }
         if (m == M_ROCK) {
-          if (live) s = x * 1.45f;  // rock plays louder (Laksh: guitar to max)
+          if (live) s = x * 1.2f;  // rock plays louder (guitar to max, then "slightly decrease")
           else { float f = bed.next() / 12000.f; s = f / (1 + fabsf(f)) * 9000.f; }  // the bed with some grit while the band connects
         } else {
           bool talking = live && m == M_REEL;
